@@ -113,6 +113,11 @@ public class PedidoServlet extends HttpServlet {
                 return;
             }
 
+            if (ids.length > 10) {
+                out.print("{\"ok\":false,\"error\":\"El carrito supera el maximo de 10 productos distintos permitido.\"}");
+                return;
+            }
+
             // Determinar cliente: si hay sesion de cliente, usar ese id; si no, el demo.
             int clienteId = obtenerClienteIdDeSesion(req);
 

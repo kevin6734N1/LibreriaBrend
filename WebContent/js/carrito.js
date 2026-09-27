@@ -10,6 +10,10 @@ function guardar() {
 
 function agregarCarrito(id, nombre, precio) {
   const item = carrito.find(i => i.nombre === nombre);
+  if (!item && carrito.length >= 10) {
+    alert('Ya tienes 10 productos distintos en el carrito. Elimina alguno antes de agregar otro.');
+    return;
+  }
   if (item) {
     item.qty++;
   } else {
