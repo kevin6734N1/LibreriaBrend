@@ -262,10 +262,71 @@ de validación manual".
 
 ---
 
+## Paso 2 — Retiro del ODS10 antiguo
+
+### E15. Grep de lógica ODS10/beneficios (resultado real)
+
+```text
+$ grep -rniE "ods ?10|beneficio|esEstudiante|esDiscapacidad|chk-estudiante|chk-discapacidad|ods10-check|inclusion-box" \
+    --include="*.java" --include="*.jsp" --include="*.js" . | grep -v "^./docs/"
+./TestPaso2QA.java:6: * verifica el recalculo del servidor con la logica ODS10 retirada.   ← test temporal, ya eliminado
+./WebContent/js/accesibilidad.js:2://  ACCESIBILIDAD VISUAL (ODS10 / Ley 29973) - Libreria Brenda
+./src/libreria/dao/PreferenciaAccesibilidadDAO.java:10: * Acceso a datos ... (ODS10 / Ley 29973).
+./src/libreria/servlets/PreferenciaAccesibilidadServlet.java:18: * Lee/guarda el perfil ... (ODS10 / Ley 29973).
+```
+
+Las 3 coincidencias restantes son **comentarios normativos** de las piezas de
+accesibilidad (citando la Ley 29973 como motivación), no código ejecutable.
+Cero lógica ODS10 en JSP/JS/Java.
+
+### E16. Sintaxis JS y compilación Java
+
+```text
+$ node --check WebContent/js/carrito.js
+carrito.js OK
+$ node --check /tmp/inline_carrito.js   (inline extraído de carrito.jsp)
+carrito.jsp inline OK
+$ javac ... $(find src -name "*.java")
+COMPILACION OK
+```
+
+### E17. Pruebas de cálculo del servidor (8/8 OK, sin tocar la BD)
+
+```text
+[OK]    S/20: envio = 10
+[OK]    S/20: total = 30
+[OK]    S/20: descuento = 0 (quedo listo para codigos promocionales)
+[OK]    S/35: envio = 0 (gratis desde S/30)
+[OK]    S/35: total = 35
+[OK]    S/20 con descuento 5: total = 25
+[OK]    S/20 con descuento 5: descuento conservado = 5
+[OK]    S/30 (borde): envio = 0
+RESULTADO: 8 OK, 0 fallos
+```
+
+El caso "descuento 5" confirma el camino del paso 3: `setDescuento()` antes
+de `calcularTotal()` se respeta (el método ya no pisa el descuento).
+
+### E18. Imagen huérfana
+
+```text
+$ grep -rl "planeta.png" --include="*.jsp" --include="*.js" --include="*.java" \
+    --include="*.html" --include="*.css" . | grep -v docs
+planeta.png ya no se usa en ninguna pagina (solo en docs/)
+```
+
+Se eliminó `WebContent/images/planeta.png` (3,9 KB) conforme al plan.
+
+Pendiente de validación manual (igual que las piezas 2 y 3): flujo completo
+de compra en el navegador con carrito de S/20 y de S/35, y confirmación en
+BD de `descuento = 0.00` en los pedidos nuevos.
+
+---
+
 ## Nota de despliegue
 
-Tras cada cambio de WebContent hay que **republicar la aplicación en Tomcat**.
+Tras cada cambio hay que **republicar la aplicación en Tomcat**.
 La pieza 1 requiere republish para registrar el servlet nuevo
-(`/PreferenciaAccesibilidadServlet`). Las piezas 2 y 3 solo modifican
-JSP/CSS/JS, pero también requieren republish para que se sirvan las
-versiones nuevas.
+(`/PreferenciaAccesibilidadServlet`). Las piezas 2 y 3 modifican JSP/CSS/JS
+y el paso 2 modifica clases Java (`PedidoServlet`, `Pedido`): en todos los
+casos aplica republish para que se sirvan/ejecuten las versiones nuevas.
