@@ -49,39 +49,6 @@
       font-weight: 600;
     }
     .cuenta-dropdown-menu a:hover { background: #f2f5fb; }
-    .inclusion-box {
-      background: linear-gradient(135deg, #E3F2FD, #F0F4FF);
-      border: 2px solid #1259C3;
-      border-radius: 12px;
-      padding: 18px;
-      margin: 25px 0;
-      font-size: 1.02rem;
-      color: #0d47a1;
-      box-shadow: 0 4px 12px rgba(18, 89, 195, 0.15);
-    }
-    .inclusion-box strong { color: #1259C3; }
-    .ods10-check {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      background: rgba(255,255,255,0.6);
-      border: 1.5px solid #bcd6f7;
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-top: 10px;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .ods10-check:hover { background: rgba(255,255,255,0.9); border-color: #1259C3; }
-    .ods10-check input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      margin-top: 1px;
-      accent-color: #1259C3;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .ods10-check span { line-height: 1.35; }
     .pago-metodos {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -176,7 +143,7 @@
         <span id="resumen-items">S/ 0.00</span>
       </div>
       <div class="resumen-fila" id="fila-descuento" style="display:none; color:#00A650; font-weight:700;">
-        <span>Descuento estudiante (ODS10, -15%)</span>
+        <span>Descuento</span>
         <span id="resumen-descuento">- S/ 0.00</span>
       </div>
       <div class="resumen-fila">
@@ -236,24 +203,6 @@
             <img src="images/efectivo.png" alt=""><span>Efectivo</span>
           </div>
         </div>
-      </div>
-
-      <!-- === NUEVA SECCIÓN ODS 10 - INCLUSIÓN === -->
-      <div class="inclusion-box">
-        <strong><img src="images/planeta.png" class="icon-img" alt=""> Inclusión y Equidad (ODS 10)</strong><br>
-        En Librería Brenda creemos en la <strong>reducción de las desigualdades</strong>.
-
-        <label class="ods10-check">
-          <input type="checkbox" id="chk-discapacidad" onchange="renderCarrito()">
-          <span><img src="images/check.png" class="icon-img" alt=""> <strong>Envío gratis</strong> para personas con discapacidad</span>
-        </label>
-
-        <label class="ods10-check">
-          <input type="checkbox" id="chk-estudiante" onchange="renderCarrito()">
-          <span><img src="images/check.png" class="icon-img" alt=""> <strong>15% de descuento</strong> para estudiantes universitarios</span>
-        </label>
-
-        <small>Marca la(s) condición(es) que correspondan para aplicar el beneficio a tu pedido.</small>
       </div>
 
       <button class="btn-comprar" onclick="realizarPedido()">
@@ -326,25 +275,12 @@
         return;
       }
 
-      // Totales con el descuento/envío ODS10 ya aplicados (mismo cálculo que el resumen)
-      const totales = calcularTotales();
-
-      const btn = document.querySelector('.btn-comprar');
-      const btnHtmlOriginal = btn ? btn.innerHTML : null;
-      if (btn) { btn.disabled = true; btn.innerHTML = 'Procesando...'; }
-
-      // El pedido solo se confirma si el servidor lo guarda de verdad (puede
-      // rechazarlo, por ejemplo si algún producto ya no tiene stock suficiente).
-      guardarPedidoEnDB(carrito, direccion, pago, totales)
+      guardarPedidoEnDB(carrito, direccion, pago)
         .then(data => {
           if (data.ok) {
             localStorage.removeItem('carritoBrend');
 
-            let mensajeBeneficios = '';
-            if (totales.esEstudiante) mensajeBeneficios += '\nDescuento estudiante aplicado (-15%)';
-            if (totales.esDiscapacidad) mensajeBeneficios += '\nEnvío gratis por discapacidad aplicado';
-
-            alert('¡Pedido realizado con éxito!\n\nNúmero: ' + data.id + mensajeBeneficios);
+            alert('¡Pedido realizado con éxito!\n\nNúmero: ' + data.id);
             window.location.href = 'pedidos.jsp';
           } else {
             alert('No se pudo completar el pedido:\n' + (data.error || 'Error desconocido.'));
@@ -361,13 +297,11 @@
     // Envía el carrito al servidor para registrar el pedido de verdad.
     // Devuelve la Promise del fetch para que realizarPedido() espere la
     // respuesta antes de vaciar el carrito o avisar éxito.
-    function guardarPedidoEnDB(carrito, direccion, pago, totales) {
+    function guardarPedidoEnDB(carrito, direccion, pago) {
       const params = new URLSearchParams();
       params.append('accion', 'guardarDB');
       params.append('direccion', direccion || '');
       params.append('pago', pago || '');
-      params.append('beneficioEstudiante', totales.esEstudiante ? 'true' : 'false');
-      params.append('beneficioDiscapacidad', totales.esDiscapacidad ? 'true' : 'false');
       carrito.forEach(it => {
         if (!it.id) return; // productos sin id conocido no se pueden ligar a la tabla productos
         params.append('item_id', it.id);
