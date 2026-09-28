@@ -128,8 +128,84 @@ quedaron intactos y la tabla quedó vacía a la espera del uso real.
 
 ---
 
+## Pieza 2 — Marcado ARIA / compatibilidad con lector de pantalla
+
+### E10. Sintaxis de JavaScript: externos + inline extraídos de cada JSP
+
+```text
+$ node --check WebContent/js/carrito.js && node --check WebContent/js/accesibilidad.js
+=== JS externos OK ===
+
+$ for f in index carrito pedidos login registro; do
+    awk '/<script>/{flag=1;next}/<\/script>/{flag=0}flag' "WebContent/$f.jsp" > "/tmp/inline_$f.js"
+    node --check "/tmp/inline_$f.js" && echo "$f.jsp: scripts inline OK"
+  done
+index.jsp: scripts inline OK
+carrito.jsp: scripts inline OK
+pedidos.jsp: scripts inline OK
+login.jsp: scripts inline OK
+registro.jsp: scripts inline OK
+```
+
+### E11. Verificación del marcado ARIA por grep (salida real)
+
+```text
+== skip-link ==
+carrito.jsp index.jsp login.jsp pedidos.jsp registro.jsp
+
+== main id="contenido-principal" (esperado 1 por página) ==
+index.jsp:1  carrito.jsp:1  pedidos.jsp:1  login.jsp:1  registro.jsp:1
+
+== nav aria-label="Navegación principal" (páginas con navbar de cliente) ==
+index.jsp:1  carrito.jsp:1  pedidos.jsp:1
+
+== role="alert" ==
+login.jsp:1  registro.jsp:2        (registro: 1 div real + 1 mención en comentario JS)
+
+== aria-checked="false" en carrito.jsp (6 métodos de pago) ==
+6
+
+== aria-pressed en pedidos.jsp (6 botones + 2 referencias en setFiltro) ==
+8
+
+== label for= en registro.jsp (8 campos + checkbox términos) ==
+9
+
+== autocomplete= ==
+login.jsp:2  registro.jsp:7
+
+== role="radiogroup" en carrito.jsp ==
+1
+
+== role="tab" en login.jsp (tablist + 2 tabs) ==
+3
+
+== :focus-visible en css/style.css ==
+1
+```
+
+### E12. Compilación Java de sanidad (la pieza no toca src/)
+
+```text
+$ javac -encoding UTF-8 -cp "WebContent/WEB-INF/lib/*:<tomcat11>/lib/servlet-api.jar" \
+    -d /tmp/libreria_bin $(find src -name "*.java")
+=== COMPILACION OK (sin cambios Java, sanity check) ===
+```
+
+### Límite de la verificación (honestidad de QA)
+
+Las evidencias E10–E12 prueban que el marcado ARIA está presente, que los
+scripts compilan y que la app sigue construyendo. **No** prueban la
+experiencia real con un lector de pantalla: esa validación requiere prueba
+manual con NVDA/JAWS/VoiceOver, no disponible en este entorno. El registro
+documenta la pieza como "implementado, pendiente de validación manual con
+NVDA", no como "cumple WCAG".
+
+---
+
 ## Nota de despliegue
 
-Tras este cambio hay que **republicar la aplicación en Tomcat** para que se
-registre el servlet nuevo (`/PreferenciaAccesibilidadServlet`) y se sirva
-`js/accesibilidad.js`.
+Tras cada cambio de WebContent hay que **republicar la aplicación en Tomcat**.
+La pieza 1 requiere republish para registrar el servlet nuevo
+(`/PreferenciaAccesibilidadServlet`). La pieza 2 solo modifica JSP/CSS/JS,
+pero también requiere republish para que se sirvan las versiones nuevas.
