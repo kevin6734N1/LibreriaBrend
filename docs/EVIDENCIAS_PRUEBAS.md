@@ -203,9 +203,69 @@ NVDA", no como "cumple WCAG".
 
 ---
 
+## Pieza 3 — Lectura en voz alta (Web Speech API)
+
+### E13. Round-trip de `lectura_voz_activa` contra la BD real (10/10 OK)
+
+Se usó un cliente temporal de QA (id=24, creado y eliminado en la misma
+corrida). El test ejercita el mismo DAO que usa el servlet, simulando
+exactamente el flujo del checkbox de la pieza 3.
+
+```text
+Cliente temporal de QA creado con id=24
+[OK]    sin fila -> defaults (ninguno/false)
+[OK]    guardar (checkbox activado) devuelve true
+[OK]    BD cruda: lectura_voz_activa = 1 (TINYINT)
+[OK]    BD cruda: tipo_daltonismo = deuteranopia
+[OK]    JSON del servlet contiene "lecturaVozActiva":true sin comillas
+        JSON simulado: {"autenticado":true,"tipoDaltonismo":"deuteranopia","lecturaVozActiva":true}
+[OK]    parseo JS simulado !!data.lecturaVozActiva = true
+[OK]    guardar (checkbox desactivado) devuelve true
+[OK]    lectura tras desactivar = false y filtro se conserva
+[OK]    filtro y voz se guardan juntos sin pisarse
+[OK]    cascade elimino la fila del cliente temporal
+RESULTADO: 10 OK, 0 fallos
+```
+
+Lo relevante: la pieza 1 enviaba `lecturaVozActiva: 'false'` fijo desde el
+JS (habría pisado el checkbox); la pieza 3 lo corrige y el round-trip
+completo queda probado, incluida la persistencia conjunta de ambos campos.
+
+### E14. Sintaxis, marcado y compilación
+
+```text
+$ node --check WebContent/js/accesibilidad.js
+accesibilidad.js OK
+
+$ awk '/<script>/{flag=1;next}/<\/script>/{flag=0}flag' WebContent/index.jsp > /tmp/inline_index.js
+$ node --check /tmp/inline_index.js
+index.jsp inline OK
+
+== GREPS ==
+grep -c "btn-leer-voz"  -> index.jsp:1  accesibilidad.js:4
+grep -c "textoVoz"      -> index.jsp:1
+grep -c "chk-lectura-voz|lectura-voz-activa" -> accesibilidad.js:4
+grep -c "html.accesibilidad-" -> accesibilidad.js:3   (selectores CSS nuevos)
+grep -c "body.accesibilidad-" -> 0  (correcto: el filtro ya no va en body)
+
+=== COMPILACION OK ===
+```
+
+### Límite de la verificación (honestidad de QA)
+
+E13–E14 prueban la persistencia y la sintaxis. **No** prueban: la calidad de
+la síntesis de voz (depende de las voces `es` instaladas en cada sistema),
+que el botón ♿ permanezca fijo al hacer scroll con un filtro activo
+(corrección `html` vs `body`, pendiente de confirmación visual), ni el
+comportamiento real con NVDA. Queda documentado como "implementado, pendiente
+de validación manual".
+
+---
+
 ## Nota de despliegue
 
 Tras cada cambio de WebContent hay que **republicar la aplicación en Tomcat**.
 La pieza 1 requiere republish para registrar el servlet nuevo
-(`/PreferenciaAccesibilidadServlet`). La pieza 2 solo modifica JSP/CSS/JS,
-pero también requiere republish para que se sirvan las versiones nuevas.
+(`/PreferenciaAccesibilidadServlet`). Las piezas 2 y 3 solo modifican
+JSP/CSS/JS, pero también requieren republish para que se sirvan las
+versiones nuevas.
