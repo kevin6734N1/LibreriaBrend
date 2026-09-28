@@ -15,6 +15,7 @@
 | 2026-09-27 | `ffcb909` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
 | 2026-09-27 | `7c45421` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
 | 2026-09-27 | `b3a5aa1` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
+| 2026-09-27 | *(hash se anota al cerrar el paso)* | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
 WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
@@ -245,11 +246,75 @@ en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E15–E17).
 
 ---
 
+## [Paso 3] Códigos promocionales
+
+**Fecha:** 2026-09-27
+**Motivación:** el campo `descuento` quedado en 0 en el paso 2 se llena ahora
+con códigos promocionales validados por el servidor.
+
+### Decisiones de diseño
+
+1. **Solo con sesión:** aplicar un código exige sesión de cliente real (sin
+   fallback al "Cliente Demo" id=1, mismo criterio que el perfil de
+   accesibilidad). Si fuera anónimo, el primer visitante gastaría el
+   "único uso" de todos.
+2. **El "un solo uso por cliente" lo garantiza la BD:** `codigos_promo_usos`
+   tiene `PRIMARY KEY (codigo, cliente_id)` y el uso se registra dentro de la
+   misma transacción del pedido; si dos pestañas confirman a la vez, la
+   segunda recibe duplicate-key, hace **rollback completo** (incluido el
+   descuento de stock) y devuelve un mensaje claro.
+3. **El servidor recalcula todo:** el navegador solo previsualiza (rama
+   `validarPromo`, que no consume el código); al confirmar, `guardarPedidoEnDB`
+   vuelve a validar el código y recalcula descuento, envío y total.
+
+### Qué se implementó
+
+- **BD:** tablas `codigos_promo` (tipo `PORCENTAJE`/`MONTO_FIJO`, CHECK de
+  valor > 0 y ≤ 100 en porcentaje) y `codigos_promo_usos` (PK compuesta, FK a
+  `codigos_promo` y a `clientes` con cascade). Seed: `BIENVENIDA10` (10% sin
+  vencimiento), `LIBRO5` (S/5 fijo, vence 2026-12-31), `VERANO20` (vencido a
+  propósito para probar ese caso). Los códigos se crean por SQL (sin pantalla
+  admin por ahora).
+- **Modelo/DAO:** `CodigoPromo.calcularDescuento()` (misma fórmula que el JS;
+  monto fijo nunca supera el subtotal), `CodigoPromoDAO` con `validar()`
+  (existencia, activo, vencimiento por zona America/Lima, uso previo) y
+  `registrarUso()` transaccional, más `CodigoPromoInvalidoException`.
+- **`PedidoDAO.crear(pedido, clienteId, codigoPromo)`:** overload con el
+  registro del uso en la misma transacción (rollback total si la PK rechaza).
+- **`Pedido.calcularTotal()`:** el envío ahora se evalúa sobre
+  `(subtotal - descuento) >= 30`.
+- **`PedidoServlet`:** rama `validarPromo` para la previsualización,
+  revalidación al confirmar, `setDescuento()` y catch de la nueva excepción.
+- **Carrito:** caja de código con Aplicar/Quitar (Enter también aplica),
+  mensaje accesible (`role="status" aria-live="polite"`), descuento y envío
+  recalculados en vivo, reset si el carrito queda vacío, y envío de
+  `codigoPromo` al confirmar.
+
+### Verificación
+
+**19/19 pruebas de integración contra la BD real** (casos 2–9 del plan +
+extras: carrito vacío, y fallo de stock no consume el código), incluyendo el
+rollback completo del caso de las dos pestañas y la persistencia de
+`descuento=4.00` / `total=36.00` en `pedidos`. Cliente, productos y usos
+temporales eliminados al terminar; la BD quedó sin filas de prueba.
+Evidencias en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E19–E20).
+
+### Decisiones abiertas (pendientes de confirmación)
+
+1. **Caso raro de envío:** con `LIBRO5` sobre S/32 el subtotal baja a S/27,
+   pierde el envío gratis y el cliente pagaría S/37 (más que sin código).
+   Está implementado como se decidió; se puede agregar un rechazo de
+   "este código te haría pagar más envío" (~3 líneas).
+2. **Cancelar no libera el código:** si se cancela un pedido PENDIENTE que
+   usó un código, el código queda gastado para ese cliente.
+3. **Defecto preexistente reportado:** `guardarPedidoEnDB` confía en los
+   `item_precio` que manda el navegador; el subtotal (y con él el descuento)
+   podría manipularse. La corrección sería leer precios reales de `productos`.
+
+---
+
 ## Pendiente (roadmap de accesibilidad)
 
-- **[Paso 3] Códigos promocionales:** antes de codificar, confirmar tres
-  decisiones de diseño (tipo de descuento, usos máximos, combinación con
-  otros beneficios).
 - Confirmar visualmente la corrección del filtro en `<html>` (scroll con el
   botón ♿ fijo).
 - Validación manual con NVDA de las piezas 2 y 3.

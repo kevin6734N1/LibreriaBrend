@@ -323,6 +323,97 @@ BD de `descuento = 0.00` en los pedidos nuevos.
 
 ---
 
+## Paso 3 — Códigos promocionales
+
+### DDL y seed aplicados a `libreria_brenda`
+
+```sql
+CREATE TABLE codigos_promo (
+  codigo VARCHAR(30) NOT NULL,
+  tipo ENUM('PORCENTAJE','MONTO_FIJO') NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
+  fecha_expiracion DATE NULL,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (codigo),
+  CONSTRAINT chk_promo_valor CHECK (valor > 0 AND (tipo <> 'PORCENTAJE' OR valor <= 100))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE codigos_promo_usos (
+  codigo VARCHAR(30) NOT NULL,
+  cliente_id INT NOT NULL,
+  pedido_id VARCHAR(30) NOT NULL,
+  fecha_uso DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (codigo, cliente_id),
+  CONSTRAINT fk_promo_uso_codigo  FOREIGN KEY (codigo) REFERENCES codigos_promo(codigo),
+  CONSTRAINT fk_promo_uso_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+Seed verificado en BD:
+
+```text
+codigo        tipo         valor  fecha_expiracion
+BIENVENIDA10  PORCENTAJE   10.00  NULL
+LIBRO5        MONTO_FIJO    5.00  2026-12-31
+VERANO20      PORCENTAJE   20.00  2026-01-31   (vencido a propósito)
+```
+
+### E19. Pruebas de integración contra la BD real (19/19 OK)
+
+Cliente temporal id=26 y 3 productos temporales creados y eliminados en la
+misma corrida (limpieza en orden de FKs). Caso 1 (sin sesión) se resuelve en
+el servlet antes de tocar el DAO.
+
+```text
+Cliente temporal id=26
+Usando categoria_id=1
+[OK]    C2: BIENVENIDA10 sobre S/40 descuenta 4.00
+[OK]    C3: 'bienvenida10' en minusculas funciona
+[OK]    C4: VERANO20 rechazado por vencido
+[OK]    C5: codigo inexistente rechazado
+[OK]    C6: LIBRO5 sobre S/3 descuenta 3.00 (no supera subtotal)
+[OK]    C-extra: codigo con carrito vacio rechazado
+[OK]    C7a: revalidacion al confirmar da 4.00
+[OK]    C7b: envio gratis porque (40 - 4) >= 30
+[OK]    C7c: total = 36.00
+[OK]    C7d: pedido creado con codigo promocional
+[OK]    C7e: BD pedidos.descuento = 4.00
+[OK]    C7f: BD pedidos.total = 36.00
+[OK]    C7g: una fila en codigos_promo_usos
+[OK]    C7h: reintento dice 'Ya usaste este codigo...'
+[OK]    C8a: excepcion con mensaje claro
+[OK]    C8b: segundo uso lanza CodigoPromoInvalidoException
+[OK]    C8c: rollback completo - el pedido duplicado NO existe en BD
+[OK]    C-extra2: pedido sin stock lanza StockInsuficienteException
+[OK]    C-extra2b: el codigo no se consumio por el fallo de stock
+Limpieza completada (cliente, pedidos, usos y productos temporales eliminados)
+RESULTADO: 19 OK, 0 fallos
+```
+
+Estado de la BD tras la limpieza (verificado por query):
+
+```text
+qa_clientes = 0    qa_productos = 0    usos_restantes = 0    codigos = 3
+```
+
+### E20. Sintaxis y compilación
+
+```text
+$ javac ... $(find src -name "*.java")
+=== COMPILACION OK ===
+$ node --check WebContent/js/carrito.js
+carrito.js OK
+$ node --check /tmp/inline_carrito.js   (inline extraído de carrito.jsp)
+carrito.jsp inline OK
+```
+
+Pendiente de validación manual: flujo real en navegador con sesión (casos 1,
+7 y 9 de la tabla del plan: aplicar/quitar, recálculo al cambiar cantidades,
+reintento tras confirmar).
+
+---
+
 ## Nota de despliegue
 
 Tras cada cambio hay que **republicar la aplicación en Tomcat**.
