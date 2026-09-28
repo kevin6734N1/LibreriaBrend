@@ -1,0 +1,64 @@
+
+---------- B.04.1 Recurso inexistente (404) y mapeo de error de web.xml ----------
+### Request: GET http://localhost:8080/LibreriaBrend/noexiste.jsp
+HTTP/1.1 404 
+Set-Cookie: JSESSIONID=<REDACTADO>; Path=/LibreriaBrend; HttpOnly
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Mon, 28 Sep 2026 06:29:54 GMT
+
+### ¿el cuerpo expone stack trace o rutas internas? (grep de firmas técnicas)
+### Tamaño del cuerpo devuelto: 10181 bytes
+
+---------- B.04.2 Servlet inexistente ----------
+GET http://localhost:8080/LibreriaBrend/ServletInexistente -> HTTP 404
+
+---------- B.04.3 Acción desconocida en PedidoServlet (GET y POST) ----------
+GET  /PedidoServlet?accion=xxx  -> HTTP 200 | Location: 
+POST /PedidoServlet  (sin cuerpo) -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/pedidos.jsp
+
+---------- B.04.4 GET /LoginServlet y /LogoutServlet (comportamiento de redirección) ----------
+GET /LoginServlet  -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/login.jsp
+GET /LogoutServlet -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/login.jsp
+
+---------- B.04.5 Validación de entrada en el servidor: RegistroServlet (payloads rechazados antes del INSERT) ----------
+### (a) todos los campos vacíos:
+{"ok":false,"error":"Completa los campos requeridos."}
+   HTTP 200
+### (b) email con formato inválido:
+{"ok":false,"error":"Ingresa un correo con formato válido."}
+   HTTP 200
+### (c) contraseña por debajo del mínimo (8):
+{"ok":false,"error":"La contraseña debe tener al menos 8 caracteres."}
+   HTTP 200
+### (d) DNI con formato no numérico (¿se valida en servidor?):
+{"ok":false,"error":"La contraseña debe tener al menos 8 caracteres."}
+   HTTP 200
+>>> Nota: (d) también cae en el corte por contraseña corta, por lo que no llega al DAO. La validación de formato del DNI se evaluó en Fase 1 (no existe).
+
+---------- B.04.6 Validación del login (payloads rechazados) ----------
+### rol no reconocido:
+{"ok":false,"error":"Rol no reconocido."}
+   HTTP 200
+### campos faltantes:
+{"ok":false,"error":"Completa todos los campos."}
+   HTTP 200
+### rol=admin sin código de empleado (no debe autenticar):
+{"ok":false,"error":"Credenciales de empleado incorrectas."}
+   HTTP 200
+
+---------- B.04.7 ¿Alguna respuesta JSON expone información interna? ----------
+### Estructura de la respuesta de /PedidoServlet (solo claves, sin datos):
+claves de un pedido : ['descuento', 'direccion', 'envio', 'estado', 'fecha', 'hora', 'id', 'items', 'pago', 'subtotal', 'total']
+claves de un ítem   : ['img', 'nombre', 'precio', 'qty']
+nº de pedidos       : 8
+### Estructura de la respuesta de /ProductoServlet:
+nº de productos: 11
+claves de un producto: ['activo', 'categoria', 'descripcion', 'etiqueta', 'id', 'imagen', 'nombre', 'precio', 'stock']
+>>> 'stock' se publica sin sesión: True | valor del 1º: 5
+
+---------- B.04.8 Síntesis: búsqueda de stack traces / rutas internas en TODAS las respuestas capturadas ----------
+(sin stack traces ni rutas del servidor en las respuestas capturadas)
+### Fugas de mensajes internos de la JVM detectadas en B.03.7:
+{"ok":false,"error":"Index 1 out of bounds for length 1"}
+{"ok":false,"error":"Cannot load from object array because \"qtys\" is null"}

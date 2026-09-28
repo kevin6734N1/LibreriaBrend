@@ -1,0 +1,151 @@
+===== C.01 Registro de accesos del día de la auditoría (peticiones de la Fase 2) =====
+-- fichero: logs/localhost_access_log.2026-09-28.txt --
+127.0.0.1 - admin [28/Sep/2026:01:13:45 -0500] "GET /manager/text/reload?path=/LibreriaBrend HTTP/1.1" 200 63
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:26:43 -0500] "HEAD /LibreriaBrend/ HTTP/1.1" 200 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:26:43 -0500] "GET / HTTP/1.1" 200 11243
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:15 -0500] "HEAD /LibreriaBrend/ HTTP/1.1" 200 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/ HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/usuario.png HTTP/1.1" 200 14008
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/libro-logo.png HTTP/1.1" 200 8363
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/css/style.css HTTP/1.1" 200 16652
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/carrito.png HTTP/1.1" 200 5021
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/js/carrito.js HTTP/1.1" 200 8508
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/todos.png HTTP/1.1" 200 28399
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/js/accesibilidad.js HTTP/1.1" 200 10470
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/productos.png HTTP/1.1" 200 9387
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/tienda.png HTTP/1.1" 200 14560
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/acuarelas.png HTTP/1.1" 200 9125
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/mochila-silueta.png HTTP/1.1" 200 2910
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/images/dashboard.png HTTP/1.1" 200 9224
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:23 -0500] "GET /LibreriaBrend/PreferenciaAccesibilidadServlet HTTP/1.1" 200 73
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/ProductoServlet HTTP/1.1" 200 2544
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/resma-papel.png HTTP/1.1" 200 15476
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/diccionario-matematicas.png HTTP/1.1" 200 10128
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/pizarra-acrilica.png HTTP/1.1" 200 2886
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/pinceles.png HTTP/1.1" 200 4696
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/Escuadras.png HTTP/1.1" 200 58909
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/agenda-escolar.png HTTP/1.1" 200 26152
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/acuarelas.png HTTP/1.1" 200 9125
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/pack-libros.png HTTP/1.1" 200 1185283
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/mochila-escolar.png HTTP/1.1" 200 10712
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /LibreriaBrend/images/productos/lapiceros-faber.png HTTP/1.1" 200 18586
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:27:24 -0500] "GET /favicon.ico HTTP/1.1" 200 21630
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/ HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/index.jsp HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/carrito.jsp HTTP/1.1" 200 13708
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/index.jsp HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/carrito.jsp HTTP/1.1" 200 13708
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/pedidos.jsp HTTP/1.1" 200 23380
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/login.jsp HTTP/1.1" 200 6170
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/registro.jsp HTTP/1.1" 200 6527
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/productos.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/admin.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/clientes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/reportes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/js/accesibilidad.js HTTP/1.1" 200 10470
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/js/carrito.js HTTP/1.1" 200 8508
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:09 -0500] "GET /LibreriaBrend/js/accesibilidad.js HTTP/1.1" 200 10470
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/ HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/index.jsp HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/carrito.jsp HTTP/1.1" 200 13708
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/index.jsp HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/carrito.jsp HTTP/1.1" 200 13708
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/pedidos.jsp HTTP/1.1" 200 23380
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/login.jsp HTTP/1.1" 200 6170
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/registro.jsp HTTP/1.1" 200 6527
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/productos.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/admin.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:32 -0500] "GET /LibreriaBrend/clientes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:33 -0500] "GET /LibreriaBrend/reportes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:33 -0500] "GET /LibreriaBrend/productos.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:33 -0500] "GET /LibreriaBrend/admin.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:33 -0500] "GET /LibreriaBrend/clientes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:33 -0500] "GET /LibreriaBrend/reportes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:33 -0500] "GET /LibreriaBrend/js/accesibilidad.js HTTP/1.1" 200 10470
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/carrito.jsp HTTP/1.1" 200 13708
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/inicio.png HTTP/1.1" 200 1630
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/ubicacion.png HTTP/1.1" 200 1714
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/plin.png HTTP/1.1" 200 2548
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/yape.png HTTP/1.1" 200 4480
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/visa.png HTTP/1.1" 200 2288
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/mastercard.png HTTP/1.1" 200 4316
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/bcp.png HTTP/1.1" 200 1994
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/check.png HTTP/1.1" 200 2110
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/efectivo.png HTTP/1.1" 200 2110
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/PreferenciaAccesibilidadServlet HTTP/1.1" 200 73
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:36 -0500] "GET /LibreriaBrend/images/empty.png HTTP/1.1" 200 2226
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/PedidoServlet HTTP/1.1" 200 3492
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/PedidoServlet HTTP/1.1" 200 3492
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 61
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 61
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 61
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 61
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 56
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 56
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/ProductoServlet HTTP/1.1" 200 2544
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/ProductoServlet HTTP/1.1" 200 2544
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/ReporteServlet HTTP/1.1" 401 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/ClienteServlet HTTP/1.1" 401 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/productos.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/clientes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/reportes.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "GET /LibreriaBrend/admin.jsp HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/ProductoServlet HTTP/1.1" 401 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:37 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 401 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 87
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 79
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 36
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 53
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 55
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 79
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 57
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 77
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 79
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 200 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "GET /LibreriaBrend/ HTTP/1.1" 200 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "GET /LibreriaBrend/carrito.jsp HTTP/1.1" 200 13708
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:38 -0500] "GET /LibreriaBrend/pedidos.jsp HTTP/1.1" 200 23380
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/resma-papel.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/agenda-escolar.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/pinceles.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/Escuadras.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/diccionario-matematicas.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/pizarra-acrilica.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/lapiceros-faber.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/pack-libros.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/acuarelas.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:54 -0500] "GET /LibreriaBrend/images/productos/mochila-escolar.png HTTP/1.1" 304 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "GET /LibreriaBrend/noexiste.jsp HTTP/1.1" 404 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "GET /LibreriaBrend/ServletInexistente HTTP/1.1" 404 10201
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "GET /LibreriaBrend/PedidoServlet?accion=xxx HTTP/1.1" 200 3492
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/PedidoServlet HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "GET /LibreriaBrend/LoginServlet HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "GET /LibreriaBrend/LogoutServlet HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/RegistroServlet HTTP/1.1" 200 54
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/RegistroServlet HTTP/1.1" 200 61
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/RegistroServlet HTTP/1.1" 200 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/RegistroServlet HTTP/1.1" 200 71
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 41
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 49
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "POST /LibreriaBrend/LoginServlet HTTP/1.1" 200 60
+0:0:0:0:0:0:0:1 - - [28/Sep/2026:01:28:59 -0500] "GET /LibreriaBrend/ProductoServlet HTTP/1.1" 200 2544
+
+===== C.02 Búsqueda de SEVERE / ERROR / WARN / Exception en TODOS los logs de Tomcat =====
+(sin coincidencias)
+
+===== C.03 Logs de error persistentes configurados =====
+-- ¿existe catalina.out? --
+NO EXISTE catalina.out
+-- ¿existe localhost.<fecha>.log? --
+NO EXISTE localhost.<fecha>.log
+-- ficheros presentes en logs/ --
+2026-09-22 23:23  24628 bytes  /home/kevin/apache-tomcat-11.0.0-M24/logs/localhost_access_log.2026-09-22.txt
+2026-09-23 22:48  9351 bytes  /home/kevin/apache-tomcat-11.0.0-M24/logs/localhost_access_log.2026-09-23.txt
+2026-09-27 23:07  6644 bytes  /home/kevin/apache-tomcat-11.0.0-M24/logs/localhost_access_log.2026-09-27.txt
+2026-09-28 01:29  13581 bytes  /home/kevin/apache-tomcat-11.0.0-M24/logs/localhost_access_log.2026-09-28.txt
+
+-- destino de stdout/stderr del proceso Tomcat (no es un fichero) --
+lrwx------ 1 kevin kevin 64 Sep 28 01:13 /proc/107662/fd/1 -> socket:[854758]
+lrwx------ 1 kevin kevin 64 Sep 28 01:13 /proc/107662/fd/2 -> socket:[854760]
+>>> Toda la salida del contenedor (incluidos stdout del servlet y stack traces) va a un socket de la terminal que lo lanzó, no a un log persistente.

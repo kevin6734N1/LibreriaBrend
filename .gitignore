@@ -1,0 +1,47 @@
+# ============================================================
+#  LibreriaBrend - Reglas de exclusión
+#  Añadido en la Fase 2 de la auditoría (rama audit/fase-2-runtime).
+# ============================================================
+
+# --- Artefactos de compilación ---
+target/
+build/
+out/
+*.class
+*.war
+*.ear
+
+# --- Logs y volcados del contenedor ---
+*.log
+logs/
+catalina.out
+localhost.*.log
+hs_err_pid*.log
+*.hprof
+# Excepción: la evidencia textual de la auditoría vive en evidencias/logs/
+!docs/auditoria/evidencias/logs/
+!docs/auditoria/evidencias/logs/**
+
+# --- Configuración local con credenciales ---
+*.properties
+!docs/**/*.properties
+*.env
+.env
+.env.*
+context.xml
+!docs/**/context.xml
+*.jks
+*.keystore
+*.p12
+
+# --- Volcados de base de datos (pueden contener datos personales) ---
+*.sql.gz
+*.dump
+*.sql.bak
+dump*.sql
+!docs/**/*.sql
+
+# --- Entornos de desarrollo (decisión pendiente del equipo) ---
+# .settings/
+# .classpath
+# .project
