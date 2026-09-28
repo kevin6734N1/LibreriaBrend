@@ -70,6 +70,8 @@
     .pago-card.selected { border-color: #1259C3; background: #E3F2FD; box-shadow: 0 0 0 2px rgba(18,89,195,0.25); }
     .pago-card img { width: 28px; height: 28px; object-fit: contain; }
     .pago-card span { font-size: 0.72rem; font-weight: 700; color: #444; }
+    .btn-promo { background:#1259C3; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-weight:700; cursor:pointer; }
+    .btn-promo:hover { background:#0d47a1; }
   </style>
 </head>
 <body>
@@ -153,6 +155,19 @@
       <div class="resumen-fila total">
         <span>Total</span>
         <span id="resumen-total">S/ 0.00</span>
+      </div>
+
+      <div class="promo-box" style="margin:16px 0;">
+        <label for="input-promo" style="display:block; font-size:0.82rem; font-weight:700; color:#444; margin-bottom:5px;">Código promocional</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="input-promo" maxlength="30" autocomplete="off" autocapitalize="characters"
+                 placeholder="Ej: BIENVENIDA10" aria-describedby="promo-msg"
+                 style="flex:1; padding:9px 10px; border:1.5px solid #ccc; border-radius:8px; font-size:0.9rem; text-transform:uppercase;"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();aplicarCodigoPromo();}">
+          <button type="button" id="btn-aplicar-promo" class="btn-promo" onclick="aplicarCodigoPromo()">Aplicar</button>
+          <button type="button" id="btn-quitar-promo" class="btn-promo" style="display:none" onclick="quitarCodigoPromo()" aria-label="Quitar código promocional">Quitar</button>
+        </div>
+        <p id="promo-msg" role="status" aria-live="polite" style="font-size:0.82rem; margin-top:6px; min-height:1.2em;"></p>
       </div>
 
       <!-- === DATOS DE ENTREGA === -->
@@ -302,6 +317,7 @@
       params.append('accion', 'guardarDB');
       params.append('direccion', direccion || '');
       params.append('pago', pago || '');
+      if (promoAplicada) params.append('codigoPromo', promoAplicada.codigo);
       carrito.forEach(it => {
         if (!it.id) return; // productos sin id conocido no se pueden ligar a la tabla productos
         params.append('item_id', it.id);

@@ -64,16 +64,85 @@ function eliminarItem(idx) {
   renderCarrito();
 }
 
+// Código promocional aplicado (ya validado por el servidor). Solo guardamos tipo/valor
+// para recalcular el descuento si el carrito cambia; el servidor lo recalcula al confirmar.
+let promoAplicada = null;
+
+function calcularDescuentoPromo(subtotal) {
+  if (!promoAplicada || subtotal <= 0) return 0;
+  return promoAplicada.tipo === 'PORCENTAJE'
+    ? Math.round(subtotal * promoAplicada.valor) / 100   // misma fórmula que CodigoPromo.java
+    : Math.min(promoAplicada.valor, subtotal);
+}
+
 // Subtotal, descuento y envío.
-// Envío gratis desde S/30 (regla general de la tienda), sino S/10.
-// `descuento` queda en 0 por ahora: lo llenará el módulo de códigos promocionales.
+// Envío gratis si (subtotal - descuento) >= S/30, sino S/10.
 function calcularTotales() {
   const subtotal = carrito.reduce((s, i) => s + i.precio * i.qty, 0);
-  const descuento = 0;
-  const envio = subtotal >= 30 ? 0 : 10;
+  const descuento = calcularDescuentoPromo(subtotal);
+  const envio = (subtotal - descuento) >= 30 ? 0 : 10;
   const total = subtotal - descuento + envio;
 
   return { subtotal, descuento, envio, total };
+}
+
+function mostrarPromoMensaje(texto, esError) {
+  const msg = document.getElementById('promo-msg');
+  if (!msg) return;
+  msg.textContent = texto;
+  msg.style.color = esError ? '#c62828' : '#00A650';
+}
+
+// Deja el campo listo para escribir otro código (sin volver a renderizar).
+function resetPromoUI() {
+  promoAplicada = null;
+  const input = document.getElementById('input-promo');
+  const btnAplicar = document.getElementById('btn-aplicar-promo');
+  const btnQuitar = document.getElementById('btn-quitar-promo');
+  if (input) { input.disabled = false; input.value = ''; }
+  if (btnAplicar) btnAplicar.style.display = '';
+  if (btnQuitar) btnQuitar.style.display = 'none';
+}
+
+function aplicarCodigoPromo() {
+  const input = document.getElementById('input-promo');
+  const codigo = input.value.trim();
+
+  if (carrito.length === 0) { mostrarPromoMensaje('Tu carrito está vacío.', true); return; }
+  if (!codigo) { mostrarPromoMensaje('Escribe un código promocional.', true); input.focus(); return; }
+
+  const { subtotal } = calcularTotales();
+  const params = new URLSearchParams();
+  params.append('accion', 'validarPromo');
+  params.append('codigo', codigo);
+  params.append('subtotal', subtotal.toFixed(2));
+
+  fetch('PedidoServlet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString()
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        promoAplicada = { codigo: data.codigo, tipo: data.tipo, valor: data.valor };
+        input.value = data.codigo;
+        input.disabled = true;
+        document.getElementById('btn-aplicar-promo').style.display = 'none';
+        document.getElementById('btn-quitar-promo').style.display = '';
+        mostrarPromoMensaje('Código ' + data.codigo + ' aplicado.', false);
+        renderCarrito();
+      } else {
+        mostrarPromoMensaje(data.error || 'No se pudo aplicar el código.', true);
+      }
+    })
+    .catch(() => mostrarPromoMensaje('No se pudo conectar con el servidor.', true));
+}
+
+function quitarCodigoPromo() {
+  resetPromoUI();
+  mostrarPromoMensaje('Código quitado.', false);
+  renderCarrito();
 }
 
 function renderCarrito() {
@@ -97,6 +166,7 @@ function renderCarrito() {
     if (resumenTotal) resumenTotal.textContent = 'S/ 0.00';
     if (resumenEnvio) resumenEnvio.textContent = '¡Gratis!';
     if (filaDescuento) filaDescuento.style.display = 'none';
+    resetPromoUI();
     return;
   }
 
