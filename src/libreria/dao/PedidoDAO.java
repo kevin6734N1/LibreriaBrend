@@ -51,7 +51,7 @@ public class PedidoDAO {
                 ps.setDouble(6, pedido.getDescuento());
                 ps.setDouble(7, pedido.getEnvio());
                 // El total ya viene calculado (subtotal - descuento + envio) desde
-                // aplicarBeneficiosODS10(); no se recalcula aquí para no perder el descuento.
+                // Pedido.calcularTotal(); no se recalcula aquí para no perder el descuento.
                 ps.setDouble(8, pedido.getTotal());
                 ps.setString(9, pedido.getDireccionEntrega());
                 ps.setString(10, pedido.getMetodoPago());

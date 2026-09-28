@@ -66,24 +66,16 @@ public class Pedido {
     }
 
     /**
-     * Aplica los beneficios de inclusión ODS10 sobre el subtotal ya calculado
-     * (llamar antes a calcularSubtotal()) y recalcula el total:
-     *  - Estudiante universitario: 15% de descuento.
-     *  - Persona con discapacidad: envío gratis.
-     *  - Envío gratis también si el subtotal ya es >= 30 (regla general de la tienda).
+     * Recalcula subtotal, envío y total.
+     *  - Envío gratis si el subtotal es >= 30 (regla general de la tienda), sino S/10.
+     *  - El descuento se conserva tal cual (0 por defecto); el módulo de códigos
+     *    promocionales lo asignará con setDescuento() antes de llamar a este método.
      */
-    public double aplicarBeneficiosODS10(boolean esEstudiante, boolean esDiscapacidad) {
-        this.descuento = esEstudiante ? subtotal * 0.15 : 0;
-        double envioBase = subtotal >= 30 ? 0 : 10;
-        this.envio = esDiscapacidad ? 0 : envioBase;
-        this.total = subtotal - descuento + envio;
-        return this.total;
-    }
-
-    /** Calcula el total sumando todos los ítems, sin descuentos ni envío (compatibilidad). */
     public double calcularTotal() {
         calcularSubtotal();
-        return aplicarBeneficiosODS10(false, false);
+        this.envio = subtotal >= 30 ? 0 : 10;
+        this.total = subtotal - descuento + envio;
+        return this.total;
     }
 
     // ---- Clase interna ItemPedido ----

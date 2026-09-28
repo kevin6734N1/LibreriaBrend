@@ -105,8 +105,6 @@ public class PedidoServlet extends HttpServlet {
             String[] precios = req.getParameterValues("item_precio");
             String direccion = req.getParameter("direccion");
             String pago      = req.getParameter("pago");
-            boolean esEstudiante   = "true".equals(req.getParameter("beneficioEstudiante"));
-            boolean esDiscapacidad = "true".equals(req.getParameter("beneficioDiscapacidad"));
 
             if (ids == null || ids.length == 0) {
                 out.print("{\"ok\":false,\"error\":\"carrito vacio\"}");
@@ -133,10 +131,10 @@ public class PedidoServlet extends HttpServlet {
 
             Pedido pedido = new Pedido();
             pedido.setItems(items);
-            pedido.calcularSubtotal();
-            // Recalculado en el servidor (no se confía en los montos que mande el navegador),
-            // con las mismas reglas ODS10 usadas en carrito.js: -15% estudiante, envio gratis discapacidad.
-            pedido.aplicarBeneficiosODS10(esEstudiante, esDiscapacidad);
+            // Recalculado en el servidor (no se confía en los montos que mande el navegador):
+            // envío gratis desde S/30 (regla general de la tienda).
+            // calcularTotal() ya llama a calcularSubtotal() internamente.
+            pedido.calcularTotal();
             pedido.setDireccionEntrega(direccion != null && !direccion.isEmpty() ? direccion : "Por confirmar");
             pedido.setMetodoPago(pago != null && !pago.isEmpty() ? pago : "Por confirmar");
 

@@ -64,22 +64,16 @@ function eliminarItem(idx) {
   renderCarrito();
 }
 
-// === ODS 10 - Inclusión y Equidad ===
-// Calcula subtotal, descuento por estudiante universitario (-15%) y envío
-// (gratis si el subtotal ya califica, o si la persona marca "discapacidad").
+// Subtotal, descuento y envío.
+// Envío gratis desde S/30 (regla general de la tienda), sino S/10.
+// `descuento` queda en 0 por ahora: lo llenará el módulo de códigos promocionales.
 function calcularTotales() {
   const subtotal = carrito.reduce((s, i) => s + i.precio * i.qty, 0);
-
-  const chkDiscapacidad = document.getElementById('chk-discapacidad');
-  const chkEstudiante = document.getElementById('chk-estudiante');
-  const esDiscapacidad = !!(chkDiscapacidad && chkDiscapacidad.checked);
-  const esEstudiante = !!(chkEstudiante && chkEstudiante.checked);
-
-  const descuento = esEstudiante ? subtotal * 0.15 : 0;
-  const envio = (subtotal >= 30 || esDiscapacidad) ? 0 : 10;
+  const descuento = 0;
+  const envio = subtotal >= 30 ? 0 : 10;
   const total = subtotal - descuento + envio;
 
-  return { subtotal, descuento, envio, total, esDiscapacidad, esEstudiante };
+  return { subtotal, descuento, envio, total };
 }
 
 function renderCarrito() {
@@ -131,7 +125,7 @@ function renderCarrito() {
 
   lista.innerHTML = html;
 
-  const { subtotal, descuento, envio, total, esDiscapacidad } = calcularTotales();
+  const { subtotal, descuento, envio, total } = calcularTotales();
 
   if (resumenItems) resumenItems.textContent = 'S/ ' + subtotal.toFixed(2);
 
@@ -146,7 +140,7 @@ function renderCarrito() {
 
   if (resumenEnvio) {
     if (envio === 0) {
-      resumenEnvio.textContent = esDiscapacidad ? '¡Gratis! (ODS10)' : '¡Gratis!';
+      resumenEnvio.textContent = '¡Gratis!';
     } else {
       resumenEnvio.textContent = 'S/ ' + envio.toFixed(2);
     }
