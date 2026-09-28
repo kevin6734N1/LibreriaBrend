@@ -169,5 +169,6 @@
       mostrarMsg('Debes iniciar sesión como administrador para ver esa página.', 'error');
     }
   </script>
+<script src="js/accesibilidad.js"></script>
 </body>
 </html>
