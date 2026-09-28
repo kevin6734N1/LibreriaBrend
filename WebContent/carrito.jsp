@@ -107,15 +107,17 @@
 </head>
 <body>
 
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
   <!-- NAVBAR -->
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Navegación principal">
     <a href="index.jsp" class="logo">
-      <img src="images/libro-logo.png" class="icon-img" style="width:32px;height:32px;" alt="Logo">
+      <img src="images/libro-logo.png" class="icon-img" style="width:32px;height:32px;" alt="">
       Librería Brenda
     </a>
     <div class="search-bar">
-      <input type="text" placeholder="Buscar productos...">
-      <button>&#128269;</button>
+      <input type="text" placeholder="Buscar productos..." aria-label="Buscar productos">
+      <button aria-label="Buscar">&#128269;</button>
     </div>
     <div class="navbar-links">
       <a href="index.jsp"><img src="images/inicio.png" class="icon-img" alt=""> Inicio</a>
@@ -125,7 +127,7 @@
       %>
       <% if ("cliente".equals(rolSesion) && nombreCliente != null) { %>
         <div class="cuenta-dropdown">
-          <button class="cuenta-dropdown-btn" onclick="toggleCuentaMenu(event)">
+          <button class="cuenta-dropdown-btn" onclick="toggleCuentaMenu(event)" aria-haspopup="true" aria-expanded="false">
             <img src="images/usuario.png" class="icon-img" alt=""> Hola, <%= nombreCliente.split(" ")[0] %> ▾
           </button>
           <div class="cuenta-dropdown-menu" id="cuenta-dropdown-menu">
@@ -137,12 +139,14 @@
         <a href="login.jsp"><img src="images/usuario.png" class="icon-img" alt=""> Mi cuenta</a>
       <% } %>
       <a href="carrito.jsp" class="btn-carrito" style="position:relative">
-        <img src="images/carrito.png" class="icon-img" alt="Carrito"> 
+        <img src="images/carrito.png" class="icon-img" alt=""> 
         Carrito
-        <span class="badge" id="carrito-badge">0</span>
+        <span class="badge" id="carrito-badge" role="status" aria-live="polite" aria-label="Productos en el carrito">0</span>
       </a>
     </div>
   </nav>
+
+  <main id="contenido-principal">
 
   <!-- BREADCRUMB -->
   <div style="padding:12px 20px; font-size:0.85rem; color:#666; background:white; border-bottom:1px solid #e0e0e0;">
@@ -155,16 +159,16 @@
     <!-- Lista de ítems -->
     <div class="carrito-items">
       <h2 style="font-family:'Nunito',sans-serif; font-weight:800; margin-bottom:20px; font-size:1.3rem;">
-        <img src="images/carrito.png" class="icon-img" style="width:32px;height:32px;" alt="Carrito"> 
+        <img src="images/carrito.png" class="icon-img" style="width:32px;height:32px;" alt=""> 
         Mi Carrito de Compras
       </h2>
-      <div id="carrito-lista">
+      <div id="carrito-lista" aria-live="polite">
         <!-- JS carga los productos -->
       </div>
     </div>
 
     <!-- Resumen de pago -->
-    <div class="carrito-resumen">
+    <div class="carrito-resumen" aria-live="polite" aria-atomic="true">
       <h3>Resumen del pedido</h3>
 
       <div class="resumen-fila">
@@ -196,28 +200,40 @@
         <input type="text" id="input-direccion" placeholder="Ej: Av. Arequipa 1234, Miraflores"
           style="width:100%; box-sizing:border-box; padding:10px 12px; border:1.5px solid #ddd; border-radius:8px; font-family:'Lato',sans-serif; font-size:0.9rem; margin-bottom:14px;">
 
-        <label style="display:block; font-size:0.82rem; font-weight:700; color:#444; margin-bottom:8px;">
+        <span id="lbl-pago" style="display:block; font-size:0.82rem; font-weight:700; color:#444; margin-bottom:8px;">
           Método de pago
-        </label>
+        </span>
         <input type="hidden" id="input-pago" value="">
-        <div class="pago-metodos" id="pago-metodos">
-          <div class="pago-card" data-valor="Tarjeta Visa" onclick="seleccionarPago(this)">
-            <img src="images/visa.png" alt="Visa"><span>Visa</span>
+        <div class="pago-metodos" id="pago-metodos" role="radiogroup" aria-labelledby="lbl-pago">
+          <div class="pago-card" data-valor="Tarjeta Visa" role="radio" aria-checked="false" tabindex="0"
+               onclick="seleccionarPago(this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarPago(this)}">
+            <img src="images/visa.png" alt=""><span>Visa</span>
           </div>
-          <div class="pago-card" data-valor="Tarjeta Mastercard" onclick="seleccionarPago(this)">
-            <img src="images/mastercard.png" alt="Mastercard"><span>Mastercard</span>
+          <div class="pago-card" data-valor="Tarjeta Mastercard" role="radio" aria-checked="false" tabindex="0"
+               onclick="seleccionarPago(this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarPago(this)}">
+            <img src="images/mastercard.png" alt=""><span>Mastercard</span>
           </div>
-          <div class="pago-card" data-valor="Yape" onclick="seleccionarPago(this)">
-            <img src="images/yape.png" alt="Yape"><span>Yape</span>
+          <div class="pago-card" data-valor="Yape" role="radio" aria-checked="false" tabindex="0"
+               onclick="seleccionarPago(this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarPago(this)}">
+            <img src="images/yape.png" alt=""><span>Yape</span>
           </div>
-          <div class="pago-card" data-valor="Plin" onclick="seleccionarPago(this)">
-            <img src="images/plin.png" alt="Plin"><span>Plin</span>
+          <div class="pago-card" data-valor="Plin" role="radio" aria-checked="false" tabindex="0"
+               onclick="seleccionarPago(this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarPago(this)}">
+            <img src="images/plin.png" alt=""><span>Plin</span>
           </div>
-          <div class="pago-card" data-valor="Transferencia BCP" onclick="seleccionarPago(this)">
-            <img src="images/bcp.png" alt="BCP"><span>Transferencia BCP</span>
+          <div class="pago-card" data-valor="Transferencia BCP" role="radio" aria-checked="false" tabindex="0"
+               onclick="seleccionarPago(this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarPago(this)}">
+            <img src="images/bcp.png" alt=""><span>Transferencia BCP</span>
           </div>
-          <div class="pago-card" data-valor="Efectivo contra entrega" onclick="seleccionarPago(this)">
-            <img src="images/efectivo.png" alt="Efectivo"><span>Efectivo</span>
+          <div class="pago-card" data-valor="Efectivo contra entrega" role="radio" aria-checked="false" tabindex="0"
+               onclick="seleccionarPago(this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();seleccionarPago(this)}">
+            <img src="images/efectivo.png" alt=""><span>Efectivo</span>
           </div>
         </div>
       </div>
@@ -241,7 +257,7 @@
       </div>
 
       <button class="btn-comprar" onclick="realizarPedido()">
-        <img src="images/check.png" class="icon-img" alt="Confirmar"> 
+        <img src="images/check.png" class="icon-img" alt=""> 
         Realizar pedido
       </button>
 
@@ -251,6 +267,8 @@
     </div>
 
   </div>
+
+  </main>
 
   <!-- FOOTER -->
   <footer class="footer">
@@ -267,16 +285,23 @@
     function toggleCuentaMenu(e) {
       e.stopPropagation();
       var menu = document.getElementById('cuenta-dropdown-menu');
-      if (menu) menu.classList.toggle('show');
+      var abierto = menu ? menu.classList.toggle('show') : false;
+      e.currentTarget.setAttribute('aria-expanded', abierto ? 'true' : 'false');
     }
     document.addEventListener('click', function() {
       var menu = document.getElementById('cuenta-dropdown-menu');
       if (menu) menu.classList.remove('show');
+      var btn = document.querySelector('.cuenta-dropdown-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
 
     function seleccionarPago(el) {
-      document.querySelectorAll('.pago-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.pago-card').forEach(c => {
+        c.classList.remove('selected');
+        c.setAttribute('aria-checked', 'false');
+      });
       el.classList.add('selected');
+      el.setAttribute('aria-checked', 'true');
       document.getElementById('input-pago').value = el.dataset.valor;
     }
 

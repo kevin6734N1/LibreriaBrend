@@ -20,6 +20,10 @@
 </head>
 <body class="login-page">
 
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
+  <main id="contenido-principal">
+
   <div class="login-box registro-box" style="max-width:480px;">
 
     <div class="login-logo">
@@ -28,55 +32,55 @@
       <p>Regístrate y empieza a comprar</p>
     </div>
 
-    <div id="msg-reg" class="alert" style="display:none;"></div>
+    <div id="msg-reg" class="alert" role="alert" style="display:none;"></div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
       <div class="form-group">
-        <label>Nombres</label>
-        <input type="text" id="nombres" placeholder="Juan">
+        <label for="nombres">Nombres</label>
+        <input type="text" id="nombres" placeholder="Juan" autocomplete="given-name">
       </div>
       <div class="form-group">
-        <label>Apellidos</label>
-        <input type="text" id="apellidos" placeholder="Pérez">
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" placeholder="Pérez" autocomplete="family-name">
       </div>
     </div>
 
     <div class="form-group">
-      <label>DNI</label>
-      <input type="text" id="dni" placeholder="12345678" maxlength="8">
+      <label for="dni">DNI</label>
+      <input type="text" id="dni" placeholder="12345678" maxlength="8" inputmode="numeric">
     </div>
 
     <div class="form-group">
-      <label>Correo electrónico</label>
-      <input type="email" id="email" placeholder="tucorreo@email.com">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" placeholder="tucorreo@email.com" autocomplete="email">
     </div>
 
     <div class="form-group">
-      <label>Teléfono</label>
-      <input type="tel" id="telefono" placeholder="9XX XXX XXX">
+      <label for="telefono">Teléfono</label>
+      <input type="tel" id="telefono" placeholder="9XX XXX XXX" autocomplete="tel">
     </div>
 
     <div class="form-group">
-      <label>Dirección de entrega</label>
-      <input type="text" id="direccion" placeholder="Av. Lima 123, Miraflores">
+      <label for="direccion">Dirección de entrega</label>
+      <input type="text" id="direccion" placeholder="Av. Lima 123, Miraflores" autocomplete="street-address">
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
       <div class="form-group">
-        <label>Contraseña</label>
-        <input type="password" id="password" placeholder="••••••••">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
       </div>
       <div class="form-group">
-        <label>Confirmar contraseña</label>
-        <input type="password" id="confirm" placeholder="••••••••">
+        <label for="confirm">Confirmar contraseña</label>
+        <input type="password" id="confirm" placeholder="••••••••" autocomplete="new-password">
       </div>
     </div>
 
-    <div style="margin-bottom:16px; font-size:0.82rem; color:#555;">
+    <label for="terminos" style="display:block; margin-bottom:16px; font-size:0.82rem; color:#555; cursor:pointer;">
       <input type="checkbox" id="terminos" style="margin-right:6px;">
       Acepto los <a href="#" style="color:#1259C3; font-weight:700;">Términos y condiciones</a> y
       la <a href="#" style="color:#1259C3; font-weight:700;">Política de privacidad</a>
-    </div>
+    </label>
 
     <button type="button" class="btn-login" onclick="registrar()">
       <img src="images/check.png" class="icon-img" alt=""> Crear mi cuenta
@@ -88,9 +92,21 @@
 
   </div>
 
+  </main>
+
   <script>
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const PASSWORD_MIN_LENGTH = 8;
+
+  // Muestra el mensaje en #msg-reg (role="alert", lo anuncia el lector de
+  // pantalla) en lugar de alert(), que interrumpe y varia entre lectores.
+  function mostrarMensaje(texto, tipo) {
+    const msg = document.getElementById('msg-reg');
+    msg.textContent = texto;
+    msg.className   = 'alert alert-' + (tipo || 'error');
+    msg.style.display = '';
+    msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 
   function registrar() {
 
@@ -105,32 +121,32 @@
 	    const terminos  = document.getElementById('terminos').checked;
 
 	    if (!nombres || !apellidos || !dni || !email || !pass) {
-	        alert('Completa los campos requeridos');
+	        mostrarMensaje('Completa los campos requeridos');
 	        return;
 	    }
 
 	    if (dni.length !== 8 || isNaN(dni)) {
-	        alert('DNI inválido');
+	        mostrarMensaje('DNI inválido');
 	        return;
 	    }
 
 	    if (!EMAIL_REGEX.test(email)) {
-	        alert('Ingresa un correo con formato válido');
+	        mostrarMensaje('Ingresa un correo con formato válido');
 	        return;
 	    }
 
 	    if (pass.length < PASSWORD_MIN_LENGTH) {
-	        alert('La contraseña debe tener al menos ' + PASSWORD_MIN_LENGTH + ' caracteres');
+	        mostrarMensaje('La contraseña debe tener al menos ' + PASSWORD_MIN_LENGTH + ' caracteres');
 	        return;
 	    }
 
 	    if (pass !== confirm) {
-	        alert('Las contraseñas no coinciden');
+	        mostrarMensaje('Las contraseñas no coinciden');
 	        return;
 	    }
 
 	    if (!terminos) {
-	        alert('Debes aceptar los términos');
+	        mostrarMensaje('Debes aceptar los términos');
 	        return;
 	    }
 
@@ -157,20 +173,20 @@
 
 	            // La cuenta ya queda logueada (RegistroServlet crea la sesion),
 	            // no hace falta mandarlo de nuevo a login.jsp.
-	            alert("Cuenta creada correctamente. ¡Bienvenido!");
+	            mostrarMensaje('✅ Cuenta creada correctamente. ¡Bienvenido!', 'success');
 
-	            window.location.href = data.redirect;
+	            setTimeout(() => { window.location.href = data.redirect; }, 900);
 
 	        } else {
 
-	            alert(data.error || "No se pudo crear la cuenta.");
+	            mostrarMensaje(data.error || "No se pudo crear la cuenta.");
 	        }
 	    })
 	    .catch(error => {
 
 	        console.error(error);
 
-	        alert("Error de conexión con el servidor");
+	        mostrarMensaje("Error de conexión con el servidor");
 	    });
 	}
   </script>

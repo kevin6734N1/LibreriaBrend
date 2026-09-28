@@ -635,6 +635,15 @@ body {
 .alert-success { background: #D4EDDA; color: #155724; }
 .alert-error   { background: #F8D7DA; color: #721c24; }
 
+/* -------- ACCESIBILIDAD (pieza 2: ARIA / lector de pantalla) -------- */
+.skip-link {
+  position: absolute; left: -9999px; top: 8px; z-index: 10000;
+  background: #1259C3; color: #fff; padding: 10px 16px; border-radius: 6px;
+  font-weight: 700; text-decoration: none;
+}
+.skip-link:focus { left: 8px; }
+:focus-visible { outline: 3px solid #FFB800; outline-offset: 2px; }
+
 /* -------- RESPONSIVE -------- */
 @media(max-width:768px){
   .banner { padding: 24px; }

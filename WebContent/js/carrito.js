@@ -35,6 +35,8 @@ function mostrarToast(nombre) {
   if (!t) {
     t = document.createElement('div');
     t.id = 'toast-carrito';
+    t.setAttribute('role', 'status');
+    t.setAttribute('aria-live', 'polite');
     t.style.cssText = `
       position:fixed; bottom:24px; right:24px; background:#1259C3;
       color:white; padding:14px 22px; border-radius:10px;
@@ -110,19 +112,19 @@ function renderCarrito() {
     const sub = it.precio * it.qty;
     html += `
       <div class="carrito-item">
-        <div class="thumb"><img src="${it.icon || 'images/producto-generico.png'}" alt="${it.nombre}" style="width:48px;height:48px;object-fit:contain;"></div>
+        <div class="thumb"><img src="${it.icon || 'images/producto-generico.png'}" alt="" style="width:48px;height:48px;object-fit:contain;"></div>
         <div class="det">
           <h4>${it.nombre}</h4>
           <p class="precio-item">S/ ${it.precio.toFixed(2)} c/u</p>
           <div class="qty-ctrl">
-            <button class="qty-btn" onclick="cambiarQty(${idx},-1)">−</button>
-            <span class="qty-num">${it.qty}</span>
-            <button class="qty-btn" onclick="cambiarQty(${idx},1)">+</button>
+            <button class="qty-btn" aria-label="Disminuir cantidad de ${it.nombre.replace(/"/g, '&quot;')}" onclick="cambiarQty(${idx},-1)">−</button>
+            <span class="qty-num" aria-label="Cantidad">${it.qty}</span>
+            <button class="qty-btn" aria-label="Aumentar cantidad de ${it.nombre.replace(/"/g, '&quot;')}" onclick="cambiarQty(${idx},1)">+</button>
           </div>
         </div>
         <div style="text-align:right">
           <div style="font-family:Nunito,sans-serif;font-weight:900;font-size:1.05rem;">S/ ${sub.toFixed(2)}</div>
-          <button class="btn-eliminar" onclick="eliminarItem(${idx})"><img src="images/eliminar.png" alt="" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"> Eliminar</button>
+          <button class="btn-eliminar" aria-label="Eliminar ${it.nombre.replace(/"/g, '&quot;')} del carrito" onclick="eliminarItem(${idx})"><img src="images/eliminar.png" alt="" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"> Eliminar</button>
         </div>
       </div>`;
   });

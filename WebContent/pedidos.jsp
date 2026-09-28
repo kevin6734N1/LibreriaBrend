@@ -181,15 +181,17 @@
 </head>
 <body>
 
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
   <!-- NAVBAR -->
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Navegación principal">
     <a href="index.jsp" class="logo">
-      <img src="images/libro-logo.png" class="icon-img" style="width:30px;height:30px;" alt="Logo">
+      <img src="images/libro-logo.png" class="icon-img" style="width:30px;height:30px;" alt="">
       Librería Brenda
     </a>
     <div class="search-bar">
-      <input type="text" placeholder="Buscar productos...">
-      <button>&#128269;</button>
+      <input type="text" placeholder="Buscar productos..." aria-label="Buscar productos">
+      <button aria-label="Buscar">&#128269;</button>
     </div>
     <div class="navbar-links">
       <a href="index.jsp"><img src="images/tienda.png" class="icon-img" alt=""> Inicio</a>
@@ -199,7 +201,7 @@
       %>
       <% if ("cliente".equals(rolSesion) && nombreCliente != null) { %>
         <div class="cuenta-dropdown">
-          <button class="cuenta-dropdown-btn" onclick="toggleCuentaMenu(event)">
+          <button class="cuenta-dropdown-btn" onclick="toggleCuentaMenu(event)" aria-haspopup="true" aria-expanded="false">
             <img src="images/usuario.png" class="icon-img" alt=""> Hola, <%= nombreCliente.split(" ")[0] %> ▾
           </button>
           <div class="cuenta-dropdown-menu" id="cuenta-dropdown-menu">
@@ -211,11 +213,13 @@
         <a href="login.jsp"><img src="images/usuario.png" class="icon-img" alt=""> Mi cuenta</a>
       <% } %>
       <a href="carrito.jsp" class="btn-carrito" style="position:relative">
-        <img src="images/carrito.png" class="icon-img" alt="Carrito"> Carrito
-        <span class="badge" id="carrito-badge">0</span>
+        <img src="images/carrito.png" class="icon-img" alt=""> Carrito
+        <span class="badge" id="carrito-badge" role="status" aria-live="polite" aria-label="Productos en el carrito">0</span>
       </a>
     </div>
   </nav>
+
+  <main id="contenido-principal">
 
   <!-- BREADCRUMB -->
   <div style="padding:10px 24px;font-size:0.83rem;color:#666;background:white;border-bottom:1px solid #e0e0e0;">
@@ -237,7 +241,7 @@
     <!-- Buscador -->
     <div style="background:white;border-radius:10px;padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:18px;display:flex;gap:10px;align-items:center;">
       <img src="images/pedidos.png" style="width:20px;height:20px;" alt="">
-      <input type="text" id="buscar-pedido"
+      <input type="text" id="buscar-pedido" aria-label="Buscar pedido"
         placeholder="Buscar por N de pedido o producto..."
         style="flex:1;border:none;outline:none;font-family:'Lato',sans-serif;font-size:0.9rem;"
         oninput="renderPedidos()">
@@ -246,37 +250,37 @@
 
     <!-- Filtros -->
     <div class="filtros-wrap">
-      <button class="filtro-btn active" onclick="setFiltro('', this)">
+      <button class="filtro-btn active" aria-pressed="true" onclick="setFiltro('', this)">
         <img src="images/todos.png" style="width:16px;height:16px;" alt=""> Todos
       </button>
-      <button class="filtro-btn" onclick="setFiltro('Pendiente', this)" style="border-color:#FFC107;color:#856404;">
+      <button class="filtro-btn" aria-pressed="false" onclick="setFiltro('Pendiente', this)" style="border-color:#FFC107;color:#856404;">
         <img src="images/pendiente.png" class="estado-icon" alt=""> Pendiente
       </button>
-      <button class="filtro-btn" onclick="setFiltro('Confirmado', this)" style="border-color:#17a2b8;color:#0c5460;">
+      <button class="filtro-btn" aria-pressed="false" onclick="setFiltro('Confirmado', this)" style="border-color:#17a2b8;color:#0c5460;">
         <img src="images/confirmado.png" class="estado-icon" alt=""> Confirmado
       </button>
-      <button class="filtro-btn" onclick="setFiltro('Enviado', this)" style="border-color:#007bff;color:#004085;">
+      <button class="filtro-btn" aria-pressed="false" onclick="setFiltro('Enviado', this)" style="border-color:#007bff;color:#004085;">
         <img src="images/enviado.png" class="estado-icon" alt=""> Enviado
       </button>
-      <button class="filtro-btn" onclick="setFiltro('Entregado', this)" style="border-color:#28a745;color:#155724;">
+      <button class="filtro-btn" aria-pressed="false" onclick="setFiltro('Entregado', this)" style="border-color:#28a745;color:#155724;">
         <img src="images/entregado.png" class="estado-icon" alt=""> Entregado
       </button>
-      <button class="filtro-btn" onclick="setFiltro('Cancelado', this)" style="border-color:#dc3545;color:#721c24;">
+      <button class="filtro-btn" aria-pressed="false" onclick="setFiltro('Cancelado', this)" style="border-color:#dc3545;color:#721c24;">
         <img src="images/cancelar.png" class="estado-icon" alt=""> Cancelado
       </button>
     </div>
 
     <!-- Lista -->
-    <div id="lista-pedidos"></div>
+    <div id="lista-pedidos" aria-live="polite"></div>
 
   </div>
 
   <!-- MODAL DETALLE -->
-  <div class="modal-overlay" id="modal-detalle" onclick="cerrarModalClick(event)">
+  <div class="modal-overlay" id="modal-detalle" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" onclick="cerrarModalClick(event)">
     <div class="modal-box">
       <div class="modal-header">
         <h3 id="modal-titulo">Detalle del Pedido</h3>
-        <button class="btn-cerrar-modal" onclick="cerrarModal()">&#10005;</button>
+        <button class="btn-cerrar-modal" onclick="cerrarModal()" aria-label="Cerrar detalle del pedido">&#10005;</button>
       </div>
       <div class="timeline" id="modal-timeline"></div>
       <div class="seccion-subtitulo">Productos</div>
@@ -289,6 +293,8 @@
       </div>
     </div>
   </div>
+
+  </main>
 
   <!-- FOOTER -->
   <footer class="footer">
@@ -303,11 +309,14 @@
     function toggleCuentaMenu(e) {
       e.stopPropagation();
       var menu = document.getElementById('cuenta-dropdown-menu');
-      if (menu) menu.classList.toggle('show');
+      var abierto = menu ? menu.classList.toggle('show') : false;
+      e.currentTarget.setAttribute('aria-expanded', abierto ? 'true' : 'false');
     }
     document.addEventListener('click', function() {
       var menu = document.getElementById('cuenta-dropdown-menu');
       if (menu) menu.classList.remove('show');
+      var btn = document.querySelector('.cuenta-dropdown-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
 
     // ===== PEDIDOS — cargados desde MySQL vía PedidoServlet =====
@@ -357,8 +366,12 @@
     function setFiltro(estado, btn) {
       filtroActual = estado;
       var btns = document.querySelectorAll('.filtro-btn');
-      for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].classList.remove('active');
+        btns[i].setAttribute('aria-pressed', 'false');
+      }
       btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       renderPedidos();
     }
 
@@ -433,7 +446,7 @@
                 '<div class="pedido-fecha">' + p.fecha + (p.hora ? ' &middot; ' + p.hora : '') + '</div>' +
               '</div>' +
               '<span class="' + badgeClass(p.estado) + '">' +
-                '<img src="' + estadoIconImg(p.estado) + '" class="estado-icon" alt="' + p.estado + '">' +
+                '<img src="' + estadoIconImg(p.estado) + '" class="estado-icon" alt="">' +
                 p.estado +
               '</span>' +
             '</div>' +
