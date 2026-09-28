@@ -414,6 +414,54 @@ reintento tras confirmar).
 
 ---
 
+## Paso 3b — Refuerzos de seguridad y usabilidad
+
+### E21. Pruebas de los 3 fixes contra la BD real (16/16 OK)
+
+Cliente temporal id=27 y producto temporal id=15, creados y eliminados en la
+misma corrida.
+
+```text
+[OK]    F1a: LIBRO5 sobre S/32 rechazado
+[OK]    F1b: mensaje correcto
+[OK]    F1c: BIENVENIDA10 sobre S/31 (desc 3.10 -> 27.90) rechazado
+[OK]    F1d: LIBRO5 sobre S/40 (desc 5 -> 35) sigue OK
+[OK]    F3a: obtenerPrecio devuelve el precio real de BD (40.00)
+[OK]    F3b: obtenerPrecio de producto inexistente devuelve null
+[OK]    F3c: subtotal con precio real = 40.00
+[OK]    F3d: descuento validado sobre precio real = 4.00
+[OK]    F2a: pedido creado con BIENVENIDA10
+[OK]    F2b: uso registrado (1 fila)
+[OK]    F2c: cancelacion del PENDIENTE exitosa
+[OK]    F2d: el uso se libero al cancelar (0 filas)
+[OK]    F2e: el codigo vuelve a estar disponible
+[OK]    F2f: reutilizacion en un pedido nuevo exitosa
+[OK]    F2g: un cliente ajeno no puede cancelar el pedido (false)
+[OK]    F2h: intento de cancelacion ajena NO libera el codigo
+Limpieza completada
+RESULTADO: 16 OK, 0 fallos
+```
+
+Estado de la BD tras la limpieza: `qa_clientes=0`, `qa_productos=0`,
+`usos=0`, `pedidos_huerfanos=0`.
+
+Cobertura por fix:
+
+| Fix | Casos |
+|---|---|
+| 1. Rechazo por envío empeorado | Límite S/32 (LIBRO5), S/31 con porcentaje (BIENVENIDA10 → 27.90), caso sano S/40 sigue funcionando |
+| 2. Liberación al cancelar | Uso registrado → cancelación → 0 usos → código válido de nuevo → reuso en pedido nuevo; cliente ajeno no cancela ni libera |
+| 3. Precio real desde BD | `obtenerPrecio` correcto, `null` para inexistente, subtotal/descuento calculados sobre precio real |
+
+### Compilación
+
+```text
+$ javac ... $(find src -name "*.java")
+=== COMPILACION OK ===
+```
+
+---
+
 ## Nota de despliegue
 
 Tras cada cambio hay que **republicar la aplicación en Tomcat**.

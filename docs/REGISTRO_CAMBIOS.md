@@ -16,6 +16,7 @@
 | 2026-09-27 | `7c45421` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
 | 2026-09-27 | `b3a5aa1` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
 | 2026-09-27 | `b5337fd` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
+| 2026-09-27 | *(hash se anota al cerrar el paso)* | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
 WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
@@ -299,17 +300,50 @@ rollback completo del caso de las dos pestañas y la persistencia de
 temporales eliminados al terminar; la BD quedó sin filas de prueba.
 Evidencias en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E19–E20).
 
-### Decisiones abiertas (pendientes de confirmación)
+### Decisiones confirmadas y aplicadas (ver [Paso 3b])
 
-1. **Caso raro de envío:** con `LIBRO5` sobre S/32 el subtotal baja a S/27,
-   pierde el envío gratis y el cliente pagaría S/37 (más que sin código).
-   Está implementado como se decidió; se puede agregar un rechazo de
-   "este código te haría pagar más envío" (~3 líneas).
-2. **Cancelar no libera el código:** si se cancela un pedido PENDIENTE que
-   usó un código, el código queda gastado para ese cliente.
-3. **Defecto preexistente reportado:** `guardarPedidoEnDB` confía en los
-   `item_precio` que manda el navegador; el subtotal (y con él el descuento)
-   podría manipularse. La corrección sería leer precios reales de `productos`.
+Las tres decisiones abiertas del diseño (rechazo del código que empeora el
+envío, liberación del código al cancelar, y precios reales desde BD) fueron
+confirmadas y aplicadas: ver la sección [Paso 3b].
+
+---
+
+## [Paso 3b] Refuerzos de seguridad y usabilidad sobre el paso 3
+
+**Fecha:** 2026-09-27
+**Motivación:** cerrar los tres puntos que el QA del paso 3 dejó como
+abiertos, tras confirmación del usuario.
+
+### 1. Rechazo del código que empeora el envío
+
+`CodigoPromoDAO.validar()` rechaza ahora el código si el subtotal ya
+alcanzaba el envío gratis y el descuento lo deja por debajo de S/30 (el
+cliente pagaría más con código que sin él, ej. `LIBRO5` sobre S/32):
+"Este código haría que pagues más por el envío. Prueba con otro."
+
+### 2. Liberar el código al cancelar un pedido PENDIENTE
+
+`PedidoDAO.cancelarPedidoCliente()` ahora es transaccional: si el UPDATE de
+cancelación aplica (pedido del cliente y en PENDIENTE), borra en la misma
+transacción la fila de `codigos_promo_usos` de ese pedido, y el código queda
+disponible para reuso. La verificación y la liberación son atómicas; un
+intento de cancelación ajena no modifica nada.
+
+### 3. Precio real desde la BD (defecto preexistente corregido)
+
+`PedidoServlet.guardarPedidoEnDB` ya **no confía** en `item_precio` del
+navegador: lee el precio real de cada producto desde `productos` con el
+nuevo `ProductoDAO.obtenerPrecio(Connection, int)` y rechaza el pedido si el
+producto no existe o la cantidad es inválida. El subtotal, el descuento y el
+total ahora son imposibles de manipular desde el cliente.
+
+### Verificación
+
+**16/16 pruebas contra la BD real** de los tres fixes (rechazo en los
+subtotales límite, liberación y reuso del código, cancelación ajena
+rechazada, precios reales y producto inexistente). Limpieza verificada: 0
+filas de prueba. Evidencias en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md)
+(E21).
 
 ---
 
