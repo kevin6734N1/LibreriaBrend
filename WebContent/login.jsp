@@ -20,6 +20,10 @@
 </head>
 <body class="login-page">
 
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
+  <main id="contenido-principal">
+
   <div class="login-box">
 
     <!-- Logo -->
@@ -30,27 +34,27 @@
     </div>
 
     <!-- Tabs Cliente / Admin -->
-    <div class="login-tabs">
-      <button class="tab-btn active" id="tab-cliente" onclick="cambiarTab('cliente')">
+    <div class="login-tabs" role="tablist" aria-label="Tipo de cuenta">
+      <button class="tab-btn active" id="tab-cliente" role="tab" aria-selected="true" onclick="cambiarTab('cliente')">
         <img src="images/usuario.png" class="icon-img" alt=""> Cliente
       </button>
-      <button class="tab-btn" id="tab-admin" onclick="cambiarTab('admin')">
+      <button class="tab-btn" id="tab-admin" role="tab" aria-selected="false" onclick="cambiarTab('admin')">
         <img src="images/admin.png" class="icon-img" alt=""> Empleado / Admin
       </button>
     </div>
 
     <!-- Mensaje de error/éxito -->
-    <div id="msg-login" style="display:none" class="alert"></div>
+    <div id="msg-login" style="display:none" class="alert" role="alert"></div>
 
     <!-- Formulario -->
     <div class="form-group">
       <label for="email">Correo electrónico</label>
-      <input type="email" id="email" placeholder="tucorreo@email.com" required>
+      <input type="email" id="email" placeholder="tucorreo@email.com" required autocomplete="email">
     </div>
 
     <div class="form-group">
       <label for="password">Contraseña</label>
-      <input type="password" id="password" placeholder="••••••••" required>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
     </div>
 
     <!-- Solo admin: campo de código -->
@@ -88,13 +92,20 @@
 
   </div>
 
+  </main>
+
   <script>
     let rolActual = 'cliente';
 
     function cambiarTab(rol) {
       rolActual = rol;
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + rol).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      const tabActivo = document.getElementById('tab-' + rol);
+      tabActivo.classList.add('active');
+      tabActivo.setAttribute('aria-selected', 'true');
       document.getElementById('campo-codigo').style.display = rol === 'admin' ? '' : 'none';
       document.getElementById('msg-login').style.display = 'none';
     }

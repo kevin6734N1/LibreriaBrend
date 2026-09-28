@@ -58,16 +58,18 @@
 </head>
 <body>
 
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+
   <!-- ===== NAVBAR ===== -->
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Navegación principal">
     <a href="index.jsp" class="logo">
-      <img src="images/libro-logo.png" class="icon-img" style="width:32px; height:32px;" alt="Logo"> 
+      <img src="images/libro-logo.png" class="icon-img" style="width:32px; height:32px;" alt=""> 
       Librería Brenda
     </a>
 
     <div class="search-bar">
-      <input type="text" id="busqueda" placeholder="Buscar libros, cuadernos, útiles...">
-      <button onclick="buscarProductos()">🔍</button>
+      <input type="text" id="busqueda" aria-label="Buscar productos" placeholder="Buscar libros, cuadernos, útiles...">
+      <button onclick="buscarProductos()" aria-label="Buscar">🔍</button>
     </div>
 
     <div class="navbar-links">
@@ -77,7 +79,7 @@
       %>
       <% if ("cliente".equals(rolSesion) && nombreCliente != null) { %>
         <div class="cuenta-dropdown">
-          <button class="cuenta-dropdown-btn" onclick="toggleCuentaMenu(event)">
+          <button class="cuenta-dropdown-btn" onclick="toggleCuentaMenu(event)" aria-haspopup="true" aria-expanded="false">
             <img src="images/usuario.png" class="icon-img" alt=""> Hola, <%= nombreCliente.split(" ")[0] %> ▾
           </button>
           <div class="cuenta-dropdown-menu" id="cuenta-dropdown-menu">
@@ -92,34 +94,36 @@
         <a href="registro.jsp">Registrarse</a>
       <% } %>
       <a href="carrito.jsp" class="btn-carrito" style="position:relative">
-        <img src="images/carrito.png" class="icon-img" alt="Carrito"> 
+        <img src="images/carrito.png" class="icon-img" alt=""> 
         Carrito
-        <span class="badge" id="carrito-badge">0</span>
+        <span class="badge" id="carrito-badge" role="status" aria-live="polite" aria-label="Productos en el carrito">0</span>
       </a>
     </div>
   </nav>
 
+  <main id="contenido-principal">
+
   <!-- ===== CATEGORÍAS ===== -->
   <div class="categorias-bar">
-    <a href="#" class="active" onclick="filtrar('todos')">
+    <a href="#" role="button" class="active" onclick="filtrar('todos')">
       <img src="images/todos.png" class="icon-img" alt=""> Todos
     </a>
-    <a href="#" onclick="filtrar('libros')">
+    <a href="#" role="button" onclick="filtrar('libros')">
       <img src="images/libro-logo.png" class="icon-img" alt=""> Libros
     </a>
-    <a href="#" onclick="filtrar('cuadernos')">
+    <a href="#" role="button" onclick="filtrar('cuadernos')">
       <img src="images/productos.png" class="icon-img" alt=""> Cuadernos
     </a>
-    <a href="#" onclick="filtrar('lapiceros')">
+    <a href="#" role="button" onclick="filtrar('lapiceros')">
       <img src="images/tienda.png" class="icon-img" alt=""> Lapiceros
     </a>
-    <a href="#" onclick="filtrar('mochilas')">
+    <a href="#" role="button" onclick="filtrar('mochilas')">
       <img src="images/mochila-silueta.png" class="icon-img" alt=""> Mochilas
     </a>
-    <a href="#" onclick="filtrar('arte')">
+    <a href="#" role="button" onclick="filtrar('arte')">
       <img src="images/acuarelas.png" class="icon-img" alt=""> Arte
     </a>
-    <a href="#" onclick="filtrar('oficina')">
+    <a href="#" role="button" onclick="filtrar('oficina')">
       <img src="images/dashboard.png" class="icon-img" alt=""> Oficina
     </a>
   </div>
@@ -135,11 +139,13 @@
 
   <!-- ===== OFERTAS ===== -->
   <h2 class="seccion-titulo">🔥 Ofertas del día</h2>
-  <div class="productos-grid" id="productos">
+  <div class="productos-grid" id="productos" aria-live="polite" aria-busy="true">
     <p id="productos-cargando" style="padding:40px;text-align:center;color:#666;grid-column:1/-1">
       Cargando productos...
     </p>
   </div>
+
+  </main>
 
   <!-- ===== FOOTER ===== -->
   <footer class="footer">
@@ -155,11 +161,14 @@
     function toggleCuentaMenu(e) {
       e.stopPropagation();
       var menu = document.getElementById('cuenta-dropdown-menu');
-      if (menu) menu.classList.toggle('show');
+      var abierto = menu ? menu.classList.toggle('show') : false;
+      e.currentTarget.setAttribute('aria-expanded', abierto ? 'true' : 'false');
     }
     document.addEventListener('click', function() {
       var menu = document.getElementById('cuenta-dropdown-menu');
       if (menu) menu.classList.remove('show');
+      var btn = document.querySelector('.cuenta-dropdown-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
 
     // ================================================================
@@ -186,14 +195,14 @@
       card.dataset.categoria = categoria;
       card.innerHTML =
         '<div class="img-wrap">' +
-          '<img src="' + imagen + '" alt="' + p.nombre + '">' +
+          '<img src="' + imagen + '" alt="' + p.nombre.replace(/"/g, '&quot;') + '">' +
         '</div>' +
         '<div class="info">' +
           badge +
           '<p class="nombre">' + p.nombre + '</p>' +
           '<p class="precio"><span>S/</span>' + p.precio.toFixed(2) + '</p>' +
           envio +
-          '<button class="btn-agregar" onclick="agregarCarrito(' + p.id + ", '" + nombreEscapado + "', " + p.precio + ')">' +
+          '<button class="btn-agregar" aria-label="Agregar ' + p.nombre.replace(/"/g, '&quot;') + ' al carrito" onclick="agregarCarrito(' + p.id + ", '" + nombreEscapado + "', " + p.precio + ')">' +
             '+ Agregar al carrito' +
           '</button>' +
         '</div>';
@@ -218,10 +227,12 @@
           activos.forEach(function(p) {
             grid.appendChild(crearTarjetaProducto(p));
           });
+          grid.setAttribute('aria-busy', 'false');
         })
         .catch(function(e) {
           console.error('Error cargando productos:', e);
           grid.innerHTML = '<p style="padding:40px;text-align:center;color:#c0392b;grid-column:1/-1">No se pudieron cargar los productos. Intenta recargar la página.</p>';
+          grid.setAttribute('aria-busy', 'false');
         });
     }
 
@@ -232,8 +243,15 @@
       cards.forEach(c => {
         c.style.display = (cat === 'todos' || c.dataset.categoria === cat) ? '' : 'none';
       });
-      document.querySelectorAll('.categorias-bar a').forEach(a => a.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.categorias-bar a').forEach(a => {
+        a.classList.remove('active');
+        a.removeAttribute('aria-current');
+      });
+      var link = event.target.closest('a');
+      if (link) {
+        link.classList.add('active');
+        link.setAttribute('aria-current', 'true');
+      }
     }
 
     function buscarProductos() {

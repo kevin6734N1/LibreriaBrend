@@ -135,6 +135,15 @@
       }
     });
 
+    // Cierre del panel con Escape (devuelve el foco al boton).
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('show')) {
+        panel.classList.remove('show');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.focus();
+      }
+    });
+
     document.body.appendChild(btn);
     document.body.appendChild(panel);
   }
