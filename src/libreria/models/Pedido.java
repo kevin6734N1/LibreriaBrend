@@ -66,14 +66,14 @@ public class Pedido {
     }
 
     /**
-     * Recalcula subtotal, envío y total.
-     *  - Envío gratis si el subtotal es >= 30 (regla general de la tienda), sino S/10.
-     *  - El descuento se conserva tal cual (0 por defecto); el módulo de códigos
-     *    promocionales lo asignará con setDescuento() antes de llamar a este método.
+     * Recalcula subtotal, envio y total.
+     *  - Envio gratis si (subtotal - descuento) >= 30, sino S/10.
+     *  - El descuento se conserva tal cual (0 por defecto); PedidoServlet lo
+     *    asigna con setDescuento() cuando hay un codigo promocional valido.
      */
     public double calcularTotal() {
         calcularSubtotal();
-        this.envio = subtotal >= 30 ? 0 : 10;
+        this.envio = (subtotal - descuento) >= 30 ? 0 : 10;
         this.total = subtotal - descuento + envio;
         return this.total;
     }

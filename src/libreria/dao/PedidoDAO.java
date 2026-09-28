@@ -30,8 +30,14 @@ public class PedidoDAO {
      * StockInsuficienteException con el nombre del producto que fallo.
      *
      * @throws StockInsuficienteException si algun item pide mas stock del disponible
+     * @throws CodigoPromoInvalidoException si el codigo promocional ya no se puede usar
      */
+    /** Compatibilidad: crea el pedido sin codigo promocional. */
     public boolean crear(Pedido pedido, int clienteId) {
+        return crear(pedido, clienteId, null);
+    }
+
+    public boolean crear(Pedido pedido, int clienteId, String codigoPromo) {
         String sqlPedido = "INSERT INTO pedidos (id, cliente_id, fecha, estado, subtotal, descuento, envio, total, direccion_entrega, metodo_pago) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String sqlItem = "INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio_unitario) " +
@@ -80,6 +86,18 @@ public class PedidoDAO {
                     ps.addBatch();
                 }
                 ps.executeBatch();
+            }
+
+            // Registrar el uso del codigo promocional en la MISMA transaccion: si la
+            // PK (codigo, cliente_id) rechaza el insert, se revierte todo el pedido
+            // (incluido el descuento de stock).
+            if (codigoPromo != null && !codigoPromo.isEmpty()) {
+                try {
+                    new CodigoPromoDAO().registrarUso(con, codigoPromo, clienteId, pedido.getId());
+                } catch (SQLIntegrityConstraintViolationException dupe) {
+                    con.rollback();
+                    throw new CodigoPromoInvalidoException("Este código ya fue usado o ya no es válido.");
+                }
             }
 
             con.commit();

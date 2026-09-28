@@ -10,6 +10,8 @@ import java.util.*;
 
 import libreria.dao.AdministradorDAO;
 import libreria.dao.ClienteDAO;
+import libreria.dao.CodigoPromoDAO;
+import libreria.dao.CodigoPromoInvalidoException;
 import libreria.dao.PedidoDAO;
 import libreria.dao.StockInsuficienteException;
 import libreria.models.Administrador;
@@ -38,6 +40,8 @@ public class PedidoServlet extends HttpServlet {
             cambiarEstado(request, response);
         } else if ("guardarDB".equals(accion)) {
             guardarPedidoEnDB(request, response);
+        } else if ("validarPromo".equals(accion)) {
+            validarPromo(request, response);
         } else if ("cancelarPedido".equals(accion)) {
             cancelarPedidoCliente(request, response);
         } else {
@@ -56,6 +60,50 @@ public class PedidoServlet extends HttpServlet {
             }
         }
         return CLIENTE_DEMO_ID;
+    }
+
+    /** Id del cliente con sesion real, o null. Los codigos promocionales no se pueden usar como "demo". */
+    private Integer obtenerClienteIdAutenticado(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        if (session != null) {
+            String email = (String) session.getAttribute("clienteEmail");
+            if (email != null) {
+                Cliente c = new ClienteDAO().buscarPorEmail(email);
+                if (c != null) return c.getId();
+            }
+        }
+        return null;
+    }
+
+    /** Valida un codigo promocional para mostrar el descuento en el carrito (no consume el codigo). */
+    private void validarPromo(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        res.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = res.getWriter();
+
+        Integer clienteId = obtenerClienteIdAutenticado(req);
+        if (clienteId == null) {
+            out.print("{\"ok\":false,\"error\":\"Inicia sesión para usar un código promocional.\"}");
+            return;
+        }
+
+        double subtotal;
+        try {
+            subtotal = Double.parseDouble(req.getParameter("subtotal"));
+        } catch (Exception e) {
+            subtotal = 0;
+        }
+
+        CodigoPromoDAO.Resultado r = new CodigoPromoDAO().validar(req.getParameter("codigo"), clienteId, subtotal);
+        if (!r.ok) {
+            out.print("{\"ok\":false,\"error\":\"" + esc(r.error) + "\"}");
+            return;
+        }
+
+        out.print("{\"ok\":true,"
+                + "\"codigo\":\"" + esc(r.promo.getCodigo()) + "\","
+                + "\"tipo\":\"" + r.promo.getTipo() + "\","
+                + "\"valor\":" + r.promo.getValor() + ","
+                + "\"descuento\":" + r.descuento + "}");
     }
 
     /** Cancela un pedido propio del cliente (usado por el boton "Cancelar" en pedidos.jsp). */
@@ -105,6 +153,7 @@ public class PedidoServlet extends HttpServlet {
             String[] precios = req.getParameterValues("item_precio");
             String direccion = req.getParameter("direccion");
             String pago      = req.getParameter("pago");
+            String codigoPromo = CodigoPromoDAO.normalizar(req.getParameter("codigoPromo"));
 
             if (ids == null || ids.length == 0) {
                 out.print("{\"ok\":false,\"error\":\"carrito vacio\"}");
@@ -131,14 +180,29 @@ public class PedidoServlet extends HttpServlet {
 
             Pedido pedido = new Pedido();
             pedido.setItems(items);
-            // Recalculado en el servidor (no se confía en los montos que mande el navegador):
-            // envío gratis desde S/30 (regla general de la tienda).
-            // calcularTotal() ya llama a calcularSubtotal() internamente.
+            pedido.calcularSubtotal();
+
+            // Codigo promocional: se vuelve a validar en el servidor (el navegador solo previsualiza).
+            if (!codigoPromo.isEmpty()) {
+                Integer clienteAuth = obtenerClienteIdAutenticado(req);
+                if (clienteAuth == null) {
+                    out.print("{\"ok\":false,\"error\":\"Inicia sesión para usar un código promocional.\"}");
+                    return;
+                }
+                CodigoPromoDAO.Resultado r = new CodigoPromoDAO().validar(codigoPromo, clienteAuth, pedido.getSubtotal());
+                if (!r.ok) {
+                    out.print("{\"ok\":false,\"error\":\"" + esc(r.error) + "\"}");
+                    return;
+                }
+                pedido.setDescuento(r.descuento);
+            }
+
+            // Recalculado en el servidor: envio gratis si (subtotal - descuento) >= 30.
             pedido.calcularTotal();
             pedido.setDireccionEntrega(direccion != null && !direccion.isEmpty() ? direccion : "Por confirmar");
             pedido.setMetodoPago(pago != null && !pago.isEmpty() ? pago : "Por confirmar");
 
-            boolean ok = new PedidoDAO().crear(pedido, clienteId);
+            boolean ok = new PedidoDAO().crear(pedido, clienteId, codigoPromo.isEmpty() ? null : codigoPromo);
 
             if (ok) {
                 out.print("{\"ok\":true,\"id\":\"" + pedido.getId() + "\"}");
@@ -149,6 +213,8 @@ public class PedidoServlet extends HttpServlet {
         } catch (StockInsuficienteException stockEx) {
             // No es un bug: el carrito pidio mas unidades de las que hay en stock.
             out.print("{\"ok\":false,\"error\":\"" + esc(stockEx.getMessage()) + "\"}");
+        } catch (CodigoPromoInvalidoException promoEx) {
+            out.print("{\"ok\":false,\"error\":\"" + esc(promoEx.getMessage()) + "\"}");
         } catch (Exception e) {
             e.printStackTrace();
             out.print("{\"ok\":false,\"error\":\"" + esc(e.getMessage()) + "\"}");
