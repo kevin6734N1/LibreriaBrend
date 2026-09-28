@@ -1,9 +1,12 @@
 # REGISTRO DE CAMBIOS — Librería Brenda
 
 > **Convención del proyecto:** cada cambio funcional se documenta en este
-> registro junto con sus pruebas, y se cierra con un commit de Git que queda
-> anotado aquí como "estado actual del proyecto". Las evidencias de
-> funcionamiento de cada pieza viven en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md).
+> registro junto con sus pruebas, y se cierra con **un solo commit** que
+> incluye todo el conjunto: código, clases compiladas, documentación y
+> evidencias. El commit se sube con `git push` a
+> `github.com/kevin6734N1/LibreriaBrend` y su hash queda anotado aquí como
+> "estado actual del proyecto". Las evidencias de funcionamiento de cada
+> pieza viven en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md).
 
 ## Estado actual del proyecto
 
