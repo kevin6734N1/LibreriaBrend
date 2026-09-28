@@ -14,6 +14,7 @@
 | 2026-09-27 | `84f4288` | **Pieza 1 accesibilidad:** perfil de accesibilidad en BD + filtro de corrección de color (Daltonize) + docs/ con registro y evidencias |
 | 2026-09-27 | `ffcb909` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
 | 2026-09-27 | `7c45421` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
+| 2026-09-27 | *(hash se anota al cerrar el paso)* | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
 WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
@@ -201,11 +202,54 @@ mandar `false` fijo.
 
 ---
 
+## [Paso 2] Retiro del ODS10 antiguo (lógica de beneficios en runtime)
+
+**Fecha:** 2026-09-27
+**Motivación:** los beneficios ODS10 (checkboxes de -15% estudiante y envío
+gratis por discapacidad) se aplicaban en runtime fuera del alcance definido
+en el Sprint 0. Se retira esa lógica para dejar **una sola regla de negocio**
+y preparar el terreno para los códigos promocionales (paso 3).
+
+### Decisiones de diseño (qué se conserva)
+
+- **Regla general de la tienda:** envío gratis si el subtotal ≥ S/30, sino S/10.
+- **El campo `descuento` se conserva** (fila del resumen en el carrito,
+  `Pedido.descuento` y su columna en BD) pero queda fijo en `0`: el paso 3 lo
+  llenará con el módulo de códigos promocionales vía `setDescuento()`.
+- La validación de "método de pago" en `realizarPedido()` se mantiene tal cual.
+
+### Qué se quitó
+
+| Archivo | Cambio |
+|---|---|
+| `carrito.jsp` | Sección HTML "Inclusión y Equidad (ODS 10)" con sus 2 checkboxes, CSS `.inclusion-box`/`.ods10-check`, rótulo "Descuento estudiante (ODS10, -15%)" → "Descuento", `mensajeBeneficios` del alert de éxito, parámetros `beneficio*` del POST |
+| `carrito.js` | `calcularTotales()` simplificado (sin checkboxes ni -15%), `esDiscapacidad` eliminado del render, envío solo por la regla general |
+| `PedidoServlet.java` | Lectura de `beneficioEstudiante`/`beneficioDiscapacidad` eliminada; `calcularSubtotal()` + `aplicarBeneficiosODS10()` reemplazados por `calcularTotal()` (recalculado en el servidor, sin confiar en montos del navegador) |
+| `Pedido.java` | `aplicarBeneficiosODS10()` eliminado; `calcularTotal()` unificado (subtotal, envío ≥30, `descuento` se respeta tal cual) |
+| `PedidoDAO.java` | Comentario actualizado (el total ya viene de `Pedido.calcularTotal()`) |
+| `images/planeta.png` | Eliminada: quedó huérfana tras retirar la sección (verificado con grep en jsp/js/java/html/css) |
+
+### Compatibilidad
+
+Los pedidos antiguos con descuento distinto de 0 **siguen mostrándose
+correctamente**: no se toca la columna `descuento` ni los `SELECT` del DAO.
+
+### Verificación
+
+Grep de lógica ODS10/beneficios en cero (solo quedan comentarios normativos
+de la Ley 29973 en las piezas de accesibilidad, que no son código),
+`node --check` de `carrito.js` y del inline de `carrito.jsp`, compilación
+Java, y **8/8 pruebas de cálculo** (S/20 → envío 10/total 30; S/35 → gratis;
+borde S/30; descuento seteado antes de `calcularTotal()` se respeta). Evidencias
+en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E15–E17).
+
+---
+
 ## Pendiente (roadmap de accesibilidad)
 
-- **[Paso 2]** Retiro del ODS10 antiguo: eliminar la lógica vieja de
-  `carrito.jsp`, `carrito.js`, `PedidoServlet` y `Pedido.java` (dejar solo la
-  vigente definida en el Sprint 0).
+- **[Paso 3] Códigos promocionales:** antes de codificar, confirmar tres
+  decisiones de diseño (tipo de descuento, usos máximos, combinación con
+  otros beneficios).
 - Confirmar visualmente la corrección del filtro en `<html>` (scroll con el
   botón ♿ fijo).
 - Validación manual con NVDA de las piezas 2 y 3.
