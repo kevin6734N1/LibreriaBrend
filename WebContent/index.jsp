@@ -202,10 +202,22 @@
           '<p class="nombre">' + p.nombre + '</p>' +
           '<p class="precio"><span>S/</span>' + p.precio.toFixed(2) + '</p>' +
           envio +
+          '<button type="button" class="btn-leer-voz" aria-pressed="false" aria-label="Leer en voz alta: ' + p.nombre.replace(/"/g, '&quot;') + '">🔊 Escuchar</button>' +
           '<button class="btn-agregar" aria-label="Agregar ' + p.nombre.replace(/"/g, '&quot;') + ' al carrito" onclick="agregarCarrito(' + p.id + ", '" + nombreEscapado + "', " + p.precio + ')">' +
             '+ Agregar al carrito' +
           '</button>' +
         '</div>';
+
+      // Texto que lee el boton 🔊 (pieza 3). Va como dataset y no en un
+      // atributo onclick para no pelear con comillas ni apostrofes.
+      // "12.50" se lee "12 con 50 soles": suena natural en la sintesis.
+      var precioTxt = p.precio.toFixed(2).replace('.', ' con ');
+      card.dataset.textoVoz = p.nombre + '. ' +
+        (p.descripcion ? p.descripcion + '. ' : '') +
+        'Categoría: ' + (p.categoria || 'sin categoría') + '. ' +
+        'Precio: ' + precioTxt + ' soles.' +
+        (p.precio >= 30 ? ' Envío gratis.' : '');
+
       return card;
     }
 
