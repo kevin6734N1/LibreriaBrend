@@ -13,6 +13,7 @@
 | 2026-09-27 | `65dce9f` | CU-03: validar máximo de 10 productos distintos en el carrito + informe de validación |
 | 2026-09-27 | `84f4288` | **Pieza 1 accesibilidad:** perfil de accesibilidad en BD + filtro de corrección de color (Daltonize) + docs/ con registro y evidencias |
 | 2026-09-27 | `ffcb909` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
+| 2026-09-27 | *(hash se anota al cerrar la pieza)* | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
 WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
@@ -140,9 +141,73 @@ label for=9, etc.) y compilación Java de sanidad. Evidencias completas en
 
 ---
 
+## [Pieza 3] Lectura en voz alta (Web Speech API)
+
+**Fecha:** 2026-09-27
+**Motivación:** completar el paso 1 de accesibilidad. Sin cambios en la BD ni
+en el servlet: la columna `lectura_voz_activa` y `PreferenciaAccesibilidadServlet`
+ya la soportaban desde la pieza 1 — solo faltaba que el frontend dejara de
+mandar `false` fijo.
+
+### Qué se implementó
+
+1. **`WebContent/js/accesibilidad.js`** (reescrito alrededor de un estado
+   compartido `estado = { tipoDaltonismo, lecturaVozActiva, autenticado }`):
+   - El panel ♿ gana el checkbox "Lectura en voz alta" (si
+     `speechSynthesis` no está disponible, muestra un aviso en su lugar).
+   - Al activarlo, cada tarjeta de producto muestra un botón 🔊 Escuchar;
+     segundo clic sobre el mismo botón detiene, e iniciar otra lectura corta
+     la anterior (`speechSynthesis.cancel()`).
+   - Un único listener por delegación cubre también las tarjetas creadas
+     dinámicamente; `pagehide` corta la lectura al salir de la página.
+   - `guardarPreferencia()` ahora envía el estado real de ambos campos
+     (antes enviaba `lecturaVozActiva: 'false'` fijo y habría pisado el
+     checkbox). Anónimos: `localStorage` (`accesibilidad_lecturaVoz`).
+   - Voz `es-PE` con fallback a cualquier voz `es*` del sistema.
+2. **`WebContent/index.jsp`** — `crearTarjetaProducto()`: botón 🔊 con
+   `aria-pressed` y `aria-label` por producto; el texto a leer va en
+   `card.dataset.textoVoz` (no en `onclick`, para no pelear con comillas).
+   El precio se sintetiza como "12 con 50 soles" en vez de "12.50".
+3. **Corrección del filtro (paso 3 del plan):** el filtro Daltonize pasa de
+   `<body>` a `<html>`. En CSS un `filter` convierte al elemento en
+   *containing block* de los `position:fixed` descendientes (excepto en la
+   raíz del documento): con el filtro en `<body>`, el botón ♿ y el toast del
+   carrito podrían desplazarse con la página al hacer scroll.
+
+### Pruebas
+
+- **10/10 pruebas QA contra la BD real** del round-trip completo del nuevo
+  campo: checkbox → `guardar()` → `TINYINT = 1` en BD cruda → JSON booleano
+  sin comillas (`"lecturaVozActiva":true`) → parseo JS `!!data.lecturaVozActiva`;
+  además desactivado → `false` conservando el filtro, ambos campos persisten
+  juntos sin pisarse, y cascade de limpieza. Cliente temporal eliminado.
+- `node --check` de `accesibilidad.js` y del script inline de `index.jsp`.
+- Greps: `btn-leer-voz` presente, 3 selectores `html.accesibilidad-*`,
+  0 referencias a `body.accesibilidad-*`. Compilación Java OK.
+- Evidencias completas en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E13–E14).
+
+### Límites honestos (para el informe y el QA)
+
+- **Pendiente de validación manual** (igual que la pieza 2): la voz en
+  español depende de las voces instaladas en el sistema operativo; probar en
+  Chrome/Edge y Firefox. Si no hay voz `es`, se usa la voz por defecto.
+- Pendiente de confirmación visual de la corrección del filtro: activar un
+  filtro, hacer scroll en `index.jsp` y verificar que el ♿ permanece fijo.
+- Con NVDA activo, verificar que el botón se anuncie como "Leer en voz alta:
+  {producto}, botón" y que no compita con la voz sintetizada.
+- La pieza lee **tarjetas de producto**; el resto de la página se sigue
+  navegando con el lector de pantalla (esta función es un complemento, no un
+  reemplazo de NVDA/JAWS).
+
+---
+
 ## Pendiente (roadmap de accesibilidad)
 
-- **[Pieza 3]** Botón de lectura en voz alta con Web Speech API (activará la columna `lectura_voz_activa`).
-- Validación manual con NVDA del marcado ARIA de la pieza 2.
+- **[Paso 2]** Retiro del ODS10 antiguo: eliminar la lógica vieja de
+  `carrito.jsp`, `carrito.js`, `PedidoServlet` y `Pedido.java` (dejar solo la
+  vigente definida en el Sprint 0).
+- Confirmar visualmente la corrección del filtro en `<html>` (scroll con el
+  botón ♿ fijo).
+- Validación manual con NVDA de las piezas 2 y 3.
 - Marcado ARIA del panel de administración (incluye `productos.jsp`).
 - Guardar el DDL en un script versionado `database/` para reproducir el schema.
