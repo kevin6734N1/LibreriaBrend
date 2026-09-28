@@ -357,5 +357,6 @@
       }).then(r => r.json());
     }
   </script>
+<script src="js/accesibilidad.js"></script>
 </body>
 </html>

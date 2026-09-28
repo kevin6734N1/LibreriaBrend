@@ -733,5 +733,6 @@ fetch('ProductoServlet')
        actualizarStats();
    });
 </script>
+<script src="js/accesibilidad.js"></script>
 </body>
 </html>
