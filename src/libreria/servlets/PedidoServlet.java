@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -13,11 +14,13 @@ import libreria.dao.ClienteDAO;
 import libreria.dao.CodigoPromoDAO;
 import libreria.dao.CodigoPromoInvalidoException;
 import libreria.dao.PedidoDAO;
+import libreria.dao.ProductoDAO;
 import libreria.dao.StockInsuficienteException;
 import libreria.models.Administrador;
 import libreria.models.Cliente;
 import libreria.models.Pedido;
 import libreria.models.Producto;
+import libreria.util.ConexionBD;
 
 /**
  * PedidoServlet - Librería Brenda
@@ -150,7 +153,6 @@ public class PedidoServlet extends HttpServlet {
         try {
             String[] ids     = req.getParameterValues("item_id");
             String[] qtys    = req.getParameterValues("item_qty");
-            String[] precios = req.getParameterValues("item_precio");
             String direccion = req.getParameter("direccion");
             String pago      = req.getParameter("pago");
             String codigoPromo = CodigoPromoDAO.normalizar(req.getParameter("codigoPromo"));
@@ -168,14 +170,31 @@ public class PedidoServlet extends HttpServlet {
             // Determinar cliente: si hay sesion de cliente, usar ese id; si no, el demo.
             int clienteId = obtenerClienteIdDeSesion(req);
 
+            // Precio REAL desde la BD: nunca se confia en los montos que mande el
+            // navegador (antes item_precio podia manipularse y, con el, el descuento).
+            ProductoDAO productoDAO = new ProductoDAO();
             List<Pedido.ItemPedido> items = new ArrayList<>();
-            for (int i = 0; i < ids.length; i++) {
-                Producto p = new Producto();
-                p.setId(Integer.parseInt(ids[i]));
-                p.setPrecio(Double.parseDouble(precios[i]));
-
-                int cantidad = Integer.parseInt(qtys[i]);
-                items.add(new Pedido.ItemPedido(p, cantidad));
+            try (Connection con = ConexionBD.getConexion()) {
+                for (int i = 0; i < ids.length; i++) {
+                    int productoId = Integer.parseInt(ids[i]);
+                    int cantidad   = Integer.parseInt(qtys[i]);
+                    if (cantidad <= 0) {
+                        out.print("{\"ok\":false,\"error\":\"Cantidad invalida en el carrito.\"}");
+                        return;
+                    }
+                    Double precioReal = productoDAO.obtenerPrecio(con, productoId);
+                    if (precioReal == null) {
+                        out.print("{\"ok\":false,\"error\":\"Uno de los productos ya no existe. Actualiza tu carrito.\"}");
+                        return;
+                    }
+                    Producto p = new Producto();
+                    p.setId(productoId);
+                    p.setPrecio(precioReal);
+                    items.add(new Pedido.ItemPedido(p, cantidad));
+                }
+            } catch (NumberFormatException nfe) {
+                out.print("{\"ok\":false,\"error\":\"Datos invalidos en el carrito.\"}");
+                return;
             }
 
             Pedido pedido = new Pedido();
