@@ -1,0 +1,119 @@
+
+---------- B.03.1 IDOR de LECTURA: GET /PedidoServlet SIN sesión (el handler cae al cliente id=1) ----------
+### Request:
+GET http://localhost:8080/LibreriaBrend/PedidoServlet   (sin cookies, sin sesión)
+### Response:
+HTTP 200 | 3492 bytes | application/json;charset=UTF-8
+### Body (primeros 1200 caracteres):
+[{"id":"PED-1788638730511","fecha":"05/09/2026","hora":"03:05 PM","estado":"Confirmado","direccion":"jiron manco inca 6767","pago":"Yape","subtotal":120.0,"descuento":18.0,"envio":0.0,"total":102.0,"items":[{"nombre":"Pizarra Acrilica 60x80cm con Marco Aluminio","img":"images/productos/pizarra-acrilica.png","qty":1,"precio":120.0}]},{"id":"PED-1783390538284","fecha":"06/07/2026","hora":"09:15 PM","estado":"Pendiente","direccion":"Av Cezar Rojas","pago":"Yape","subtotal":50.4,"descuento":7.56,"envio":0.0,"total":42.84,"items":[{"nombre":"Reglas","img":"images/productos/Escuadras.png","qty":1,"precio":3.0},{"nombre":"Cuaderno Universitario 100 hojas Cuadriculado","img":"images/productos/agenda-escolar.png","qty":1,"precio":8.5},{"nombre":"Caja de Acuarelas Profesional 48 colores","img":"images/productos/acuarelas.png","qty":1,"precio":38.9}]},{"id":"PED-1783106072691","fecha":"03/07/2026","hora":"02:14 PM","estado":"Pendiente","direccion":"jiron manco inca 283","pago":"Transferencia BCP","subtotal":51.5,"descuento":7.73,"envio":0.0,"total":43.78,"items":[{"nombre":"Agenda Escolar 2026 Diseno Moderno","img":"images/productos/agenda-escolar.png","qty":1,"precio":18.0},{"nombre":"Cuader
+### Nº de pedidos devueltos al anónimo:
+8 pedidos
+   PED-1788638730511 Confirmado jiron manco inca 6767 Yape 102.0
+   PED-1783390538284 Pendiente Av Cezar Rojas Yape 42.84
+   PED-1783106072691 Pendiente jiron manco inca 283 Transferencia BCP 43.78
+   PED-1783104538829 Pendiente jiron manco inca 281 Efectivo contra entrega 3.0
+   PED-1783047700759 Pendiente jiron manco inca 276 Tarjeta Visa 8.5
+   PED-1783046974349 Enviado jiron manco inca 269 Tarjeta Visa 9.0
+   PED-1783026074772 Confirmado jiron manco inca 267 Transferencia BCP 85.5
+   PED-1783021834713 Enviado jiron manco inca 262 Yape 248.8
+
+---------- B.03.2 IDOR comparativo: misma petición con cookie de sesión anónima (no autenticada) ----------
+HTTP 200
+pedidos devueltos: 8
+>>> Si el conteo coincide con B.03.1, el servlet NO distingue 'sin sesión' de 'sesión de cliente': ambos se resuelven al cliente id=1.
+
+---------- B.03.3 Inyección SQL en el login (la consulta es SELECT: no puede mutar datos) ----------
+
+### payload email: ' OR '1'='1
+{"ok":false,"error":"Ingresa un correo con formato válido."}
+   HTTP 200 | application/json;charset=UTF-8
+
+### payload email: a@b.co' OR '1'='1
+{"ok":false,"error":"Ingresa un correo con formato válido."}
+   HTTP 200 | application/json;charset=UTF-8
+
+### payload email: a@b.co' OR email LIKE '%' -- -
+{"ok":false,"error":"Ingresa un correo con formato válido."}
+   HTTP 200 | application/json;charset=UTF-8
+
+### payload email: a@b.co' UNION SELECT 1,2,3 -- -
+{"ok":false,"error":"Ingresa un correo con formato válido."}
+   HTTP 200 | application/json;charset=UTF-8
+
+### payload email: auditoria'||'@noexiste.pe
+{"ok":false,"error":"Correo o contraseña incorrectos."}
+   HTTP 200 | application/json;charset=UTF-8
+### Control (email válido, password incorrecta):
+{"ok":false,"error":"Correo o contraseña incorrectos."}
+   HTTP 200
+
+---------- B.03.4 Inyección SQL en parámetros de búsqueda/filtro accesibles sin sesión ----------
+
+### GET /ProductoServlet (catálogo público) sin parámetros de payload: HTTP 200
+
+### GET /ProductoServlet (catálogo público) sin parámetros de payload: HTTP 200
+### /ProductoServlet no recibe filtros por parámetro (solo GET lista completa) -> no hay superficie de inyección por parámetro aquí.
+
+---------- B.03.5 Endpoints protegidos por AuthFilter (control de autorización real) ----------
+/ReporteServlet      -> HTTP 401 | Location: 
+/ClienteServlet      -> HTTP 401 | Location: 
+/productos.jsp       -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/login.jsp?error=sesion
+/clientes.jsp        -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/login.jsp?error=sesion
+/reportes.jsp        -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/login.jsp?error=sesion
+/admin.jsp           -> HTTP 302 | Location: http://localhost:8080/LibreriaBrend/login.jsp?error=sesion
+### POST a ProductoServlet (acción de admin) sin sesión:
+{"ok":false,"error":"No autorizado. Inicia sesion como administrador."}
+   HTTP 401
+### POST a PedidoServlet accion=cambiarEstado (acción de admin) sin sesión:
+{"ok":false,"error":"No autorizado. Inicia sesion como administrador."}
+   HTTP 401
+
+---------- B.03.6 Verificación del fix CU-03 (límite de 10 productos) en el SERVIDOR, sin escribir ----------
+### Request: POST /PedidoServlet accion=guardarDB con 11 'item_id' distintos (sin sesión)
+### (el control de longitud retorna ANTES de cualquier acceso a la BD: no hay escritura posible)
+### Payload: accion=guardarDB&item_id=9001..9011&item_qty=1&direccion=x&pago=Yape
+{"ok":false,"error":"El carrito supera el maximo de 10 productos distintos permitido."}
+   HTTP 200
+### Control con 10 ítems (mismos ids inexistentes): debe pasar el límite y fallar en la validación de producto
+{"ok":false,"error":"Uno de los productos ya no existe. Actualiza tu carrito."}
+   HTTP 200
+>>> Contraste: 11 ítems -> rechazo por límite | 10 ítems -> el límite NO se activa (pasa a validar productos).
+
+---------- B.03.7 Manipulación de lógica de negocio: payloads que el servidor debe descartar ----------
+### (a) carrito vacío:
+{"ok":false,"error":"carrito vacio"}
+   HTTP 200
+### (b) item_id no numérico:
+{"ok":false,"error":"Datos invalidos en el carrito."}
+   HTTP 200
+### (c) cantidad 0 / negativa:
+{"ok":false,"error":"Cantidad invalida en el carrito."}
+   HTTP 200
+### (d) producto inexistente:
+{"ok":false,"error":"Uno de los productos ya no existe. Actualiza tu carrito."}
+   HTTP 200
+### (e) arrays de longitud dispar (item_id=1 y 9001, un solo item_qty) -> comprobar fuga de mensaje interno:
+###     item_id=1 es un producto REAL (89.90) para que el bucle llegue a la 2ª iteración y dispare el error de índice;
+###     el pedido se crea DESPUÉS del bucle, por lo que no hay escritura posible.
+{"ok":false,"error":"Index 1 out of bounds for length 1"}
+   HTTP 200
+### (f) item_qty ausente:
+{"ok":false,"error":"Cannot load from object array because \"qtys\" is null"}
+   HTTP 200
+### (g) precio manipulado del cliente (item_precio=0.01) con producto inexistente:
+{"ok":false,"error":"Uno de los productos ya no existe. Actualiza tu carrito."}
+   HTTP 200
+### (h) código promocional SIN sesión (retorna antes de crear el pedido):
+{"ok":false,"error":"Inicia sesión para usar un código promocional."}
+   HTTP 200
+
+---------- B.03.8 CSRF: petición POST de alteración de estado con Origin externo y sin token ----------
+### (no se envía ninguna petición que pueda llegar a escribir; ver informe §4)
+### Verificación de la EXISTENCIA de defensa (token/atributo SameSite):
+Set-Cookie: JSESSIONID=<REDACTADO>; Path=/LibreriaBrend; HttpOnly
+### (sin 'SameSite' en la cookie; ver informe §2)
+### ¿Algún formulario/fetch servido incluye un campo token/CSRF?
+0
+0 coincidencias de 'csrf' en el DOM de carrito.jsp
+0
+0 coincidencias de 'csrf' en el DOM de pedidos.jsp

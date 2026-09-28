@@ -1,0 +1,37 @@
+
+---------- B.05.1 Limitador de intentos fallidos de login (5 intentos -> bloqueo de 2 min) ----------
+### Se usa el email inexistente auditoria.bruteforce@noexiste.pe (no afecta a ninguna cuenta real).
+intento #1 -> {"ok":false,"error":"Correo o contraseña incorrectos."}
+intento #2 -> {"ok":false,"error":"Correo o contraseña incorrectos."}
+intento #3 -> {"ok":false,"error":"Correo o contraseña incorrectos."}
+intento #4 -> {"ok":false,"error":"Correo o contraseña incorrectos."}
+intento #5 -> {"ok":false,"error":"Correo o contraseña incorrectos."}
+intento #6 -> {"ok":false,"error":"Demasiados intentos fallidos. Intenta de nuevo en 2 minuto(s)."}
+intento #7 -> {"ok":false,"error":"Demasiados intentos fallidos. Intenta de nuevo en 2 minuto(s)."}
+>>> El bloqueo es POR EMAIL (no global) y vive en memoria del contenedor: se pierde al reiniciar Tomcat.
+
+---------- B.05.2 Controles presentes en los artefactos servidos (no en el código fuente JSP/JS) ----------
+### A-05: regla de envío por PRECIO DE PRODUCTO en el DOM servido de index.jsp
+2
+    (líneas del JS inline servido que deciden el envío gratis por precio de producto)
+
+### M-01: ¿existe manejo de Escape o gestión de foco en el DOM servido de pedidos.jsp?
+occurrencias de 'Escape': 0
+occurrencias de 'focus(': 0
+atributo aria-modal      : 1
+
+### M-02: alert() bloqueantes en el flujo de compra (DOM servido de carrito.jsp)
+carrito.jsp  -> 6
+pedidos.jsp  -> 2
+registro.jsp -> 1
+
+### M-03: referencias a variables no declaradas en el DOM servido de carrito.jsp
+      2 btnHtmlOriginal
+    ('btnHtmlOriginal' se usa pero no se declara: 2 usos detectados en Fase 1)
+
+### Fix CU-03 en el CLIENTE: control de 10 productos en el JS servido
+carrito.length >= 10
+
+### PreferenciaAccesibilidadServlet sin sesión (contraste con el fallback del Cliente Demo)
+GET -> {"autenticado":false,"tipoDaltonismo":"ninguno","lecturaVozActiva":false}
+GET /PedidoServlet (misma situación, sin sesión) -> 3492 bytes de datos de cliente

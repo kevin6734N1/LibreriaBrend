@@ -1,0 +1,42 @@
+=========== VERIFICACIÓN DE INTEGRIDAD DE LA BD DE PRODUCCIÓN (libreria_brenda) ===========
+Objetivo: demostrar que ninguna de las 156 peticiones HTTP de la Fase 2 ni ninguna prueba de auditoría
+escribió, modificó ni eliminó una sola fila.
+
+--- 1. Hashes del estado capturado antes y después ---
+1e8f03a5a8f3065c48ec93d9a7cf0eaf541fece7a137a66bc04cd0c82b7f4b94  docs/auditoria/evidencias/db/00_baseline_antes.txt
+d80a3edf71889e526830725017856d9ba2ac3ef16587d99488d4d7d651af7685  docs/auditoria/evidencias/db/01_baseline_despues.txt
+
+--- 2. Diferencia entre ambos volcados (ignorando la marca de tiempo 'momento_captura') ---
+RESULTADO: 0 diferencias -> el contenido de la BD es IDÉNTICO antes y después de la auditoría.
+
+--- 3. Conteos finales, uno por uno ---
++----------------------------+-------+
+| tabla                      | filas |
++----------------------------+-------+
+| clientes                   |    16 |
+| administradores            |     1 |
+| productos                  |    11 |
+| pedidos                    |    16 |
+| pedido_items               |    31 |
+| comprobantes               |     8 |
+| codigos_promo              |     3 |
+| codigos_promo_usos         |     0 |
+| preferencias_accesibilidad |     0 |
+| categorias                 |     6 |
++----------------------------+-------+
+
+--- 4. ¿Se creó o existe alguna base de datos de prueba? ---
+libreria_brenda
+(solo libreria_brenda: no se creó libreria_brenda_test)
+
+--- 5. ¿Existen filas de auditoría en pedidos/codigos_promo_usos? ---
++-----------------------------+
+| pedidos_con_marca_auditoria |
++-----------------------------+
+|                           0 |
++-----------------------------+
++--------------------+
+| usos_promo_totales |
++--------------------+
+|                  0 |
++--------------------+
