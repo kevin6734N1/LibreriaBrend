@@ -236,20 +236,46 @@ public class PedidoDAO {
      *         cancelado antes).
      */
     public boolean cancelarPedidoCliente(String pedidoId, int clienteId) {
-        String sql = "UPDATE pedidos SET estado = 'CANCELADO' " +
-                     "WHERE id = ? AND cliente_id = ? AND estado = 'PENDIENTE'";
+        String sqlUpdate = "UPDATE pedidos SET estado = 'CANCELADO' " +
+                           "WHERE id = ? AND cliente_id = ? AND estado = 'PENDIENTE'";
+        String sqlLiberaPromo = "DELETE FROM codigos_promo_usos WHERE pedido_id = ?";
 
-        try (Connection con = ConexionBD.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        Connection con = null;
+        try {
+            con = ConexionBD.getConexion();
+            con.setAutoCommit(false);
 
-            ps.setString(1, pedidoId);
-            ps.setInt(2, clienteId);
-            int filas = ps.executeUpdate();
+            int filas = 0;
+            try (PreparedStatement ps = con.prepareStatement(sqlUpdate)) {
+                ps.setString(1, pedidoId);
+                ps.setInt(2, clienteId);
+                filas = ps.executeUpdate();
+            }
+
+            if (filas > 0) {
+                // Liberar el codigo promocional usado por este pedido (si lo tuvo):
+                // al cancelarse un PENDIENTE, el cliente puede volver a usar el codigo.
+                // Va en la misma transaccion: si la cancelacion no aplica, no se libera.
+                try (PreparedStatement ps = con.prepareStatement(sqlLiberaPromo)) {
+                    ps.setString(1, pedidoId);
+                    ps.executeUpdate();
+                }
+            }
+
+            con.commit();
             return filas > 0;
 
         } catch (SQLException e) {
+            if (con != null) {
+                try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
             e.printStackTrace();
             return false;
+        } finally {
+            if (con != null) {
+                try { con.setAutoCommit(true); } catch (SQLException ignored) {}
+                ConexionBD.cerrar(con);
+            }
         }
     }
 

@@ -72,6 +72,14 @@ public class CodigoPromoDAO {
 
             double descuento = promo.calcularDescuento(subtotal);
             if (descuento <= 0) return Resultado.fallo("El código no aplica a este pedido.");
+
+            // Evita que un codigo haga pagar MAS por el envio: si el subtotal ya
+            // alcanzaba el envio gratis y el descuento lo deja por debajo de S/30,
+            // el cliente pagaria mas con codigo que sin el (ej. LIBRO5 sobre S/32).
+            if (subtotal >= 30 && (subtotal - descuento) < 30) {
+                return Resultado.fallo("Este código haría que pagues más por el envío. Prueba con otro.");
+            }
+
             return Resultado.exito(promo, descuento);
 
         } catch (SQLException e) {

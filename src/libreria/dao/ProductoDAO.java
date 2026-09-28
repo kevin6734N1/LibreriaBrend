@@ -195,6 +195,17 @@ public class ProductoDAO {
         }
     }
 
+    /** Precio real del producto en la BD (null si el producto no existe). Usado por PedidoServlet para no confiar en los precios que mande el navegador. */
+    public Double obtenerPrecio(Connection con, int productoId) throws SQLException {
+        String sql = "SELECT precio FROM productos WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? (Double) rs.getDouble("precio") : null;
+            }
+        }
+    }
+
     /** Nombre del producto, usado para armar un mensaje de error legible cuando falta stock. */
     public String obtenerNombre(Connection con, int productoId) throws SQLException {
         String sql = "SELECT nombre FROM productos WHERE id = ?";
