@@ -20,6 +20,7 @@
 | 2026-09-27 | `b3a5aa1` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
 | 2026-09-27 | `b5337fd` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
 | 2026-09-27 | `54a810c` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
+| 2026-09-28 | *(pendiente de commit)* | **Laboratorio de calidad — TDD (H0007):** `ValidadorProducto` construido test-first (9 tests JUnit 5) + validación en servidor de crear/editar producto (HTTP 400 con errores) |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
 WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
@@ -347,6 +348,50 @@ subtotales límite, liberación y reuso del código, cancelación ajena
 rechazada, precios reales y producto inexistente). Limpieza verificada: 0
 filas de prueba. Evidencias en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md)
 (E21).
+
+---
+
+## [Laboratorio TDD] Validaciones de producto en servidor (H0007)
+
+**Fecha:** 2026-09-28
+**Motivación:** laboratorio de calidad de la semana con TDD. El Sprint 2 declaró
+"validaciones de formulario (precio, stock, campos requeridos)" como tarea 5,
+pero en el servidor no existían: el servlet convertía precio/stock inválidos en
+`0` sin avisar, aceptaba precios negativos y un nombre `null` llegaba directo
+a la BD.
+
+### Qué se implementó
+
+1. **`ValidadorProducto`** (`src/libreria/util/`), construido test-first con
+   ciclos Rojo → Verde → Refactor: nombre obligatorio, precio > 0, stock no
+   negativo y categoría obligatoria. Los errores se **acumulan** (una sola
+   pasada reporta todas las reglas incumplidas) y el refactor final usa
+   helper `vacio()` + constantes `ERR_*`.
+2. **9 tests JUnit 5** en `test/libreria/util/ValidadorProductoTest.java`
+   (helper `productoValido()`: cada test cambia un solo campo; incluye el
+   test de borde `stockCero_noDevuelveError`, que pasa desde el inicio para
+   proteger contra `<= 0`, y los de regresión de producto válido y
+   acumulación de 4 errores). Primer test automatizado permanente del
+   proyecto: responde parcialmente al hallazgo M-07 de la auditoría
+   (pruebas no reproducibles).
+3. **`ProductoServlet`:** `crear` y `editar` validan antes de tocar el DAO;
+   si hay errores responden **HTTP 400** con `{"ok":false,"error":...}` y el
+   producto no llega a la BD. `productos.jsp` ya mostraba `data.error` en el
+   modal, no requirió cambios.
+4. **Entorno:** `junit-platform-console-standalone-1.11.4.jar` en
+   `WEB-INF/lib` + registro en `.classpath` (fuente `test/`).
+
+### Verificación
+
+Rojo y verde documentados **por ciclo y por corrida** (se corrió JUnit después
+de cada Rojo y antes de cada Verde; ciclos 1-5 en secciones 3-7 del informe).
+9/9 en verde al cerrar, también tras el refactor. Compilación completa del
+proyecto OK. Evidencias completas, reproducción y límites honestos en
+[`LABORATORIO_TDD.md`](LABORATORIO_TDD.md).
+
+**Pendiente:** republish en Tomcat y prueba HTTP end-to-end (400 con payload
+inválido) — Tomcat estaba detenido al cerrar la sesión. El fallback silencioso
+a categoría 1 en `ProductoDAO.obtenerCategoriaId()` queda como refactor futuro.
 
 ---
 

@@ -10,15 +10,21 @@ import jakarta.servlet.http.*;
 
 import libreria.dao.ProductoDAO;
 import libreria.models.Producto;
+import libreria.util.ValidadorProducto;
 
 /**
  * ProductoServlet - Libreria Brenda
  *
  * GET  /ProductoServlet           -> JSON con todos los productos (para cargar la tabla)
- * POST /ProductoServlet accion=crear        -> inserta producto nuevo
- * POST /ProductoServlet accion=editar       -> actualiza producto existente
+ * POST /ProductoServlet accion=crear        -> valida e inserta producto nuevo
+ * POST /ProductoServlet accion=editar       -> valida y actualiza producto existente
  * POST /ProductoServlet accion=toggleActivo -> invierte activo/inactivo
  * POST /ProductoServlet accion=eliminar     -> elimina producto
+ *
+ * Las reglas de validación (H0007 / tarea 5 del Sprint 2) viven en
+ * ValidadorProducto y se aplican EN EL SERVIDOR para crear y editar:
+ * si hay errores se responde HTTP 400 con {"ok":false,"error":...}
+ * y el producto no llega a tocar la base de datos.
  */
 @WebServlet("/ProductoServlet")
 public class ProductoServlet extends HttpServlet {
@@ -73,6 +79,12 @@ public class ProductoServlet extends HttpServlet {
 
         if ("crear".equals(accion)) {
             Producto p = leerProductoDeRequest(request);
+            List<String> errores = ValidadorProducto.validar(p);
+            if (!errores.isEmpty()) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"" + esc(String.join(" | ", errores)) + "\"}");
+                return;
+            }
             int nuevoId = dao.crear(p);
             if (nuevoId > 0) {
                 out.print("{\"ok\":true,\"id\":" + nuevoId + "}");
@@ -82,6 +94,12 @@ public class ProductoServlet extends HttpServlet {
 
         } else if ("editar".equals(accion)) {
             Producto p = leerProductoDeRequest(request);
+            List<String> errores = ValidadorProducto.validar(p);
+            if (!errores.isEmpty()) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"" + esc(String.join(" | ", errores)) + "\"}");
+                return;
+            }
             p.setId(Integer.parseInt(request.getParameter("id")));
             boolean ok = dao.editar(p);
             out.print("{\"ok\":" + ok + "}");
