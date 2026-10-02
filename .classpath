@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/21.0.12.1-linux-x86_64"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/home/kevin/proyectos/LibreriaBrend/WebContent/WEB-INF/lib/mysql-connector-j-9.7.0.jar"/>
-	<classpathentry kind="lib" path="/home/kevin/proyectos/LibreriaBrend/WebContent/WEB-INF/lib/junit-platform-console-standalone-1.11.4.jar"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="lib" path="/home/kevin/proyectos/LibreriaBrend/WebContent/WEB-INF/lib/jbcrypt-0.4.jar"/>
-	<classpathentry kind="lib" path="/home/kevin/apache-tomcat-11.0.0-M24/lib/servlet-api.jar"/>
-	<classpathentry kind="lib" path="/home/kevin/apache-tomcat-11.0.0-M24/lib/jasper-el.jar"/>
-	<classpathentry kind="lib" path="/home/kevin/apache-tomcat-11.0.0-M24/lib/jsp-api.jar"/>
-	<classpathentry kind="lib" path="/home/kevin/apache-tomcat-11.0.0-M24/lib/annotations-api.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/mysql-connector-j-9.7.0.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/junit-platform-console-standalone-1.11.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jbcrypt-0.4.jar"/>
+	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/jasper-el.jar"/>
+	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/jsp-api.jar"/>
+	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/annotations-api.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

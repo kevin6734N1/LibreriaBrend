@@ -7,6 +7,7 @@
 target/
 build/
 out/
+.tools/
 *.class
 *.war
 *.ear
