@@ -1,5 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page isELIgnored="false" %>
+<%-- Separacion de responsabilidades: "Mis Pedidos" es la vista del
+     comprador. Un administrador que llegue aqui se manda a la gestion de
+     pedidos; de lo contrario su fetch fallaria con 401 y acabaria en el
+     login estando ya autenticado. --%>
+<% if ("admin".equals(session.getAttribute("rol"))) {
+     response.sendRedirect(request.getContextPath() + "/admin-pedidos.jsp");
+     return;
+   } %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -61,7 +69,10 @@
     }
     .filtro-btn:hover { border-color:#1259C3; color:#1259C3; }
     .filtro-btn.active { background:#1259C3; color:white; border-color:#1259C3; }
-    .filtro-btn.active img { filter:brightness(10); }
+    /* Los iconos de estado son JPEG con fondo blanco: teñirlos con
+       brightness() solo producía un cuadrado blanco sobre el azul. En el
+       filtro activo se muestran como una ficha blanca redondeada. */
+    .filtro-btn.active img { background:#fff; border-radius:4px; }
 
     .pedido-card {
       background:white; border-radius:10px;
@@ -327,8 +338,15 @@
       lista.innerHTML = '<p style="padding:40px;text-align:center;color:#666;">Cargando tus pedidos...</p>';
 
       fetch('PedidoServlet')
-        .then(function(r) { return r.json(); })
+        .then(function(r) {
+          if (r.status === 401) {
+            window.location.href = 'login.jsp';
+            return null;
+          }
+          return r.json();
+        })
         .then(function(data) {
+          if (!data) return;
           todosPedidos = data;
           renderPedidos();
         })
@@ -477,10 +495,17 @@
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: cuerpo
       })
-        .then(function(r) { return r.json(); })
+        .then(function(r) {
+          if (r.status === 401) {
+            window.location.href = 'login.jsp';
+            return null;
+          }
+          return r.json();
+        })
         .then(function(data) {
+          if (!data) return;
           if (!data.ok) {
-            alert('No se pudo cancelar el pedido.');
+            alert(data.error || 'No se pudo cancelar el pedido.');
             return;
           }
           for (var i = 0; i < todosPedidos.length; i++) {

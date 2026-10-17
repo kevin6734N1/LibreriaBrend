@@ -25,11 +25,12 @@ import jakarta.servlet.http.HttpSession;
  *  - Paginas .jsp completas         -> redirige a login.jsp
  *  - Servlets/JSON (llamados via fetch) -> responde 401 en JSON
  *
- * ProductoServlet y PedidoServlet se protegen solo parcialmente: sus
- * lecturas publicas (listar catalogo, listar/crear/cancelar pedido propio)
- * siguen abiertas para cualquier cliente/visitante; solo las acciones de
- * administracion (crear/editar/eliminar producto, cambiar estado de un
- * pedido) exigen sesion admin.
+ * ProductoServlet y PedidoServlet se protegen solo parcialmente: el
+ * catalogo (GET de productos) sigue siendo publico; crear/editar/eliminar
+ * producto y cambiar el estado de un pedido exigen sesion admin. Las
+ * operaciones de cliente (listar/crear/cancelar pedido propio) exigen una
+ * sesion de cliente valida y se validan dentro de PedidoServlet, que
+ * responde 401 si no la hay.
  */
 @WebFilter(urlPatterns = {
         "/admin.jsp",
@@ -40,6 +41,7 @@ import jakarta.servlet.http.HttpSession;
         "/ClienteServlet",
         "/ReporteServlet",
         "/ProductoServlet",
+        "/ImagenProductoServlet",
         "/PedidoServlet"
 })
 public class AuthFilter implements Filter {
@@ -88,6 +90,11 @@ public class AuthFilter implements Filter {
         // Datos sensibles: listado de clientes (con DNI/telefono/direccion) y
         // reportes de negocio. No tienen ninguna razon para ser publicos.
         if (path.equals("/ClienteServlet") || path.equals("/ReporteServlet")) {
+            return true;
+        }
+
+        // Subir imagenes de producto escribe archivos en el proyecto: solo admin.
+        if (path.equals("/ImagenProductoServlet")) {
             return true;
         }
 

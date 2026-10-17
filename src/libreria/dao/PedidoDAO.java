@@ -230,6 +230,11 @@ public class PedidoDAO {
      * otra peticion pueda colarse (ej. el admin confirmandolo justo en ese
      * instante).
      *
+     * Al cancelar se repone el stock de cada item y se libera el codigo
+     * promocional, todo dentro de la MISMA transaccion. Solo ocurre cuando
+     * el UPDATE afecto una fila, asi que una cancelacion rechazada no toca
+     * inventario ni cupones.
+     *
      * @return true si se cancelo (existia, era del cliente y estaba
      *         PENDIENTE); false si no existe, no es del cliente, o ya no
      *         esta en PENDIENTE (ya fue confirmado/enviado/entregado/
@@ -238,6 +243,8 @@ public class PedidoDAO {
     public boolean cancelarPedidoCliente(String pedidoId, int clienteId) {
         String sqlUpdate = "UPDATE pedidos SET estado = 'CANCELADO' " +
                            "WHERE id = ? AND cliente_id = ? AND estado = 'PENDIENTE'";
+        String sqlItems = "SELECT producto_id, cantidad FROM pedido_items WHERE pedido_id = ?";
+        String sqlReponerStock = "UPDATE productos SET stock = stock + ? WHERE id = ?";
         String sqlLiberaPromo = "DELETE FROM codigos_promo_usos WHERE pedido_id = ?";
 
         Connection con = null;
@@ -253,6 +260,22 @@ public class PedidoDAO {
             }
 
             if (filas > 0) {
+                // Reponer el stock que el pedido habia descontado al crearse.
+                // Se hace solo si la cancelacion aplico (filas > 0), por lo que
+                // reintentar sobre un pedido ya cancelado no infla el inventario.
+                try (PreparedStatement ps = con.prepareStatement(sqlItems);
+                     PreparedStatement reponer = con.prepareStatement(sqlReponerStock)) {
+                    ps.setString(1, pedidoId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            reponer.setInt(1, rs.getInt("cantidad"));
+                            reponer.setInt(2, rs.getInt("producto_id"));
+                            reponer.addBatch();
+                        }
+                    }
+                    reponer.executeBatch();
+                }
+
                 // Liberar el codigo promocional usado por este pedido (si lo tuvo):
                 // al cancelarse un PENDIENTE, el cliente puede volver a usar el codigo.
                 // Va en la misma transaccion: si la cancelacion no aplica, no se libera.

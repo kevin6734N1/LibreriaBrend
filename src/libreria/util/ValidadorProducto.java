@@ -26,7 +26,7 @@ public class ValidadorProducto {
         List<String> errores = new ArrayList<>();
 
         if (vacio(p.getNombre()))    errores.add(ERR_NOMBRE);
-        if (p.getPrecio() <= 0)      errores.add(ERR_PRECIO);
+        if (!Double.isFinite(p.getPrecio()) || p.getPrecio() <= 0) errores.add(ERR_PRECIO);
         if (p.getStock() < 0)        errores.add(ERR_STOCK);
         if (vacio(p.getCategoria())) errores.add(ERR_CATEGORIA);
 

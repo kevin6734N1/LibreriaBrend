@@ -64,3 +64,24 @@ Tras aplicar la corrección del punto 5, el caso de uso principal (flujo de comp
 **Nota de consistencia interna:** la fila de CU-04 de la tabla de la sección 4 menciona "descuentos ODS10", lógica que fue **retirada del sistema en el paso 2** (ver `docs/REGISTRO_CAMBIOS.md`). Esa referencia está desactualizada a la fecha de esta aclaración.
 
 **No se afirma conformidad WCAG de ningún nivel:** no hubo validación con lector de pantalla real (NVDA/JAWS/VoiceOver) ni con navegador.
+
+---
+
+## 8. Actualización 2026-10-17 — correcciones y revalidación en entorno aislado
+
+Esta sección actualiza el estado anterior sin borrar el registro histórico. La verificación se hizo sobre el árbol de trabajo del 17/10/2026 con **OpenJDK 21**, **Tomcat 11.0.26** y **MariaDB 11.8**, usando una base ficticia `libreria_brenda_test` creada desde `database/schema_test.sql` + `database/fixtures_test.sql`. **No se escribió en la base comercial.**
+
+**Correcciones aplicadas:**
+
+- `PedidoServlet` ya no usa el «Cliente Demo» como identidad de respaldo: `GET`, `guardarDB`, `cancelarPedido` y `validarPromo` responden `401` sin sesión de cliente. Un cliente autenticado solo ve y cancela sus propios pedidos.
+- Los errores internos de la JVM ya no se devuelven al cliente; el detalle queda en el log del servidor.
+- `ProductoServlet` rechaza con `400` precio/stock no numéricos (incluido `stock=abc`), nombre o categoría vacíos y categorías inexistentes. `ProductoDAO` ya no sustituye una categoría desconocida por la categoría 1.
+- La cancelación de un pedido `PENDIENTE` repone el stock y libera el cupón en la misma transacción; una cancelación ajena, repetida o sobre un pedido confirmado no modifica datos.
+- La conexión JDBC se configura por variables de entorno (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, etc.) y ya no contiene credenciales embebidas.
+
+**Evidencia de ejecución:**
+
+- **52/52 tests unitarios** JUnit 5 (15 `PedidoTest`, 7 `CodigoPromoTest`, 10 `PasswordUtilTest`, 11 `ControlIntentosLoginTest` y 9 `ValidadorProductoTest`).
+- **80/80 comprobaciones de integración HTTP/BD** en Tomcat aislado, cubriendo IT-01 a IT-10 y QA-02, QA-05, QA-06, QA-07, QA-08, QA-09 y QA-10. La suite es reproducible con `test/integration/http-tests.sh`.
+
+**Estado de casos de uso:** CU-01 a CU-06 quedaron ejercitados contra la base de prueba, incluidos CU-04 (confirmar pedido) y CU-05 (registrar pedido), que antes no tenían verificación de escritura. Esto **no** equivale a una validación integral del sistema: siguen pendientes la accesibilidad con lector de pantalla/WCAG, las pruebas de carga/concurrencia, la cobertura instrumentada y los controles CSRF/`SameSite` (QA-15). El archivo `libreria_brenda_backup.sql` continúa versionado con datos históricos y su retiro requiere aprobación.

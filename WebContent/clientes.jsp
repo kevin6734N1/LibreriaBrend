@@ -6,187 +6,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clientes | Libreria Brenda Admin</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
   <style>
-    .icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
-
-    .admin-layout { display: flex; min-height: 100vh; }
-
-    .sidebar {
-      width: 220px; min-width: 220px; background: #1259C3;
-      display: flex; flex-direction: column; padding: 20px 0;
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-    }
-    .sb-logo {
-      padding: 0 20px 24px; font-family: 'Nunito', sans-serif;
-      font-weight: 900; font-size: 1.05rem; color: white;
-      border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 10px;
-    }
-    .sidebar nav a {
-      display: flex; align-items: center; padding: 11px 20px;
-      color: rgba(255,255,255,0.75); text-decoration: none;
-      font-size: 0.9rem; font-weight: 700; transition: all 0.18s;
-    }
-    .sidebar nav a:hover, .sidebar nav a.active {
-      background: rgba(255,255,255,0.15); color: white;
-    }
-    .sidebar nav a img { filter: brightness(5); opacity: 0.8; }
-    .sidebar nav a.active img, .sidebar nav a:hover img { opacity: 1; }
-    .sidebar-sep { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 10px 20px; }
-
-    .admin-main { flex: 1; background: #EDEDED; padding: 28px; overflow: auto; }
-
-    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .topbar h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.4rem; }
-    .topbar-right { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: #555; }
-    .badge-admin { background: #1259C3; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 24px; }
-    .stat-card  { background: white; border-radius: 8px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
-    .stat-card img { width: 40px; height: 40px; margin-bottom: 8px; }
-    .stat-num   { font-family: 'Nunito', sans-serif; font-size: 1.9rem; font-weight: 900; color: #1259C3; }
-    .stat-label { font-size: 0.80rem; color: #666; margin-top: 2px; }
-
-    .toolbar {
-      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-      background: white; border-radius: 8px; padding: 14px 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 18px;
-    }
-    .toolbar input[type=text] {
-      flex: 1; min-width: 180px; padding: 9px 14px; border: 1.5px solid #e0e0e0;
-      border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 0.9rem; outline: none;
-    }
-    .toolbar input[type=text]:focus { border-color: #1259C3; }
-    .toolbar select {
-      padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px;
-      font-family: 'Lato', sans-serif; font-size: 0.88rem; outline: none; background: white;
-    }
-    .contador-tabla { font-size: 0.82rem; color: #666; margin-left: auto; }
-    .btn-exportar {
-      background: none; border: 1.5px solid #1259C3; color: #1259C3;
-      padding: 9px 18px; border-radius: 8px; font-weight: 700; cursor: pointer;
-      font-family: 'Lato', sans-serif; font-size: 0.88rem; white-space: nowrap;
-      transition: all 0.18s; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-exportar:hover { background: #1259C3; color: white; }
-
-    .admin-table-wrap { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
-    .admin-table-wrap table { width: 100%; border-collapse: collapse; }
-    .admin-table-wrap th {
-      background: #F5F5F5; padding: 12px 16px; text-align: left;
-      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px; color: #666; white-space: nowrap; cursor: pointer;
-      user-select: none;
-    }
-    .admin-table-wrap th:hover { color: #1259C3; }
+    /* ===== Estilos propios de Clientes ===== */
+    .admin-table-wrap th { cursor: pointer; user-select: none; }
+    .admin-table-wrap th:hover { color: var(--azul); }
     .admin-table-wrap th .sort-arrow { font-size: 0.7rem; opacity: 0.5; margin-left: 3px; }
-    .admin-table-wrap td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid #F0F0F0; vertical-align: middle; }
-    .admin-table-wrap tr:last-child td { border-bottom: none; }
-    .admin-table-wrap tr:hover td { background: rgba(18,89,195,0.03); }
 
     .cliente-avatar {
       width: 38px; height: 38px; border-radius: 50%;
-      background: #1259C3; color: white; display: flex; align-items: center; justify-content: center;
+      background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 0.9rem; font-family: 'Nunito', sans-serif;
     }
     .cliente-nombre-wrap { display: flex; align-items: center; gap: 10px; }
     .cliente-nombre { font-weight: 700; font-size: 0.9rem; }
     .cliente-dni { font-size: 0.78rem; color: #888; }
 
-    .badge-pedidos {
-      background: #EEF2FF; color: #1259C3; padding: 3px 12px;
-      border-radius: 12px; font-size: 0.82rem; font-weight: 700;
-    }
-    .badge-vip { background: #FFF3CD; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; margin-left: 6px; }
-    .badge-activo   { background: #D4EDDA; color: #155724; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-    .badge-inactivo { background: #F8D7DA; color: #721c24; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-
-    .btn-accion {
-      border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer;
-      font-size: 0.78rem; font-weight: 700; font-family: 'Lato', sans-serif; transition: all 0.15s;
-    }
-    .btn-ver     { background: #EEF2FF; color: #1259C3; border: 1px solid #1259C3; }
-    .btn-ver:hover { background: #1259C3; color: white; }
-
-    .sin-resultados { text-align: center; padding: 50px 20px; color: #999; font-size: 0.9rem; }
-    .sin-resultados img { width: 60px; opacity: 0.4; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-
-    /* Modal detalle cliente */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: white; border-radius: 12px; padding: 28px;
-      width: 90%; max-width: 540px; max-height: 85vh; overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.25); animation: fadeUp 0.2s ease;
-    }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-header h3 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.2rem; }
-    .btn-cerrar { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #666; line-height: 1; }
-
     .cliente-detalle-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
     .cliente-avatar-lg {
       width: 60px; height: 60px; border-radius: 50%;
-      background: #1259C3; color: white; display: flex; align-items: center; justify-content: center;
+      background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 1.4rem; font-family: 'Nunito', sans-serif; flex-shrink: 0;
     }
 
-    .modal-row { display: flex; justify-content: space-between; padding: 9px 0; font-size: 0.88rem; border-bottom: 1px solid #f5f5f5; }
+    .modal-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; font-size: 0.88rem; border-bottom: 1px solid #f5f5f5; }
     .modal-row:last-child { border-bottom: none; }
     .modal-label { color: #666; }
     .modal-value { font-weight: 700; text-align: right; }
-
     .seccion-subtitulo { font-size: 0.78rem; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .5px; margin: 18px 0 8px; }
 
-    .mini-pedido-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 9px 0; font-size: 0.84rem; border-bottom: 1px solid #f5f5f5;
-    }
+    .mini-pedido-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; font-size: 0.84rem; border-bottom: 1px solid #f5f5f5; }
     .mini-pedido-row:last-child { border-bottom: none; }
-
-    @media (max-width: 768px) {
-      .admin-layout { flex-direction: column; }
-      .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 10px; }
-    }
   </style>
 </head>
 <body>
 <div class="admin-layout">
 
   <!-- ===== SIDEBAR ===== -->
-  <aside class="sidebar">
-    <div class="sb-logo">
-      <img src="images/libro-logo.png" style="width:26px;height:26px;vertical-align:middle;filter:brightness(10);margin-right:8px;" alt="">
-      Libreria Brenda
-      <div style="font-size:0.7rem;opacity:0.6;font-weight:400;margin-top:2px;">Panel de Administracion</div>
-    </div>
-    <nav>
-      <a href="admin.jsp">
-        <img src="images/dashboard.png" class="icon-img"> Dashboard
-      </a>
-      <a href="pedidos.jsp">
-        <img src="images/pedidos.png" class="icon-img"> Pedidos
-      </a>
-      <a href="productos.jsp">
-        <img src="images/productos.png" class="icon-img"> Productos
-      </a>
-      <a href="clientes.jsp" class="active">
-        <img src="images/clientes.png" class="icon-img"> Clientes
-      </a>
-      <a href="reportes.jsp">
-        <img src="images/reportes.png" class="icon-img"> Reportes
-      </a>
-      <hr class="sidebar-sep">
-      <a href="index.jsp">
-        <img src="images/tienda.png" class="icon-img"> Ver tienda
-      </a>
-      <a href="LogoutServlet">
-        <img src="images/logout.png" class="icon-img"> Cerrar sesion
-      </a>
-    </nav>
-  </aside>
+  <%@ include file="/WEB-INF/jspf/admin-sidebar.jspf" %>
 
   <!-- ===== MAIN ===== -->
   <main class="admin-main">
@@ -248,7 +105,7 @@
     </div>
 
     <!-- Tabla -->
-    <div class="admin-table-wrap">
+    <div class="admin-table-wrap tabla-cards">
       <table>
         <thead>
           <tr>
@@ -443,7 +300,7 @@
     contador.textContent = lista.length + ' cliente' + (lista.length !== 1 ? 's' : '');
 
     if (lista.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="sin-resultados">' +
+      tbody.innerHTML = '<tr><td colspan="8" class="celda-vacia"><div class="sin-resultados">' +
         '<img src="images/empty.png" alt=""><br>No se encontraron clientes</div></td></tr>';
       return;
     }
@@ -459,7 +316,7 @@
 
       html +=
         '<tr>' +
-          '<td>' +
+          '<td data-label="Cliente">' +
             '<div class="cliente-nombre-wrap">' +
               '<div class="cliente-avatar">' + iniciales(c) + '</div>' +
               '<div>' +
@@ -468,13 +325,13 @@
               '</div>' +
             '</div>' +
           '</td>' +
-          '<td>' + c.email + '</td>' +
-          '<td>' + c.telefono + '</td>' +
-          '<td><span class="badge-pedidos">' + c.pedidos + '</span></td>' +
-          '<td><strong style="font-family:Nunito,sans-serif;">S/ ' + c.totalGastado.toFixed(2) + '</strong></td>' +
-          '<td>' + formatearFecha(c.fechaRegistro) + '</td>' +
-          '<td>' + estadoHtml + '</td>' +
-          '<td><button class="btn-accion btn-ver" onclick="abrirDetalle(' + c.id + ')">Ver</button> ' +
+          '<td data-label="Correo">' + c.email + '</td>' +
+          '<td data-label="Teléfono">' + c.telefono + '</td>' +
+          '<td data-label="Pedidos"><span class="badge-pedidos">' + c.pedidos + '</span></td>' +
+          '<td data-label="Total gastado"><strong style="font-family:Nunito,sans-serif;">S/ ' + c.totalGastado.toFixed(2) + '</strong></td>' +
+          '<td data-label="Registro">' + formatearFecha(c.fechaRegistro) + '</td>' +
+          '<td data-label="Estado">' + estadoHtml + '</td>' +
+          '<td data-label="Acciones" class="celda-acciones"><button class="btn-accion btn-ver" onclick="abrirDetalle(' + c.id + ')">Ver</button> ' +
           '<button class="btn-accion" onclick="toggleEstado(' + c.id + ',' + !c.activo + ')" style="border-color:' + (c.activo ? '#DC3545' : '#00A650') + ';color:' + (c.activo ? '#DC3545' : '#00A650') + ';">' +
           (c.activo ? 'Inactivar' : 'Activar') + '</button></td>' +
         '</tr>';

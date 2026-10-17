@@ -6,145 +6,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reportes | Libreria Brenda Admin</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
   <style>
-    .icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
-
-    .admin-layout { display: flex; min-height: 100vh; }
-
-    .sidebar {
-      width: 220px; min-width: 220px; background: #1259C3;
-      display: flex; flex-direction: column; padding: 20px 0;
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-    }
-    .sb-logo {
-      padding: 0 20px 24px; font-family: 'Nunito', sans-serif;
-      font-weight: 900; font-size: 1.05rem; color: white;
-      border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 10px;
-    }
-    .sidebar nav a {
-      display: flex; align-items: center; padding: 11px 20px;
-      color: rgba(255,255,255,0.75); text-decoration: none;
-      font-size: 0.9rem; font-weight: 700; transition: all 0.18s;
-    }
-    .sidebar nav a:hover, .sidebar nav a.active { background: rgba(255,255,255,0.15); color: white; }
-    .sidebar nav a img { filter: brightness(5); opacity: 0.8; }
-    .sidebar nav a.active img, .sidebar nav a:hover img { opacity: 1; }
-    .sidebar-sep { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 10px 20px; }
-
-    .admin-main { flex: 1; background: #EDEDED; padding: 28px; overflow: auto; }
-
-    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .topbar h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.4rem; }
-    .topbar-right { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: #555; }
-    .badge-admin { background: #1259C3; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-
+    /* ===== Estilos propios de Reportes ===== */
     .periodo-selector { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
     .periodo-btn {
-      padding: 8px 18px; border-radius: 20px; border: 1.5px solid #e0e0e0;
-      background: white; cursor: pointer; font-family: 'Lato', sans-serif;
+      padding: 8px 18px; border-radius: 20px; border: 1.5px solid var(--gris-borde);
+      background: #fff; cursor: pointer; font-family: 'Lato', sans-serif;
       font-weight: 700; font-size: 0.85rem; color: #333; transition: all 0.18s;
     }
-    .periodo-btn:hover { border-color: #1259C3; color: #1259C3; }
-    .periodo-btn.active { background: #1259C3; color: white; border-color: #1259C3; }
+    .periodo-btn:hover { border-color: var(--azul); color: var(--azul); }
+    .periodo-btn.active { background: var(--azul); color: #fff; border-color: var(--azul); }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 14px; margin-bottom: 26px; }
-    .stat-card  { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); position: relative; overflow: hidden; }
-    .stat-card img { width: 42px; height: 42px; margin-bottom: 8px; }
-    .stat-num   { font-family: 'Nunito', sans-serif; font-size: 1.9rem; font-weight: 900; color: #1259C3; }
-    .stat-label { font-size: 0.80rem; color: #666; margin-top: 2px; }
     .stat-delta { font-size: 0.76rem; font-weight: 700; margin-top: 6px; display: inline-block; padding: 2px 8px; border-radius: 10px; }
-    .delta-up   { background: #D4EDDA; color: #155724; }
+    .delta-up { background: #D4EDDA; color: #155724; }
     .delta-down { background: #F8D7DA; color: #721c24; }
 
-    .charts-grid {
-      display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 18px;
-    }
-    .charts-grid-3 {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;
-    }
-    .chart-card {
-      background: white; border-radius: 10px; padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-    }
-    .chart-card h3 {
-      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
-      margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
-    }
+    .charts-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .charts-grid-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .chart-card { background: #fff; border-radius: var(--radio); padding: 20px; box-shadow: var(--sombra); }
+    .chart-card h3 { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
     .chart-card .chart-sub { font-size: 0.78rem; color: #888; margin-bottom: 14px; }
     .chart-wrap { position: relative; height: 280px; }
     .chart-wrap.short { height: 230px; }
 
     .ranking-list { list-style: none; padding: 0; margin: 0; }
-    .ranking-item {
-      display: flex; align-items: center; gap: 12px; padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
+    .ranking-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
     .ranking-item:last-child { border-bottom: none; }
-    .ranking-pos {
-      width: 26px; height: 26px; border-radius: 50%; background: #EEF2FF; color: #1259C3;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 0.8rem; flex-shrink: 0;
-    }
+    .ranking-pos { width: 26px; height: 26px; border-radius: 50%; background: #EEF2FF; color: var(--azul); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
     .ranking-pos.top1 { background: #FFE600; color: #5a4a00; }
     .ranking-pos.top2 { background: #E0E0E0; color: #444; }
     .ranking-pos.top3 { background: #FFD8B0; color: #7a3e00; }
     .ranking-info { flex: 1; }
     .ranking-nombre { font-weight: 700; font-size: 0.87rem; }
     .ranking-meta { font-size: 0.76rem; color: #888; }
-    .ranking-valor { font-family: 'Nunito', sans-serif; font-weight: 900; color: #1259C3; font-size: 0.92rem; white-space: nowrap; }
-
-    .btn-exportar {
-      background: none; border: 1.5px solid #1259C3; color: #1259C3;
-      padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;
-      font-family: 'Lato', sans-serif; font-size: 0.85rem;
-      transition: all 0.18s; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-exportar:hover { background: #1259C3; color: white; }
-
-    @media (max-width: 900px) {
-      .charts-grid, .charts-grid-3 { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-      .admin-layout { flex-direction: column; }
-      .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 10px; }
-    }
+    .ranking-valor { font-family: 'Nunito', sans-serif; font-weight: 900; color: var(--azul); font-size: 0.92rem; white-space: nowrap; }
   </style>
 </head>
 <body>
 <div class="admin-layout">
 
   <!-- ===== SIDEBAR ===== -->
-  <aside class="sidebar">
-    <div class="sb-logo">
-      <img src="images/libro-logo.png" style="width:26px;height:26px;vertical-align:middle;filter:brightness(10);margin-right:8px;" alt="">
-      Libreria Brenda
-      <div style="font-size:0.7rem;opacity:0.6;font-weight:400;margin-top:2px;">Panel de Administracion</div>
-    </div>
-    <nav>
-      <a href="admin.jsp">
-        <img src="images/dashboard.png" class="icon-img"> Dashboard
-      </a>
-      <a href="pedidos.jsp">
-        <img src="images/pedidos.png" class="icon-img"> Pedidos
-      </a>
-      <a href="productos.jsp">
-        <img src="images/productos.png" class="icon-img"> Productos
-      </a>
-      <a href="clientes.jsp">
-        <img src="images/clientes.png" class="icon-img"> Clientes
-      </a>
-      <a href="reportes.jsp" class="active">
-        <img src="images/reportes.png" class="icon-img"> Reportes
-      </a>
-      <hr class="sidebar-sep">
-      <a href="index.jsp">
-        <img src="images/tienda.png" class="icon-img"> Ver tienda
-      </a>
-      <a href="LogoutServlet">
-        <img src="images/logout.png" class="icon-img"> Cerrar sesion
-      </a>
-    </nav>
-  </aside>
+  <%@ include file="/WEB-INF/jspf/admin-sidebar.jspf" %>
 
   <!-- ===== MAIN ===== -->
   <main class="admin-main">

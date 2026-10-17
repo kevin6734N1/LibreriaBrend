@@ -29,9 +29,6 @@ import libreria.util.ConexionBD;
 @WebServlet("/PedidoServlet")
 public class PedidoServlet extends HttpServlet {
 
-    // Cliente de respaldo cuando nadie inicio sesion (id=1, "Cliente Demo" del seed SQL)
-    private static final int CLIENTE_DEMO_ID = 1;
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,21 +49,12 @@ public class PedidoServlet extends HttpServlet {
         }
     }
 
-    /** Determina el id de cliente a partir de la sesion (o el cliente demo si nadie inicio sesion). */
-    private int obtenerClienteIdDeSesion(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        if (session != null) {
-            String email = (String) session.getAttribute("clienteEmail");
-            if (email != null) {
-                Cliente c = new ClienteDAO().buscarPorEmail(email);
-                if (c != null) return c.getId();
-            }
-        }
-        return CLIENTE_DEMO_ID;
-    }
-
-    /** Id del cliente con sesion real, o null. Los codigos promocionales no se pueden usar como "demo". */
-    private Integer obtenerClienteIdAutenticado(HttpServletRequest req) {
+    /**
+     * Id del cliente con sesion real, o null si no hay sesion valida.
+     * No existe ningun cliente de respaldo: sin sesion no se puede actuar
+     * como otra persona (ver QA-02 / hallazgo R-01).
+     */
+    private Integer obtenerClienteIdDeSesion(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session != null) {
             String email = (String) session.getAttribute("clienteEmail");
@@ -78,13 +66,17 @@ public class PedidoServlet extends HttpServlet {
         return null;
     }
 
+    private static final String ERR_SIN_SESION =
+        "Inicia sesión como cliente para consultar o registrar pedidos.";
+
     /** Valida un codigo promocional para mostrar el descuento en el carrito (no consume el codigo). */
     private void validarPromo(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("application/json;charset=UTF-8");
         PrintWriter out = res.getWriter();
 
-        Integer clienteId = obtenerClienteIdAutenticado(req);
+        Integer clienteId = obtenerClienteIdDeSesion(req);
         if (clienteId == null) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             out.print("{\"ok\":false,\"error\":\"Inicia sesión para usar un código promocional.\"}");
             return;
         }
@@ -116,8 +108,16 @@ public class PedidoServlet extends HttpServlet {
         res.setContentType("application/json;charset=UTF-8");
         PrintWriter out = res.getWriter();
 
+        Integer clienteId = obtenerClienteIdDeSesion(req);
+        if (clienteId == null) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            out.print("{\"ok\":false,\"error\":\"" + ERR_SIN_SESION + "\"}");
+            return;
+        }
+
         String idPedido = req.getParameter("idPedido");
         if (idPedido == null || idPedido.isEmpty()) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"ok\":false,\"error\":\"idPedido requerido\"}");
             return;
         }
@@ -126,12 +126,12 @@ public class PedidoServlet extends HttpServlet {
         // validar que el pedido fuera del cliente logueado ni que siguiera
         // en PENDIENTE. Ahora ambas condiciones van dentro del propio UPDATE
         // (ver PedidoDAO.cancelarPedidoCliente).
-        int clienteId = obtenerClienteIdDeSesion(req);
         boolean ok = new PedidoDAO().cancelarPedidoCliente(idPedido, clienteId);
 
         if (ok) {
             out.print("{\"ok\":true}");
         } else {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"ok\":false,\"error\":\"No se pudo cancelar: el pedido no existe, no te pertenece, o ya no esta pendiente\"}");
         }
     }
@@ -151,6 +151,16 @@ public class PedidoServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
 
         try {
+            // Sin sesion de cliente no se registra ningun pedido: antes se
+            // usaba el id del "Cliente Demo", lo que permitia comprar y
+            // cancelar a nombre de otra persona (QA-02 / R-01).
+            Integer clienteId = obtenerClienteIdDeSesion(req);
+            if (clienteId == null) {
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                out.print("{\"ok\":false,\"error\":\"" + ERR_SIN_SESION + "\"}");
+                return;
+            }
+
             String[] ids     = req.getParameterValues("item_id");
             String[] qtys    = req.getParameterValues("item_qty");
             String direccion = req.getParameter("direccion");
@@ -158,32 +168,55 @@ public class PedidoServlet extends HttpServlet {
             String codigoPromo = CodigoPromoDAO.normalizar(req.getParameter("codigoPromo"));
 
             if (ids == null || ids.length == 0) {
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"ok\":false,\"error\":\"carrito vacio\"}");
                 return;
             }
 
-            if (ids.length > 10) {
-                out.print("{\"ok\":false,\"error\":\"El carrito supera el maximo de 10 productos distintos permitido.\"}");
+            if (qtys == null || qtys.length != ids.length) {
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"ok\":false,\"error\":\"Datos invalidos en el carrito.\"}");
                 return;
             }
 
-            // Determinar cliente: si hay sesion de cliente, usar ese id; si no, el demo.
-            int clienteId = obtenerClienteIdDeSesion(req);
+            // Validar formato y cantidad de productos DISTINTOS antes de tocar la BD.
+            int[] productoIds = new int[ids.length];
+            int[] cantidades  = new int[ids.length];
+            Set<Integer> distintos = new LinkedHashSet<>();
+            try {
+                for (int i = 0; i < ids.length; i++) {
+                    productoIds[i] = Integer.parseInt(ids[i]);
+                    cantidades[i]  = Integer.parseInt(qtys[i]);
+                    if (cantidades[i] <= 0) {
+                        res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        out.print("{\"ok\":false,\"error\":\"Cantidad invalida en el carrito.\"}");
+                        return;
+                    }
+                    distintos.add(productoIds[i]);
+                }
+            } catch (NumberFormatException nfe) {
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"ok\":false,\"error\":\"Datos invalidos en el carrito.\"}");
+                return;
+            }
+
+            if (distintos.size() > 10) {
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"ok\":false,\"error\":\"El carrito supera el maximo de 10 productos distintos permitido.\"}");
+                return;
+            }
 
             // Precio REAL desde la BD: nunca se confia en los montos que mande el
             // navegador (antes item_precio podia manipularse y, con el, el descuento).
             ProductoDAO productoDAO = new ProductoDAO();
             List<Pedido.ItemPedido> items = new ArrayList<>();
             try (Connection con = ConexionBD.getConexion()) {
-                for (int i = 0; i < ids.length; i++) {
-                    int productoId = Integer.parseInt(ids[i]);
-                    int cantidad   = Integer.parseInt(qtys[i]);
-                    if (cantidad <= 0) {
-                        out.print("{\"ok\":false,\"error\":\"Cantidad invalida en el carrito.\"}");
-                        return;
-                    }
+                for (int i = 0; i < productoIds.length; i++) {
+                    int productoId = productoIds[i];
+                    int cantidad   = cantidades[i];
                     Double precioReal = productoDAO.obtenerPrecio(con, productoId);
                     if (precioReal == null) {
+                        res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         out.print("{\"ok\":false,\"error\":\"Uno de los productos ya no existe. Actualiza tu carrito.\"}");
                         return;
                     }
@@ -192,9 +225,6 @@ public class PedidoServlet extends HttpServlet {
                     p.setPrecio(precioReal);
                     items.add(new Pedido.ItemPedido(p, cantidad));
                 }
-            } catch (NumberFormatException nfe) {
-                out.print("{\"ok\":false,\"error\":\"Datos invalidos en el carrito.\"}");
-                return;
             }
 
             Pedido pedido = new Pedido();
@@ -203,12 +233,7 @@ public class PedidoServlet extends HttpServlet {
 
             // Codigo promocional: se vuelve a validar en el servidor (el navegador solo previsualiza).
             if (!codigoPromo.isEmpty()) {
-                Integer clienteAuth = obtenerClienteIdAutenticado(req);
-                if (clienteAuth == null) {
-                    out.print("{\"ok\":false,\"error\":\"Inicia sesión para usar un código promocional.\"}");
-                    return;
-                }
-                CodigoPromoDAO.Resultado r = new CodigoPromoDAO().validar(codigoPromo, clienteAuth, pedido.getSubtotal());
+                CodigoPromoDAO.Resultado r = new CodigoPromoDAO().validar(codigoPromo, clienteId, pedido.getSubtotal());
                 if (!r.ok) {
                     out.print("{\"ok\":false,\"error\":\"" + esc(r.error) + "\"}");
                     return;
@@ -231,12 +256,17 @@ public class PedidoServlet extends HttpServlet {
 
         } catch (StockInsuficienteException stockEx) {
             // No es un bug: el carrito pidio mas unidades de las que hay en stock.
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"ok\":false,\"error\":\"" + esc(stockEx.getMessage()) + "\"}");
         } catch (CodigoPromoInvalidoException promoEx) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"ok\":false,\"error\":\"" + esc(promoEx.getMessage()) + "\"}");
         } catch (Exception e) {
-            e.printStackTrace();
-            out.print("{\"ok\":false,\"error\":\"" + esc(e.getMessage()) + "\"}");
+            // El detalle tecnico queda solo en el log del servidor (QA-07):
+            // nunca se devuelven mensajes de la JVM ni nombres de variables.
+            log("Error inesperado al registrar un pedido", e);
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"ok\":false,\"error\":\"No se pudo procesar la solicitud.\"}");
         }
     }
 
@@ -280,9 +310,14 @@ public class PedidoServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        int clienteId = obtenerClienteIdDeSesion(request);
-        List<Map<String, Object>> pedidosCliente = new PedidoDAO().listarPorCliente(clienteId);
+        Integer clienteId = obtenerClienteIdDeSesion(request);
+        if (clienteId == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().print("{\"ok\":false,\"error\":\"" + ERR_SIN_SESION + "\"}");
+            return;
+        }
 
+        List<Map<String, Object>> pedidosCliente = new PedidoDAO().listarPorCliente(clienteId);
         response.getWriter().print(construirJsonPedidos(pedidosCliente));
     }
 
@@ -347,6 +382,10 @@ public class PedidoServlet extends HttpServlet {
 
     private String esc(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

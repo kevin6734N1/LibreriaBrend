@@ -1,0 +1,99 @@
+<%@ page pageEncoding="UTF-8" %>
+<%--
+  Menú único del panel administrativo.
+  - Solo se incluye desde páginas protegidas por AuthFilter (rol admin).
+  - No hay roles VENDEDOR/SUPERADMIN en este proyecto: si se agregan,
+    deben añadirse aquí y en AuthFilter, sin mostrar opciones no permitidas.
+  - Las rutas usan el context path: no fijan host, puerto ni nombre de tienda.
+  - Los iconos son SVG inline: los PNG del proyecto son JPEG sin
+    transparencia y se veían como cuadrados blancos sobre el azul.
+--%>
+<%
+    String adminPath = request.getServletPath();
+    if (adminPath == null || adminPath.isEmpty()) adminPath = request.getRequestURI();
+    String adminPage = adminPath.substring(adminPath.lastIndexOf('/') + 1);
+    String ctx = request.getContextPath();
+
+    boolean enDashboard = "admin.jsp".equals(adminPage);
+    boolean enPedidos   = "admin-pedidos.jsp".equals(adminPage);
+    boolean enProductos = "productos.jsp".equals(adminPage);
+    boolean enClientes  = "clientes.jsp".equals(adminPage);
+    boolean enReportes  = "reportes.jsp".equals(adminPage);
+%>
+<aside class="sidebar">
+  <div class="sb-logo">
+    <span class="sb-logo-brand">
+      <svg class="sb-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"></path>
+        <path d="M8 3v18"></path>
+        <path d="M12 7h4"></path>
+        <path d="M12 11h4"></path>
+      </svg>
+      Librería Brenda
+    </span>
+    <span class="sb-logo-sub">Panel de Administración</span>
+  </div>
+  <nav aria-label="Menú de administración">
+    <a href="<%= ctx %>/admin.jsp" class="<%= enDashboard ? "active" : "" %>"<%= enDashboard ? " aria-current=\"page\"" : "" %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+      </svg>
+      Dashboard
+    </a>
+    <a href="<%= ctx %>/admin-pedidos.jsp" class="<%= enPedidos ? "active" : "" %>"<%= enPedidos ? " aria-current=\"page\"" : "" %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 3h12v18H6z"></path>
+        <path d="M9 7h6"></path>
+        <path d="M9 11h6"></path>
+        <path d="M9 15h4"></path>
+      </svg>
+      Pedidos
+    </a>
+    <a href="<%= ctx %>/productos.jsp" class="<%= enProductos ? "active" : "" %>"<%= enProductos ? " aria-current=\"page\"" : "" %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7l9-4 9 4-9 4-9-4z"></path>
+        <path d="M3 7v10l9 4 9-4V7"></path>
+        <path d="M12 11v10"></path>
+      </svg>
+      Productos
+    </a>
+    <a href="<%= ctx %>/clientes.jsp" class="<%= enClientes ? "active" : "" %>"<%= enClientes ? " aria-current=\"page\"" : "" %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="9" cy="8" r="3"></circle>
+        <path d="M3 20c0-3 2.5-5 6-5s6 2 6 5"></path>
+        <path d="M16 5.5a3 3 0 0 1 0 5.8"></path>
+        <path d="M18 15c2 .6 3 2.1 3 4"></path>
+      </svg>
+      Clientes
+    </a>
+    <a href="<%= ctx %>/reportes.jsp" class="<%= enReportes ? "active" : "" %>"<%= enReportes ? " aria-current=\"page\"" : "" %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 20V10"></path>
+        <path d="M10 20V4"></path>
+        <path d="M16 20v-7"></path>
+        <path d="M22 20H2"></path>
+      </svg>
+      Reportes
+    </a>
+    <hr class="sidebar-sep">
+    <a href="<%= ctx %>/index.jsp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9l2-5h14l2 5"></path>
+        <path d="M4 9v11h16V9"></path>
+        <path d="M9 20v-6h6v6"></path>
+      </svg>
+      Ver tienda
+    </a>
+    <a href="<%= ctx %>/LogoutServlet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <path d="M16 17l5-5-5-5"></path>
+        <path d="M21 12H9"></path>
+      </svg>
+      Cerrar sesión
+    </a>
+  </nav>
+</aside>

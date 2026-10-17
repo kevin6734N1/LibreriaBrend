@@ -46,7 +46,13 @@ public class ProductoDAO {
         return lista;
     }
 
-    /** Busca el id de una categoria por nombre para los INSERT/UPDATE. */
+    /**
+     * Busca el id de una categoria por nombre para los INSERT/UPDATE.
+     *
+     * @throws CategoriaInvalidaException si la categoria no existe. Antes se
+     *         devolvia 1 como fallback, lo que asignaba la primera categoria
+     *         sin avisar (QA-06 / IT-05).
+     */
     private int obtenerCategoriaId(Connection con, String nombreCategoria) throws SQLException {
         String sql = "SELECT id FROM categorias WHERE nombre = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -55,7 +61,7 @@ public class ProductoDAO {
                 if (rs.next()) return rs.getInt("id");
             }
         }
-        return 1; // fallback a primera categoria si no encuentra
+        throw new CategoriaInvalidaException(nombreCategoria);
     }
 
     /** Inserta un producto nuevo. Devuelve el id generado o -1 si falla. */

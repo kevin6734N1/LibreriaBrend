@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
+import libreria.dao.CategoriaInvalidaException;
 import libreria.dao.ProductoDAO;
 import libreria.models.Producto;
 import libreria.util.ValidadorProducto;
@@ -78,40 +79,76 @@ public class ProductoServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         if ("crear".equals(accion)) {
-            Producto p = leerProductoDeRequest(request);
+            Producto p;
+            try {
+                p = leerProductoDeRequest(request);
+            } catch (IllegalArgumentException formato) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"" + esc(formato.getMessage()) + "\"}");
+                return;
+            }
             List<String> errores = ValidadorProducto.validar(p);
             if (!errores.isEmpty()) {
                 response.setStatus(400);
                 out.print("{\"ok\":false,\"error\":\"" + esc(String.join(" | ", errores)) + "\"}");
                 return;
             }
-            int nuevoId = dao.crear(p);
-            if (nuevoId > 0) {
-                out.print("{\"ok\":true,\"id\":" + nuevoId + "}");
-            } else {
-                out.print("{\"ok\":false,\"error\":\"No se pudo crear el producto.\"}");
+            try {
+                int nuevoId = dao.crear(p);
+                if (nuevoId > 0) {
+                    out.print("{\"ok\":true,\"id\":" + nuevoId + "}");
+                } else {
+                    response.setStatus(500);
+                    out.print("{\"ok\":false,\"error\":\"No se pudo crear el producto.\"}");
+                }
+            } catch (CategoriaInvalidaException categoria) {
+                // No se asigna ninguna categoria "de respaldo" ni se escribe nada.
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"" + esc(categoria.getMessage()) + "\"}");
             }
 
         } else if ("editar".equals(accion)) {
-            Producto p = leerProductoDeRequest(request);
+            Producto p;
+            try {
+                p = leerProductoDeRequest(request);
+            } catch (IllegalArgumentException formato) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"" + esc(formato.getMessage()) + "\"}");
+                return;
+            }
             List<String> errores = ValidadorProducto.validar(p);
             if (!errores.isEmpty()) {
                 response.setStatus(400);
                 out.print("{\"ok\":false,\"error\":\"" + esc(String.join(" | ", errores)) + "\"}");
                 return;
             }
-            p.setId(Integer.parseInt(request.getParameter("id")));
-            boolean ok = dao.editar(p);
-            out.print("{\"ok\":" + ok + "}");
+            try {
+                p.setId(Integer.parseInt(request.getParameter("id")));
+                boolean ok = dao.editar(p);
+                if (ok) {
+                    out.print("{\"ok\":true}");
+                } else {
+                    response.setStatus(404);
+                    out.print("{\"ok\":false,\"error\":\"El producto no existe o no se pudo actualizar.\"}");
+                }
+            } catch (NumberFormatException idInvalido) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"El id del producto es inválido.\"}");
+            } catch (CategoriaInvalidaException categoria) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"" + esc(categoria.getMessage()) + "\"}");
+            }
 
-        } else if ("toggleActivo".equals(accion)) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            boolean ok = dao.toggleActivo(id);
-            out.print("{\"ok\":" + ok + "}");
-
-        } else if ("eliminar".equals(accion)) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            boolean ok = dao.eliminar(id);
+        } else if ("toggleActivo".equals(accion) || "eliminar".equals(accion)) {
+            int id;
+            try {
+                id = Integer.parseInt(request.getParameter("id"));
+            } catch (NumberFormatException idInvalido) {
+                response.setStatus(400);
+                out.print("{\"ok\":false,\"error\":\"El id del producto es inválido.\"}");
+                return;
+            }
+            boolean ok = "toggleActivo".equals(accion) ? dao.toggleActivo(id) : dao.eliminar(id);
             out.print("{\"ok\":" + ok + "}");
 
         } else {
@@ -123,6 +160,12 @@ public class ProductoServlet extends HttpServlet {
     // ================================================================
     //  HELPERS
     // ================================================================
+    /**
+     * Lee el formulario. Un valor no numerico se rechaza con
+     * IllegalArgumentException (HTTP 400) en vez de convertirse a 0: para el
+     * stock, 0 es un valor VALIDO, asi que "stock=abc" no puede terminar
+     * guardado como stock 0 (QA-10 / IT-05).
+     */
     private Producto leerProductoDeRequest(HttpServletRequest req) {
         Producto p = new Producto();
         p.setNombre(req.getParameter("nombre"));
@@ -132,17 +175,35 @@ public class ProductoServlet extends HttpServlet {
                     ? req.getParameter("imagen") : "images/productos.png");
         p.setEtiqueta(req.getParameter("etiqueta"));
 
-        try { p.setPrecio(Double.parseDouble(req.getParameter("precio"))); }
-        catch (NumberFormatException e) { p.setPrecio(0); }
+        String precioStr = req.getParameter("precio");
+        if (precioStr == null || precioStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("El precio es obligatorio.");
+        }
+        try {
+            p.setPrecio(Double.parseDouble(precioStr.trim()));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El precio debe ser un número válido.");
+        }
 
-        try { p.setStock(Integer.parseInt(req.getParameter("stock"))); }
-        catch (NumberFormatException e) { p.setStock(0); }
+        String stockStr = req.getParameter("stock");
+        if (stockStr == null || stockStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("El stock es obligatorio.");
+        }
+        try {
+            p.setStock(Integer.parseInt(stockStr.trim()));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El stock debe ser un número entero válido.");
+        }
 
         return p;
     }
 
     private String esc(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

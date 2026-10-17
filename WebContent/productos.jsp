@@ -6,224 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Productos | Libreria Brenda Admin</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
   <style>
-    .icon-img { width: 24px; height: 24px; vertical-align: middle; margin-right: 6px; }
-
-    /* ===== LAYOUT ADMIN ===== */
-    .admin-layout { display: flex; min-height: 100vh; }
-
-    .sidebar {
-      width: 220px; min-width: 220px; background: #1259C3;
-      display: flex; flex-direction: column; padding: 20px 0;
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-    }
-    .sb-logo {
-      padding: 0 20px 24px; font-family: 'Nunito', sans-serif;
-      font-weight: 900; font-size: 1.05rem; color: white;
-      border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 10px;
-    }
-    .sidebar nav a {
-      display: flex; align-items: center; padding: 11px 20px;
-      color: rgba(255,255,255,0.75); text-decoration: none;
-      font-size: 0.9rem; font-weight: 700; transition: all 0.18s;
-    }
-    .sidebar nav a:hover, .sidebar nav a.active {
-      background: rgba(255,255,255,0.15); color: white;
-    }
-    .sidebar nav a img { filter: brightness(5); opacity: 0.8; }
-    .sidebar nav a.active img, .sidebar nav a:hover img { opacity: 1; }
-    .sidebar-sep { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 10px 20px; }
-
-    .admin-main { flex: 1; background: #EDEDED; padding: 28px; overflow: auto; }
-
-    /* ===== TOPBAR ===== */
-    .topbar {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 24px;
-    }
-    .topbar h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.4rem; }
-    .topbar-right { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: #555; }
-    .badge-admin {
-      background: #1259C3; color: white; padding: 4px 10px;
-      border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-    }
-
-    /* ===== STATS ===== */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 24px; }
-    .stat-card  { background: white; border-radius: 8px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
-    .stat-card img { width: 40px; height: 40px; margin-bottom: 8px; }
-    .stat-num   { font-family: 'Nunito', sans-serif; font-size: 1.9rem; font-weight: 900; color: #1259C3; }
-    .stat-label { font-size: 0.80rem; color: #666; margin-top: 2px; }
-
-    /* ===== BARRA DE HERRAMIENTAS ===== */
-    .toolbar {
-      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-      background: white; border-radius: 8px; padding: 14px 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 18px;
-    }
-    .toolbar input[type=text] {
-      flex: 1; min-width: 180px; padding: 9px 14px; border: 1.5px solid #e0e0e0;
-      border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 0.9rem; outline: none;
-    }
-    .toolbar input[type=text]:focus { border-color: #1259C3; }
-    .toolbar select {
-      padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px;
-      font-family: 'Lato', sans-serif; font-size: 0.88rem; outline: none; background: white;
-    }
-    .btn-nuevo {
-      background: #1259C3; color: white; border: none; padding: 10px 20px;
-      border-radius: 8px; font-weight: 700; cursor: pointer;
-      font-family: 'Lato', sans-serif; font-size: 0.9rem; white-space: nowrap;
-      transition: background 0.18s; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-nuevo:hover { background: #0a3e8f; }
-
-    /* ===== TABLA ===== */
-    .admin-table-wrap { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
-    .admin-table-wrap table { width: 100%; border-collapse: collapse; }
-    .admin-table-wrap th {
-      background: #F5F5F5; padding: 12px 16px; text-align: left;
-      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px; color: #666; white-space: nowrap;
-    }
-    .admin-table-wrap td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid #F0F0F0; vertical-align: middle; }
-    .admin-table-wrap tr:last-child td { border-bottom: none; }
-    .admin-table-wrap tr:hover td { background: rgba(18,89,195,0.03); }
-
-    .prod-thumb { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; background: #F5F5F5; padding: 3px; }
+    /* ===== Estilos propios de Productos ===== */
+    .prod-thumb { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; background: var(--gris-card); padding: 3px; }
     .prod-nombre { font-weight: 700; font-size: 0.9rem; }
-    .prod-desc   { font-size: 0.78rem; color: #888; margin-top: 2px; }
-
-    .badge-cat {
-      padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;
-      background: #EEF2FF; color: #1259C3;
-    }
-    .badge-activo    { background: #D4EDDA; color: #155724; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-    .badge-inactivo  { background: #F8D7DA; color: #721c24; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-    .badge-stock-ok  { color: #00A650; font-weight: 700; }
-    .badge-stock-low { color: #FFC107; font-weight: 700; }
-    .badge-stock-out { color: #dc3545; font-weight: 700; }
-
-    .btn-accion {
-      border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer;
-      font-size: 0.78rem; font-weight: 700; font-family: 'Lato', sans-serif; transition: all 0.15s;
-    }
-    .btn-editar  { background: #EEF2FF; color: #1259C3; border: 1px solid #1259C3; }
-    .btn-editar:hover  { background: #1259C3; color: white; }
-    .btn-toggle  { background: #FFF3CD; color: #856404; border: 1px solid #FFC107; }
-    .btn-toggle:hover  { background: #FFC107; color: white; }
-    .btn-eliminar-tbl { background: #F8D7DA; color: #721c24; border: 1px solid #dc3545; }
-    .btn-eliminar-tbl:hover { background: #dc3545; color: white; }
-
-    .sin-resultados {
-      text-align: center; padding: 50px 20px; color: #999;
-      font-size: 0.9rem;
-    }
-    .sin-resultados img { width: 60px; opacity: 0.4; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-
-    /* ===== MODAL ===== */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 999;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: white; border-radius: 12px; padding: 28px;
-      width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.25); animation: fadeUp 0.2s ease;
-    }
-    @keyframes fadeUp {
-      from { opacity:0; transform:translateY(20px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-    .modal-header h3 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.2rem; }
-    .btn-cerrar { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #666; line-height: 1; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 0.83rem; font-weight: 700; margin-bottom: 6px; color: #444; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px;
-      font-family: 'Lato', sans-serif; font-size: 0.9rem; outline: none;
-      transition: border-color 0.18s; box-sizing: border-box;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1259C3; }
-    .form-group textarea { resize: vertical; min-height: 70px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-    .preview-img {
-      width: 80px; height: 80px; object-fit: contain;
-      border-radius: 8px; background: #F5F5F5; padding: 6px;
-      border: 1.5px dashed #e0e0e0; display: block; margin-bottom: 8px;
-    }
-
-    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 18px; border-top: 1px solid #e0e0e0; }
-    .btn-guardar {
-      background: #1259C3; color: white; border: none; padding: 11px 26px;
-      border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.9rem;
-    }
-    .btn-guardar:hover { background: #0a3e8f; }
-    .btn-cancelar-modal {
-      background: none; border: 1.5px solid #e0e0e0; color: #555; padding: 11px 20px;
-      border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.9rem;
-    }
-    .btn-cancelar-modal:hover { border-color: #999; }
-
-    .alert-toast {
-      position: fixed; bottom: 24px; right: 24px; padding: 14px 22px;
-      border-radius: 10px; font-weight: 700; font-size: 0.9rem; z-index: 9999;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s;
-      pointer-events: none;
-    }
-    .alert-toast.show { opacity: 1; }
-    .toast-ok  { background: #D4EDDA; color: #155724; }
-    .toast-err { background: #F8D7DA; color: #721c24; }
-
-    .contador-tabla { font-size: 0.82rem; color: #666; margin-left: auto; }
-
-    @media (max-width: 768px) {
-      .admin-layout { flex-direction: column; }
-      .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 10px; }
-      .form-row { grid-template-columns: 1fr; }
-    }
+    .prod-desc { font-size: 0.78rem; color: #888; margin-top: 2px; }
   </style>
 </head>
 <body>
 <div class="admin-layout">
 
   <!-- ===== SIDEBAR ===== -->
-  <aside class="sidebar">
-    <div class="sb-logo">
-      <img src="images/libro-logo.png" style="width:26px;height:26px;vertical-align:middle;filter:brightness(10);margin-right:8px;" alt="">
-      Libreria Brenda
-      <div style="font-size:0.7rem;opacity:0.6;font-weight:400;margin-top:2px;">Panel de Administracion</div>
-    </div>
-    <nav>
-      <a href="admin.jsp">
-        <img src="images/dashboard.png" class="icon-img"> Dashboard
-      </a>
-      <a href="admin.jsp">
-        <img src="images/pedidos.png" class="icon-img"> Pedidos
-      </a>
-      <a href="productos.jsp" class="active">
-        <img src="images/productos.png" class="icon-img"> Productos
-      </a>
-      <a href="clientes.jsp">
-        <img src="images/clientes.png" class="icon-img"> Clientes
-      </a>
-      <a href="reportes.jsp">
-        <img src="images/reportes.png" class="icon-img"> Reportes
-      </a>
-      <hr class="sidebar-sep">
-      <a href="index.jsp">
-        <img src="images/tienda.png" class="icon-img"> Ver tienda
-      </a>
-      <a href="LogoutServlet">
-        <img src="images/logout.png" class="icon-img"> Cerrar sesion
-      </a>
-    </nav>
-  </aside>
+  <%@ include file="/WEB-INF/jspf/admin-sidebar.jspf" %>
 
   <!-- ===== MAIN ===== -->
   <main class="admin-main">
@@ -289,7 +84,7 @@
     </div>
 
     <!-- Tabla -->
-    <div class="admin-table-wrap">
+    <div class="admin-table-wrap tabla-cards">
       <table>
         <thead>
           <tr>
@@ -319,10 +114,23 @@
       <button class="btn-cerrar" onclick="cerrarModal()">&#10005;</button>
     </div>
 
-    <!-- Preview imagen -->
-    <div style="text-align:center;margin-bottom:16px;">
-      <img id="preview-img" class="preview-img" src="images/productos.png" alt="Preview">
-      <div style="font-size:0.78rem;color:#888;">Vista previa de imagen</div>
+    <!-- Imagen: arrastrar y soltar o elegir desde el equipo -->
+    <div class="form-group">
+      <label for="f-archivo">Imagen del producto</label>
+      <div class="dropzone" id="dropzone" role="button" tabindex="0"
+           aria-label="Arrastra una imagen o pulsa para elegirla"
+           aria-describedby="dropzone-ayuda">
+        <img id="preview-img" class="preview-img" src="images/productos.png" alt="Vista previa de la imagen">
+        <div class="dropzone-texto">
+          <strong>Arrastra una imagen aquí</strong>
+          <span>o haz clic para elegirla desde tu equipo</span>
+          <span class="dropzone-hint" id="dropzone-ayuda">JPG, PNG, GIF o WEBP &middot; máximo 3 MB</span>
+        </div>
+      </div>
+      <input type="file" id="f-archivo" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
+      <p class="dropzone-estado" id="estado-imagen" role="status" aria-live="polite"></p>
+      <label class="label-ruta" for="f-imagen">Ruta guardada en el proyecto</label>
+      <input type="text" id="f-imagen" class="input-ruta" placeholder="images/productos/mi-imagen.png" oninput="actualizarPreview()">
     </div>
 
     <!-- Formulario -->
@@ -358,20 +166,16 @@
         <input type="number" id="f-stock" placeholder="0" min="0" oninput="validarCampo('f-stock')">
       </div>
       <div class="form-group">
-        <label>Ruta de imagen</label>
-        <input type="text" id="f-imagen" placeholder="images/productos/nombre.png" oninput="actualizarPreview()">
+        <label>Etiqueta especial</label>
+        <select id="f-etiqueta">
+          <option value="">Sin etiqueta</option>
+          <option value="NUEVO">NUEVO</option>
+          <option value="OFERTA">OFERTA</option>
+          <option value="HOT">HOT</option>
+          <option value="30% OFF">30% OFF</option>
+          <option value="15% OFF">15% OFF</option>
+        </select>
       </div>
-    </div>
-    <div class="form-group">
-      <label>Etiqueta especial</label>
-      <select id="f-etiqueta">
-        <option value="">Sin etiqueta</option>
-        <option value="NUEVO">NUEVO</option>
-        <option value="OFERTA">OFERTA</option>
-        <option value="HOT">HOT</option>
-        <option value="30% OFF">30% OFF</option>
-        <option value="15% OFF">15% OFF</option>
-      </select>
     </div>
 
     <div id="msg-modal" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.85rem;font-weight:600;margin-bottom:8px;"></div>
@@ -379,7 +183,9 @@
     <div class="modal-footer">
       <button class="btn-cancelar-modal" onclick="cerrarModal()">Cancelar</button>
       <button class="btn-guardar" onclick="guardarProducto()">
-        <img src="images/check.png" style="width:16px;height:16px;vertical-align:middle;filter:brightness(10);margin-right:4px;" alt="">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 6L9 17l-5-5"></path>
+        </svg>
         Guardar producto
       </button>
     </div>
@@ -451,7 +257,7 @@
     contador.textContent = lista.length + ' producto' + (lista.length !== 1 ? 's' : '');
 
     if (lista.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="sin-resultados">' +
+      tbody.innerHTML = '<tr><td colspan="7" class="celda-vacia"><div class="sin-resultados">' +
         '<img src="images/empty.png" alt=""><br>No se encontraron productos</div></td></tr>';
       return;
     }
@@ -473,17 +279,17 @@
 
       html +=
         '<tr>' +
-          '<td><img src="' + p.imagen + '" class="prod-thumb" alt="' + p.nombre + '" onerror="this.src=\'images/productos.png\'"></td>' +
-          '<td>' +
+          '<td data-label="Imagen"><img src="' + p.imagen + '" class="prod-thumb" alt="' + p.nombre + '" onerror="this.src=\'images/productos.png\'"></td>' +
+          '<td data-label="Producto">' +
             '<div class="prod-nombre">' + p.nombre + '</div>' +
             '<div class="prod-desc">' + (p.descripcion || '') + '</div>' +
             (p.etiqueta ? '<span style="background:#FFE600;color:#333;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;margin-top:4px;display:inline-block;">' + p.etiqueta + '</span>' : '') +
           '</td>' +
-          '<td><span class="badge-cat">' + p.categoria + '</span></td>' +
-          '<td><strong style="font-family:Nunito,sans-serif;font-size:1rem;">S/ ' + p.precio.toFixed(2) + '</strong></td>' +
-          '<td>' + stockHtml + '</td>' +
-          '<td>' + estadoHtml + '</td>' +
-          '<td>' +
+          '<td data-label="Categoría"><span class="badge-cat">' + p.categoria + '</span></td>' +
+          '<td data-label="Precio"><strong style="font-family:Nunito,sans-serif;font-size:1rem;">S/ ' + p.precio.toFixed(2) + '</strong></td>' +
+          '<td data-label="Stock">' + stockHtml + '</td>' +
+          '<td data-label="Estado">' + estadoHtml + '</td>' +
+          '<td data-label="Acciones" class="celda-acciones">' +
             '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
               '<button class="btn-accion btn-editar" onclick="abrirModalEditar(' + p.id + ')">&#9998; Editar</button>' +
               '<button class="btn-accion btn-toggle" onclick="toggleActivo(' + p.id + ')">' + toggleTxt + '</button>' +
@@ -521,14 +327,145 @@
     document.getElementById('f-imagen').value      = p.imagen;
     document.getElementById('f-etiqueta').value    = p.etiqueta || '';
     document.getElementById('preview-img').src     = p.imagen || 'images/productos.png';
+    document.getElementById('estado-imagen').textContent = '';
     document.getElementById('msg-modal').style.display = 'none';
     document.getElementById('modal-prod').classList.add('open');
+  }
+
+  // ================================================================
+  //  SUBIDA DE IMAGEN (arrastrar y soltar / elegir archivo)
+  //  El archivo NO se manda junto al producto: se sube primero a
+  //  ImagenProductoServlet, que lo guarda en images/productos y devuelve
+  //  la ruta. El formulario solo envia esa ruta, igual que antes.
+  // ================================================================
+  var subiendoImagen = false;
+  var TIPOS_IMAGEN  = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  var MAX_IMAGEN_MB = 3;
+
+  function iniciarDropzone() {
+    var zona  = document.getElementById('dropzone');
+    var input = document.getElementById('f-archivo');
+    if (!zona || !input) return;
+
+    zona.addEventListener('click', function() { input.click(); });
+    zona.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        input.click();
+      }
+    });
+    input.addEventListener('change', function() {
+      if (input.files && input.files[0]) subirImagen(input.files[0]);
+    });
+
+    // Evita que el navegador abra la imagen si se suelta FUERA de la zona,
+    // sin romper otros elementos que acepten archivos.
+    ['dragover', 'drop'].forEach(function(ev) {
+      document.addEventListener(ev, function(e) {
+        if (!zona.contains(e.target)) e.preventDefault();
+      });
+    });
+
+    ['dragenter', 'dragover'].forEach(function(ev) {
+      zona.addEventListener(ev, function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        zona.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'dragend'].forEach(function(ev) {
+      zona.addEventListener(ev, function(e) {
+        if (e.target === zona) zona.classList.remove('dragover');
+      });
+    });
+    zona.addEventListener('drop', function(e) {
+      e.preventDefault();
+      zona.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        subirImagen(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  function subirImagen(file) {
+    var preview = document.getElementById('preview-img');
+    var ruta    = document.getElementById('f-imagen');
+    var input   = document.getElementById('f-archivo');
+    var anterior = ruta.value;
+
+    if (TIPOS_IMAGEN.indexOf(file.type) < 0) {
+      mostrarEstadoImagen('Formato no permitido. Usa JPG, PNG, GIF o WEBP.', 'error');
+      input.value = '';
+      return;
+    }
+    if (file.size > MAX_IMAGEN_MB * 1024 * 1024) {
+      mostrarEstadoImagen('La imagen pesa demasiado (máximo ' + MAX_IMAGEN_MB + ' MB).', 'error');
+      input.value = '';
+      return;
+    }
+
+    // Vista previa inmediata mientras sube
+    preview.src = URL.createObjectURL(file);
+    subiendoImagen = true;
+    actualizarBotonGuardar();
+    mostrarEstadoImagen('Subiendo ' + file.name + '…', 'subiendo');
+
+    var datos = new FormData();
+    datos.append('archivo', file);
+
+    fetch('ImagenProductoServlet', { method: 'POST', body: datos })
+      .then(function(r) {
+        if (r.status === 401) {
+          window.location.href = 'login.jsp?error=sesion';
+          return null;
+        }
+        return r.json();
+      })
+      .then(function(data) {
+        if (!data) return;
+        if (!data.ok) {
+          ruta.value = anterior;
+          preview.src = anterior || 'images/productos.png';
+          mostrarEstadoImagen(data.error || 'No se pudo subir la imagen.', 'error');
+          return;
+        }
+        ruta.value = data.imagen;
+        preview.src = data.imagen;
+        mostrarEstadoImagen('Guardada en ' + data.imagen, 'ok');
+        mostrarToast('Imagen subida correctamente', 'ok');
+      })
+      .catch(function() {
+        ruta.value = anterior;
+        preview.src = anterior || 'images/productos.png';
+        mostrarEstadoImagen('Error de conexión al subir la imagen.', 'error');
+      })
+      .then(function() {
+        subiendoImagen = false;
+        actualizarBotonGuardar();
+        input.value = '';
+      });
+  }
+
+  function mostrarEstadoImagen(txt, tipo) {
+    var el = document.getElementById('estado-imagen');
+    el.textContent = txt || '';
+    el.className = 'dropzone-estado' + (tipo ? ' ' + tipo : '');
+  }
+
+  function actualizarBotonGuardar() {
+    var btn = document.querySelector('.modal-footer .btn-guardar');
+    if (btn) btn.disabled = subiendoImagen;
   }
 
   // ================================================================
   //  GUARDAR (nuevo o editar)
   // ================================================================
   function guardarProducto() {
+    if (subiendoImagen) {
+      mostrarMsgModal('Espera a que termine la subida de la imagen.', 'error');
+      return;
+    }
+
     var nombre    = document.getElementById('f-nombre').value.trim();
     var desc      = document.getElementById('f-descripcion').value.trim();
     var categoria = document.getElementById('f-categoria').value;
@@ -659,6 +596,8 @@
     document.getElementById('f-imagen').value      = '';
     document.getElementById('f-etiqueta').value    = '';
     document.getElementById('preview-img').src     = 'images/productos.png';
+    document.getElementById('estado-imagen').textContent = '';
+    document.getElementById('f-archivo').value     = '';
     document.getElementById('msg-modal').style.display = 'none';
   }
 
@@ -696,8 +635,9 @@
   }
 
 //================================================================
-//INIT - CARGAR DESDE MYSQL
+//INIT - DROPZONE + CARGAR DESDE MYSQL
 //================================================================
+iniciarDropzone();
 
 fetch('ProductoServlet')
    .then(function(response) {

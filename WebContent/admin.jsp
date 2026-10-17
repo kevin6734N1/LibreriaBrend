@@ -36,57 +36,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Admin | Libreria Brenda</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .icon-img      { width: 24px; height: 24px; vertical-align: middle; margin-right: 8px; }
-    .stat-icon-img { width: 48px; height: 48px; margin-bottom: 8px; }
-  </style>
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
 
 <div class="admin-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-logo">
-      <img src="images/libro-logo.png" class="icon-img" style="width:28px;height:28px;" alt="Logo">
-      Libreria Brenda<br>
-      <span style="font-size:0.7rem;opacity:0.6;font-weight:400;">Panel de Administracion</span>
-    </div>
-    <nav>
-      <a href="admin.jsp" class="active">
-        <img src="images/dashboard.png" class="icon-img" alt="Dashboard"> Dashboard
-      </a>
-      <a href="admin-pedidos.jsp">
-        <img src="images/pedidos.png" class="icon-img" alt="Pedidos"> Pedidos
-      </a>
-      <a href="productos.jsp">
-        <img src="images/productos.png" class="icon-img" alt="Productos"> Productos
-      </a>
-      <a href="clientes.jsp">
-        <img src="images/clientes.png" class="icon-img" alt="Clientes"> Clientes
-      </a>
-      <a href="reportes.jsp">
-        <img src="images/reportes.png" class="icon-img" alt="Reportes"> Reportes
-      </a>
-      <a href="index.jsp" style="margin-top:30px;border-top:1px solid rgba(255,255,255,0.1);">
-        <img src="images/tienda.png" class="icon-img" alt="Tienda"> Ver tienda
-      </a>
-      <a href="LogoutServlet">
-        <img src="images/logout.png" class="icon-img" alt="Cerrar sesion"> Cerrar sesion
-      </a>
-    </nav>
-  </aside>
+  <%@ include file="/WEB-INF/jspf/admin-sidebar.jspf" %>
 
   <!-- MAIN -->
   <main class="admin-main">
 
     <!-- TOP BAR -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:1.4rem;">Dashboard</h2>
-      <div style="display:flex;align-items:center;gap:10px;font-size:0.88rem;color:#555;">
+    <div class="topbar">
+      <h2>
+        <img src="images/dashboard.png" alt="">
+        Dashboard
+      </h2>
+      <div class="topbar-right">
         <img src="images/usuario.png" style="width:28px;height:28px;" alt="">
         <span><%= session.getAttribute("adminNombre") != null ? session.getAttribute("adminNombre") : "Admin" %></span>
-        <span style="background:#1259C3;color:white;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;">ADMIN</span>
+        <span class="badge-admin">ADMIN</span>
       </div>
     </div>
 
@@ -115,7 +86,7 @@
     </div>
 
     <!-- PEDIDOS RECIENTES desde la BD -->
-    <h3 style="font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:12px;">Pedidos recientes</h3>
+    <h3 class="seccion-titulo">Pedidos recientes</h3>
     <div class="admin-table-wrap">
       <table>
         <thead>
@@ -160,12 +131,7 @@
                 </span>
               </td>
               <td>
-                <a href="admin-pedidos.jsp"
-                   style="background:none;border:1px solid #1259C3;color:#1259C3;padding:4px 10px;
-                          border-radius:6px;font-size:0.8rem;font-family:Lato,sans-serif;
-                          font-weight:700;text-decoration:none;">
-                  Ver pedidos
-                </a>
+                <a href="<%= request.getContextPath() %>/admin-pedidos.jsp" class="btn-accion btn-ver">Ver pedidos</a>
               </td>
             </tr>
           <% } } %>

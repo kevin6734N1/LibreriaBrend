@@ -1,4 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%-- El carrito y el checkout son del comprador: la sesion de administrador
+     no puede cerrar pedidos, asi que se le devuelve a su panel. --%>
+<% if ("admin".equals(session.getAttribute("rol"))) {
+     response.sendRedirect(request.getContextPath() + "/admin.jsp");
+     return;
+   } %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -298,6 +304,11 @@
             alert('¡Pedido realizado con éxito!\n\nNúmero: ' + data.id);
             window.location.href = 'pedidos.jsp';
           } else {
+            if (data.requiereLogin) {
+              alert('Inicia sesión para registrar tu pedido. Te llevaremos al inicio de sesión.');
+              window.location.href = 'login.jsp';
+              return;
+            }
             alert('No se pudo completar el pedido:\n' + (data.error || 'Error desconocido.'));
             if (btn) { btn.disabled = false; btn.innerHTML = btnHtmlOriginal; }
           }
@@ -329,7 +340,13 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()
-      }).then(r => r.json());
+      }).then(r => {
+        // Sin sesion el servidor responde 401: no se registra nada.
+        if (r.status === 401) {
+          return { ok: false, requiereLogin: true, error: 'Inicia sesión para registrar tu pedido.' };
+        }
+        return r.json();
+      });
     }
   </script>
 <script src="js/accesibilidad.js"></script>

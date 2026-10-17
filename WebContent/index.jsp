@@ -87,17 +87,26 @@
             <a href="LogoutServlet">Cerrar sesión</a>
           </div>
         </div>
+      <% } else if ("admin".equals(rolSesion)) { %>
+        <%-- Un administrador no es un comprador: se le lleva a su panel en
+             lugar de ofrecerle "Ingresar" o el carrito de compras. --%>
+        <a href="admin.jsp">
+          <img src="images/dashboard.png" class="icon-img" alt=""> Panel admin
+        </a>
+        <a href="LogoutServlet">Cerrar sesión</a>
       <% } else { %>
         <a href="login.jsp">
           <img src="images/usuario.png" class="icon-img" alt="Cuenta"> Ingresar
         </a>
         <a href="registro.jsp">Registrarse</a>
       <% } %>
+      <% if (!"admin".equals(rolSesion)) { %>
       <a href="carrito.jsp" class="btn-carrito" style="position:relative">
         <img src="images/carrito.png" class="icon-img" alt=""> 
         Carrito
         <span class="badge" id="carrito-badge" role="status" aria-live="polite" aria-label="Productos en el carrito">0</span>
       </a>
+      <% } %>
     </div>
   </nav>
 
