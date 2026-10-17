@@ -1,9 +1,9 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.20-11.8.9-MariaDB, for Win64 (AMD64)
+-- MariaDB dump 10.20-12.3.3-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: libreria_brenda
 -- ------------------------------------------------------
--- Server version	11.8.8-MariaDB
+-- Server version	12.3.3-MariaDB-ubu2404
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -15,6 +15,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
+
+--
+-- Current Database: `libreria_brenda`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `libreria_brenda` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci */;
+
+USE `libreria_brenda`;
 
 --
 -- Table structure for table `administradores`
@@ -508,6 +516,12 @@ SET character_set_client = @saved_cs_client;
 --
 
 --
+-- Current Database: `libreria_brenda`
+--
+
+USE `libreria_brenda`;
+
+--
 -- Final view structure for view `vista_clientes_resumen`
 --
 
@@ -570,4 +584,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-10-01 16:58:43
+-- Dump completed on 2026-10-17  8:38:19
