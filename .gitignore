@@ -24,6 +24,8 @@ hs_err_pid*.log
 !docs/auditoria/evidencias/logs/**
 
 # --- Configuración local con credenciales ---
+# La plantilla db.properties.example SÍ se versiona; las credenciales reales no.
+WebContent/WEB-INF/db.properties
 *.properties
 !docs/**/*.properties
 *.env

@@ -1,0 +1,21 @@
+# ============================================================
+#  Configuracion local de la base de datos - Libreria Brenda
+#
+#  Copia este archivo como db.properties (misma carpeta) y ajusta
+#  los valores de tu entorno. db.properties NO se versiona.
+#
+#  Prioridad: propiedad del sistema (-DDB_NAME=...) > variable de
+#  entorno (DB_NAME) > este archivo > valor por defecto.
+#
+#  DB_URL tiene prioridad sobre DB_HOST/DB_PORT/DB_NAME y sirve para
+#  conexiones no estandar. Ejemplo:
+#  DB_URL=jdbc:mysql://127.0.0.1:3306/libreria_brenda?useSSL=false&serverTimezone=America/Lima
+# ============================================================
+
+DB_NAME=libreria_brenda
+DB_USER=root
+DB_PASSWORD=cambia_esta_clave
+
+# Opcionales
+# DB_HOST=localhost
+# DB_PORT=3306

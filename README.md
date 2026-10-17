@@ -20,7 +20,7 @@ Capas principales: `src/libreria/models` (modelo), `src/libreria/dao` (acceso a 
 - JDK 21.
 - Apache Tomcat 11.
 - MariaDB 11 o MySQL 8 en `localhost:3306`.
-- Las librerías de `WebContent/WEB-INF/lib/` (no hace falta descargar nada más).
+- Las librerías de `WebContent/WEB-INF/lib/` y las APIs de Tomcat de `lib/tomcat-11/` (no hace falta descargar nada más para compilar).
 
 ## Puesta en marcha local
 
@@ -39,9 +39,9 @@ mysql -u root -p < database/fixtures_test.sql
 
 ### 2. Configurar la conexión sin editar código
 
-`ConexionBD` lee la configuración de variables de entorno o de propiedades del sistema. No hay usuario ni contraseña embebidos en el código.
+`ConexionBD` resuelve la conexión en este orden: **propiedad del sistema** (`-DDB_NAME=...`) → **variable de entorno** → **`WebContent/WEB-INF/db.properties`** → valor por defecto. No hay usuario ni contraseña embebidos en el código.
 
-| Variable | Por defecto | Uso |
+| Clave | Por defecto | Uso |
 |---|---|---|
 | `DB_URL` | — | URL JDBC completa; si existe, ignora las demás |
 | `DB_HOST` | `localhost` | Host del motor |
@@ -50,7 +50,16 @@ mysql -u root -p < database/fixtures_test.sql
 | `DB_USER` | `root` | Usuario |
 | `DB_PASSWORD` | vacío | Contraseña |
 
-Ejemplo (Linux/macOS):
+**Desde el IDE (VS Code/Eclipse) lo más simple es el archivo**, porque no hay que configurar variables en el servidor:
+
+```bash
+cp WebContent/WEB-INF/db.properties.example WebContent/WEB-INF/db.properties
+# editar DB_USER / DB_PASSWORD / DB_NAME
+```
+
+`db.properties` está en `.gitignore`: cada entorno tiene el suyo y no se sube al repositorio. Si prefieres tenerlo fuera del proyecto, define `DB_CONFIG` con su ruta absoluta.
+
+Ejemplo con variables de entorno (Linux/macOS):
 
 ```bash
 export DB_NAME=libreria_brenda_test
@@ -66,13 +75,15 @@ $env:DB_NAME="libreria_brenda_test"; $env:DB_USER="root"; $env:DB_PASSWORD="tu_c
 
 ### 3. Compilar y desplegar en Tomcat
 
-Con Eclipse: importar el proyecto, marcarlo como *Dynamic Web Project* y ejecutarlo en el servidor Tomcat 11. El `.classpath` ya incluye `src`, `test` y las librerías de `WEB-INF/lib`.
+Con Eclipse o VS Code: importar el proyecto como *Dynamic Web Project* y ejecutarlo en el servidor Tomcat 11. El `.classpath` ya incluye `src`, `test`, las librerías de `WEB-INF/lib` y las APIs de Tomcat de `lib/tomcat-11/`.
 
-Alternativa manual:
+> Las APIs de Tomcat (`servlet-api`, `jsp-api`, `jasper-el`, `annotations-api`) están versionadas en `lib/tomcat-11/` **solo para compilar**: no se despliegan, porque el contenedor ya las aporta en tiempo de ejecución. No apuntes el `.classpath` a `.tools/` ni a una ruta absoluta del Tomcat instalado: el proyecto dejaría de compilar en otra máquina.
+
+Alternativa manual (en Windows/Git Bash el separador de classpath es `;`, en Linux/macOS es `:`):
 
 ```bash
-# compilar clases de producción (ajusta las rutas de Tomcat si hace falta)
-javac -encoding UTF-8 -cp "WebContent/WEB-INF/lib/mysql-connector-j-9.7.0.jar:WebContent/WEB-INF/lib/jbcrypt-0.4.jar:<TOMCAT>/lib/servlet-api.jar:<TOMCAT>/lib/jsp-api.jar" \
+# compilar clases de producción
+javac -encoding UTF-8 -cp "WebContent/WEB-INF/lib/mysql-connector-j-9.7.0.jar;WebContent/WEB-INF/lib/jbcrypt-0.4.jar;lib/tomcat-11/*" \
   -d build/classes $(find src -name '*.java')
 
 # publicar el contexto

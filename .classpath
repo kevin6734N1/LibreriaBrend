@@ -6,9 +6,9 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/mysql-connector-j-9.7.0.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/junit-platform-console-standalone-1.11.4.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jbcrypt-0.4.jar"/>
-	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/servlet-api.jar"/>
-	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/jasper-el.jar"/>
-	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/jsp-api.jar"/>
-	<classpathentry kind="lib" path=".tools/apache-tomcat-11.0.26/lib/annotations-api.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-11/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-11/jasper-el.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-11/jsp-api.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat-11/annotations-api.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
