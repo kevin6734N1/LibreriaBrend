@@ -1,0 +1,73 @@
+name: JUnit 5
+
+on:
+  push:
+    branches:
+      - main
+      - 'qa/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Tests unitarios (sin BD)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Compilar y ejecutar JUnit
+        env:
+          JUNIT_EXCLUDE: 'libreria\.dao\..*'
+        run: bash test/run-junit-tests.sh
+
+  login-dao-tests:
+    name: Login de clientes y administradores (DAO + BD)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+          MARIADB_ROOT_HOST: '%'
+          MARIADB_DATABASE: libreria_brenda_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Instalar cliente MySQL
+        run: sudo apt-get update && sudo apt-get install -y default-mysql-client
+
+      - name: Cargar esquema y datos ficticios
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root < database/schema_test.sql
+          mysql -h 127.0.0.1 -P 3306 -u root < database/fixtures_test.sql
+
+      - name: Compilar y ejecutar JUnit
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: libreria_brenda_test
+          DB_USER: root
+          DB_PASSWORD: ''
+        run: bash test/run-junit-tests.sh

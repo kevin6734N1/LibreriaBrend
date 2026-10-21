@@ -4,6 +4,14 @@ Maqueta académica de una tienda en línea para la **Librería Brenda** (Lima, 2
 
 Este repositorio contiene solo el producto y sus pruebas. Los informes, rúbricas, capturas y entregas del curso se conservan **fuera** del repositorio.
 
+## Enfoque QA (portafolio)
+
+- **JUnit 5:** 90 pruebas. 72 corren sin motor de base de datos; 18 prueban los DAO de login contra `libreria_brenda_test`.
+- **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
+- **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados y rotación de sesión. Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
+- **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (workflow versionado; aún no ejecutado en GitHub).
+- **Detalle:** [matriz y evidencias de RF02](docs/QA/RF02_LOGIN.md) · [riesgo de datos en el repositorio](docs/QA/SEGURIDAD_REPOSITORIO.md).
+
 ## Stack y arquitectura
 
 - **Java 21** (probado con OpenJDK 21), JSP y Jakarta Servlets 6.
@@ -104,54 +112,64 @@ Abrir `http://localhost:8080/LibreriaBrend/index.jsp`.
 - **Accesibilidad:** preferencias de daltonismo y lectura por voz (funcionalidad parcial).
 
 > Detalle de los cambios del panel administrativo y de la carga de imágenes: [`docs/REPORTE_PANEL_ADMIN.md`](docs/REPORTE_PANEL_ADMIN.md).
+>
+> Detalle de RF02 (matriz, TDD, evidencias y límites): [`docs/QA/RF02_LOGIN.md`](docs/QA/RF02_LOGIN.md).
 
 ## Cómo correr los tests
 
-### Unitarios JUnit 5 (52 tests)
+### JUnit 5 (72 sin BD / 90 con BD)
 
-Linux/macOS (separador `:`):
+Un solo script compila todo el proyecto y ejecuta la suite. Sin `DB_NAME`, las pruebas de `libreria.dao` se omiten con `Assumptions`; con `DB_NAME=libreria_brenda_test` se ejecutan las 18 pruebas de los DAO de login.
 
 ```bash
-L=WebContent/WEB-INF/lib
-javac -encoding UTF-8 -cp "$L/junit-platform-console-standalone-1.11.4.jar:$L/jbcrypt-0.4.jar" -d out/junit-check \
-  src/libreria/models/Producto.java src/libreria/models/CodigoPromo.java src/libreria/models/Pedido.java \
-  src/libreria/util/ValidadorProducto.java src/libreria/util/PasswordUtil.java src/libreria/util/ControlIntentosLogin.java \
-  $(find test -name '*.java')
+# Suite rápida, sin motor de base de datos: 72/72
+JUNIT_EXCLUDE='libreria\.dao\..*' bash test/run-junit-tests.sh
 
-java -jar "$L/junit-platform-console-standalone-1.11.4.jar" \
-  -cp "out/junit-check:$L/jbcrypt-0.4.jar" --scan-class-path out/junit-check --disable-banner
+# Suite completa contra la base ficticia: 90/90
+DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=libreria_brenda_test \
+DB_USER=root DB_PASSWORD=tu_clave bash test/run-junit-tests.sh
 ```
 
-En **Windows (Git Bash)** usa `;` como separador de classpath en ambos comandos.
+El script detecta el separador de classpath de Linux/macOS (`:`) y Git Bash en Windows (`;`). Las pruebas de DAO abortan si la conexión no apunta exactamente a `libreria_brenda_test`.
 
-### Integración HTTP/BD (80 comprobaciones)
+### Integración HTTP/BD
 
-Requiere un Tomcat apuntando a `libreria_brenda_test` y el script carga los fixtures antes de ejecutar. Nunca usa la base comercial.
+Requiere Tomcat con el contexto `/LibreriaBrend` y la base de prueba cargada. Los scripts cargan o crean sus propios datos ficticios; nunca usan la base comercial.
 
 ```bash
-DB_NAME=libreria_brenda_test DB_PASSWORD=tu_clave \
+# RF02: login, roles, sesión y fuerza bruta (62 comprobaciones)
 BASE=http://localhost:8091/LibreriaBrend \
+DB_NAME=libreria_brenda_test DB_PASSWORD=tu_clave \
+bash test/integration/rf02-login-tests.sh
+
+# Regresión general: carrito, pedidos, cupones, stock y permisos (80 comprobaciones)
+BASE=http://localhost:8091/LibreriaBrend \
+DB_NAME=libreria_brenda_test DB_PASSWORD=tu_clave \
 bash test/integration/http-tests.sh
 ```
 
-El script cubre acceso anónimo, login/bloqueo, validación de productos, compra, cupones, cancelación, stock, límite de 10 productos y payloads malformados.
+La suite de RF02 crea correos `rf02.*@test.local` por ejecución y los elimina al terminar, para no acumular bloqueos ni depender de reiniciar Tomcat.
 
 ## Estado verificado y limitaciones
 
-**Verificado en ejecución el 17/10/2026** (OpenJDK 21, Tomcat 11.0.26, MariaDB 11.8):
+**Verificado en ejecución el 21/10/2026** (OpenJDK 21.0.12, Tomcat 11.0.26, MariaDB 11.8.9 en WSL2):
 
-- **52/52 tests unitarios** JUnit 5.
-- **80/80 comprobaciones de integración HTTP/BD** contra `libreria_brenda_test`.
-- Acceso anónimo a pedidos corregido (`401`), errores internos ya no se exponen, categoría inexistente y stock/precio malformados se rechazan con `400`, cancelación repone stock y libera cupón.
+- **72/72 tests JUnit** sin base de datos y **90/90** con `libreria_brenda_test` (incluye 18 pruebas de DAO de login).
+- **62/62 comprobaciones HTTP de RF02** y **80/80 comprobaciones HTTP generales** contra la base ficticia.
+- RF02 cubre cliente activo/inactivo, contraseña incorrecta, correo inexistente y mal formado, límite de 120 caracteres, BCrypt, separación de roles, autorización y rotación de sesión en login y registro.
+- Se corrigieron session fixation, el fallo con hashes BCrypt truncados y la aceptación de correos más largos que la columna.
+- Regresión general en verde: acceso anónimo, validación de productos, compra, cupones, cancelación, stock, límite de 10 productos y payloads malformados.
 
 **No ejecutado o fuera del alcance inmediato:**
 
 - Validación integral de accesibilidad con lector de pantalla/contraste/WCAG (solo revisión parcial de DOM y teclado).
-- Pruebas de carga y concurrencia; cobertura instrumentada (JaCoCo).
+- Pruebas de carga y concurrencia; cobertura instrumentada (JaCoCo). No se afirma ningún porcentaje.
 - Tokens CSRF y atributo `SameSite` en cookies (QA-15).
+- Bloqueo de login en memoria: es por correo y compartido entre roles, por lo que cinco fallos pueden bloquear temporalmente a un administrador (DoS). Está documentado en [RF02](docs/QA/RF02_LOGIN.md#6-limitaciones-y-riesgos-abiertos).
+- GitHub Actions: el workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) está versionado y sus comandos se verificaron localmente, pero **aún no se ejecutó en GitHub**.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.
 
-**Deuda conocida:** `libreria_brenda_backup.sql` sigue versionado y contiene datos históricos. No debe usarse para pruebas ni publicarse; su retiro del repositorio e historial requiere aprobación del equipo y, si las credenciales fueron reales, rotación.
+**Riesgo de seguridad abierto — requiere decisión del propietario:** `libreria_brenda_backup.sql` y varias evidencias de auditoría siguen versionados y contienen datos personales (nombres, DNI, teléfono, dirección, correo y hashes BCrypt de clientes, además de direcciones de entrega). El repositorio es público y el historial conserva esos blobs. **No se publicó ningún cambio nuevo ni se reescribió el historial.** Las acciones necesarias (poner el repositorio en privado, retirar los archivos, purgar el historial y rotar credenciales) están detalladas en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Roles académicos
 

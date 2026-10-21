@@ -1,0 +1,81 @@
+test\libreria\util\ValidadorEmailTest.java:17: error: cannot find symbol
+        assertTrue(ValidadorEmail.esValido("cliente@test.local"));
+                   ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:22: error: cannot find symbol
+        assertTrue(ValidadorEmail.esValido("cliente+ofertas@test.local"));
+                   ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:27: error: cannot find symbol
+        assertTrue(ValidadorEmail.esValido("Cliente.A@Test.Local"));
+                   ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:32: error: cannot find symbol
+        assertTrue(ValidadorEmail.esValido("  cliente@test.local  "));
+                   ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:39: error: cannot find symbol
+        assertTrue(ValidadorEmail.esValido(correo));
+                   ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:46: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido(correo));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:51: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido(null));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:56: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido(""));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:61: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("   "));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:66: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("cliente.test.local"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:71: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("cliente@test"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:76: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("cliente @test.local"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:81: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("cliente@@test.local"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:86: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("@test.local"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:91: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("cliente@"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+test\libreria\util\ValidadorEmailTest.java:96: error: cannot find symbol
+        assertFalse(ValidadorEmail.esValido("cliente@test.local\nBcc: otro@test.local"));
+                    ^
+  symbol:   variable ValidadorEmail
+  location: class ValidadorEmailTest
+16 errors

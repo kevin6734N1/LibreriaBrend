@@ -21,6 +21,7 @@
 | 2026-09-27 | `b5337fd` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
 | 2026-09-27 | `54a810c` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
 | 2026-09-28 | *(pendiente de commit)* | **Laboratorio de calidad — TDD (H0007):** `ValidadorProducto` construido test-first (9 tests JUnit 5) + validación en servidor de crear/editar producto (HTTP 400 con errores) |
+| 2026-10-21 | *(rama `qa/rf02-login`, pendiente de publicar)* | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
 WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
@@ -392,6 +393,43 @@ proyecto OK. Evidencias completas, reproducción y límites honestos en
 **Pendiente:** republish en Tomcat y prueba HTTP end-to-end (400 con payload
 inválido) — Tomcat estaba detenido al cerrar la sesión. El fallback silencioso
 a categoría 1 en `ProductoDAO.obtenerCategoriaId()` queda como refactor futuro.
+
+---
+
+## [RF02] Inicio de sesión de cliente y administrador
+
+**Fecha:** 2026-10-21
+**Motivación:** convertir el login en un incremento de portafolio QA verificable
+y cerrar defectos reales de autenticación y sesión.
+
+### Qué se implementó
+
+1. **`ValidadorEmail`** (`src/libreria/util/`), construido test-first: formato
+   y límite de 120 caracteres (el de la columna `email`). Reemplaza las dos
+   regex duplicadas de `LoginServlet` y `RegistroServlet`.
+2. **`SesionAutenticada`** (`src/libreria/servlets/`): crea la sesión, rota el
+   `JSESSIONID` con `request.changeSessionId()` y limpia atributos previos.
+   Se usa en login y registro.
+3. **`PasswordUtil.verificar`:** valida el formato BCrypt completo antes de
+   llamar a jBCrypt. Un hash truncado ya no puede lanzar
+   `StringIndexOutOfBoundsException` y tumbar el login.
+4. **Pruebas:** 18 JUnit de DAO (caracterización contra `libreria_brenda_test`),
+   16 JUnit de `ValidadorEmail` (TDD), 2 de hash malformado, 1 de concurrencia
+   del contador de intentos y 62 comprobaciones HTTP de RF02.
+
+### Verificación
+
+**72/72 JUnit sin BD · 90/90 JUnit con BD · 62/62 HTTP RF02 · 80/80 HTTP
+general.** Evidencias, matriz y límites en
+[`docs/QA/RF02_LOGIN.md`](QA/RF02_LOGIN.md).
+
+### Pendiente
+
+- CI versionado pero **no ejecutado en GitHub**.
+- Bloqueo de login en memoria, por correo y compartido entre roles (riesgo de
+  DoS sobre una cuenta admin); sin límite por IP ni TTL de entradas.
+- La exposición de datos del repositorio sigue abierta: ver
+  [`docs/QA/SEGURIDAD_REPOSITORIO.md`](QA/SEGURIDAD_REPOSITORIO.md).
 
 ---
 
