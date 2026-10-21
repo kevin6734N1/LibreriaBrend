@@ -21,9 +21,9 @@
 | 2026-09-27 | `b5337fd` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
 | 2026-09-27 | `54a810c` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
 | 2026-09-28 | *(pendiente de commit)* | **Laboratorio de calidad — TDD (H0007):** `ValidadorProducto` construido test-first (9 tests JUnit 5) + validación en servidor de crear/editar producto (HTTP 400 con errores) |
-| 2026-10-21 | *(rama `qa/rf02-login`, pendiente de publicar)* | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
-| 2026-10-21 | *(sin commit)* | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
-| 2026-10-21 | *(sin commit)* | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
+| 2026-10-21 | `18f2967` | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
+| 2026-10-21 | `c825f82` | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
+| 2026-10-21 | `18f2967` | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.26 en `:8080` sirviendo LibreriaBrend
 con la base `libreria_brenda_demo` y el usuario `libreria_demo_app`; el Tomcat
@@ -429,7 +429,7 @@ general.** Evidencias, matriz y límites en
 
 ### Pendiente
 
-- CI ejecutado en GitHub sobre `32d7179`: **2/2 jobs en success** (unitarios y DAO con MariaDB), ver [evidencia](QA/evidencias/ci-2026-10-21.txt).
+- CI ejecutado en GitHub sobre `18f2967`: **2/2 jobs en success** (unitarios y DAO con MariaDB), ver [evidencia](QA/evidencias/ci-2026-10-21.txt).
 - Bloqueo de login en memoria, por correo y compartido entre roles (riesgo de
   DoS sobre una cuenta admin); sin límite por IP ni TTL de entradas.
 - Saneamiento aplicado en el árbol actual (DNI, correos, nombre personal y
