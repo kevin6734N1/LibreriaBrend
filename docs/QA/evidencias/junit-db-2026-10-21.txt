@@ -102,7 +102,7 @@
 [36m│     └─[0m [34mmasDeCincoFallos_sigueBloqueado()[0m [32m✔[0m
 [36m└─[0m [36mJUnit Vintage[0m [32m✔[0m
 
-Test run finished after 3643 ms
+Test run finished after 3810 ms
 [        12 containers found      ]
 [         0 containers skipped    ]
 [        12 containers started    ]

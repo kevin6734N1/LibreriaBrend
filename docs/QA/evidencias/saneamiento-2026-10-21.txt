@@ -1,0 +1,40 @@
+# Saneamiento del backup - 2026-10-21
+# Solo conteos agregados; no se imprimen nombres, correos, DNI ni hashes.
+
+== Comparacion HEAD vs arbol actual ==
+dominio_gmail_antes= 5
+dominio_gmail_despues= 0
+dominio_email_com_antes= 10
+dominio_email_com_despues= 0
+dominio_brenda_pe_antes= 2
+dominio_brenda_pe_despues= 0
+example_com_despues= 17
+hashes_bcrypt_despues= 17
+dni_999_despues= 16
+menciones_nombre_personal_despues= 0
+menciones_correo_personal_despues= 0
+lineas_totales_antes= 587
+lineas_totales_despues= 587
+crlf_preservado= True
+
+== Integridad del SQL importado (MariaDB 11.8 aislado) ==
+import_exit=0
+clientes	16
+administradores	1
+pedidos	16
+pedido_items	31
+comprobantes	8
+productos	11
+codigos_promo	3
+dnis_unicos	16	dnis_999	16
+emails_example	16	emails_unicos	16
+admin_email_example	1
+hashes_clientes_validos	16	hashes_clientes_distintos	1
+hashes_admin_validos	1	hashes_admin_distintos	1
+pedidos_huerfanos	0
+items_pedido_huerfanos	0
+items_producto_huerfanos	0
+comprobantes_pedido_huerfanos	0
+comprobantes_admin_huerfanos	0
+nombres_personales	0
+emails_personales	0

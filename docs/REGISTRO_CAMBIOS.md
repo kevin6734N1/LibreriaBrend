@@ -24,7 +24,7 @@
 | 2026-10-21 | *(rama `qa/rf02-login`, pendiente de publicar)* | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
-WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
+WSL2 · BD `libreria_brenda` (credenciales locales no versionadas, puerto 3306) · driver
 `mysql-connector-j-9.7.0.jar` · Jakarta Servlet 6.
 
 ---
@@ -428,8 +428,9 @@ general.** Evidencias, matriz y límites en
 - CI versionado pero **no ejecutado en GitHub**.
 - Bloqueo de login en memoria, por correo y compartido entre roles (riesgo de
   DoS sobre una cuenta admin); sin límite por IP ni TTL de entradas.
-- La exposición de datos del repositorio sigue abierta: ver
-  [`docs/QA/SEGURIDAD_REPOSITORIO.md`](QA/SEGURIDAD_REPOSITORIO.md).
+- Saneamiento aplicado en el árbol actual (DNI, correos, nombre personal y
+  hashes sensibles). El historial anterior conserva los valores antiguos porque
+  no se reescribió: ver [`docs/QA/SEGURIDAD_REPOSITORIO.md`](QA/SEGURIDAD_REPOSITORIO.md).
 
 ---
 

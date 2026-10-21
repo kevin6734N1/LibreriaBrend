@@ -10,7 +10,7 @@ Este repositorio contiene solo el producto y sus pruebas. Los informes, rúbrica
 - **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
 - **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados y rotación de sesión. Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
 - **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (workflow versionado; aún no ejecutado en GitHub).
-- **Detalle:** [matriz y evidencias de RF02](docs/QA/RF02_LOGIN.md) · [riesgo de datos en el repositorio](docs/QA/SEGURIDAD_REPOSITORIO.md).
+- **Detalle:** [matriz y evidencias de RF02](docs/QA/RF02_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Stack y arquitectura
 
@@ -169,7 +169,7 @@ La suite de RF02 crea correos `rf02.*@test.local` por ejecución y los elimina a
 - GitHub Actions: el workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) está versionado y sus comandos se verificaron localmente, pero **aún no se ejecutó en GitHub**.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.
 
-**Riesgo de seguridad abierto — requiere decisión del propietario:** `libreria_brenda_backup.sql` y varias evidencias de auditoría siguen versionados y contienen datos personales (nombres, DNI, teléfono, dirección, correo y hashes BCrypt de clientes, además de direcciones de entrega). El repositorio es público y el historial conserva esos blobs. **No se publicó ningún cambio nuevo ni se reescribió el historial.** Las acciones necesarias (poner el repositorio en privado, retirar los archivos, purgar el historial y rotar credenciales) están detalladas en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
+**Saneamiento de datos:** el backup del árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. **El historial de Git no se reescribió**, así que los valores anteriores siguen en commits públicos; el alcance y el riesgo residual están en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Roles académicos
 

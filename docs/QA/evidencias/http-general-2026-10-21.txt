@@ -52,7 +52,7 @@ PASS  Edición inválida no cambia categoría
 
 == IT-06 / IT-07 / IT-09 / IT-10: pedidos ==
 PASS  Crear pedido con sesión -> 200
-PASS  Pedido creado (PED-1792606890798)
+PASS  Pedido creado (PED-1792608801836)
 PASS  Precio recalculado desde BD (15.00+10.00=25.00)
 PASS  Stock descontado (100-3)
 PASS  Cliente A ve su pedido

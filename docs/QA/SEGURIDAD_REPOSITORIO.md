@@ -1,134 +1,105 @@
-# Exposición de datos en el repositorio público — acción requerida
+# Saneamiento de datos del repositorio
 
-**Fecha del hallazgo:** 2026-10-21
-**Estado:** abierto. No se publicó ningún cambio nuevo mientras esté abierto.
-**Repositorio:** `github.com/kevin6734N1/LibreriaBrend` (verificado público el 2026-10-21).
+**Fecha:** 2026-10-21
+**Estado:** árbol de trabajo saneado. **El historial de Git no se reescribió.**
+**Alcance:** `libreria_brenda_backup.sql` y credenciales locales de la documentación.
 
-Este documento describe el riesgo **sin reproducir** nombres, correos, DNI,
-teléfonos, direcciones, IDs de pedido ni hashes.
+## 1. Confirmación del propietario
 
-## 1. Qué se encontró
+El propietario revisó visualmente los clientes y confirmó:
 
-### Archivo de volcado completo
+- Los datos del respaldo son **ficticios**, salvo su nombre y su correo personal,
+  usados para registrar una cuenta de prueba.
+- Su DNI y teléfono mostrados también son ficticios.
+- El propietario advirtió que no podía garantizar que todos los DNI fueran
+  ficticios, por eso se pidió reemplazar todos los DNI.
+- Se autorizó un saneamiento mínimo: sin borrar el backup, sin reescribir el
+  historial y conservando los tres commits de `qa/rf02-login`.
 
-`libreria_brenda_backup.sql` está versionado y contiene:
+## 2. Cambios aplicados en el árbol actual
 
-| Tabla | Registros | Datos sensibles |
+| Dato | Tratamiento | Resultado |
 |---|---|---|
-| `clientes` | 16 | nombres y apellidos, DNI, correo, teléfono, dirección, `password_hash` BCrypt |
-| `pedidos` | 16 | IDs, fechas, montos, direcciones de entrega, método de pago |
-| `pedido_items` | 31 | detalle de compra |
-| `comprobantes` | 8 | series y montos |
-| `administradores` | 1 | correo, código de empleado, `password_hash` BCrypt |
+| DNI de clientes | reemplazados por el rango de demostración `99900001`–`99900016` | 16 DNI únicos, ninguno aportado por usuarios |
+| Correos de clientes | reemplazados por `cliente<id>@example.com` | 16 correos únicos |
+| Correo de administrador | reemplazado por `admin@example.com` | 1 correo |
+| Nombre personal | reemplazado por `Cliente Sintetico 22` | sin nombre personal en el árbol |
+| Hashes de clientes | los 16 reemplazados por el hash sintético de los fixtures | sin contraseñas originales |
+| Hash del administrador | reemplazado por el hash sintético de los fixtures | sin contraseña original |
+| IDs, fechas, montos, teléfonos, direcciones y claves foráneas | **sin cambios** | relaciones y demo intactos |
+| Backup completo | **conservado** | 587 líneas, mismo formato y CRLF |
 
-Señales que impiden tratarlo como ficticio:
+También se retiraron las menciones literales de usuario y clave por defecto de la documentación
+(`docs/EVIDENCIAS_PRUEBAS.md`, `docs/REGISTRO_CAMBIOS.md` y
+`docs/auditoria/FASE2_CIERRE_LIMITACIONES.md`). Ahora se describen como
+credenciales locales por defecto.
 
-- Los 16 DNI son distintos y tienen 8 dígitos; los teléfonos son distintos.
-- Hay correos en dominios de uso personal, no en `test.local` ni `example.com`.
-- No aparece ninguna marca de dato de prueba (`test.local`, `ficticio`, `dummy`).
-- Los pedidos cubren varios meses de 2026 y los montos/direcciones son variados.
-- Los hashes tienen formato BCrypt real (`$2a$10$...`), no texto plano.
+## 3. Verificación ejecutada
 
-No es posible demostrar que los datos sean inventados. Por tanto, se tratan
-como **PII real hasta que el propietario confirme lo contrario**.
+El backup saneado se importó en una instancia MariaDB 11.8 aislada. Resultado:
 
-### Evidencias de auditoría con datos de pedidos
+| Comprobación | Resultado |
+|---|---|
+| Importación SQL | exit 0 |
+| Clientes / administradores / pedidos / ítems / comprobantes / productos / cupones | 16 / 1 / 16 / 31 / 8 / 11 / 3 |
+| DNI únicos / DNI en rango `999` | 16 / 16 |
+| Correos de clientes únicos / `@example.com` | 16 / 16 |
+| Correo de administrador `@example.com` | 1 |
+| Hashes BCrypt válidos (clientes / admin) | 16 / 1 |
+| Hashes de clientes distintos | 1 (todos sintéticos) |
+| Pedidos, ítems y comprobantes huérfanos | 0 |
+| Nombres o correos personales en el backup actual | 0 |
+| Credenciales en texto plano en el backup | 0 |
 
-Además del volcado, estos archivos versionados contienen direcciones de
-entrega e identificadores de pedidos (11 apariciones; algunos IDs se repiten
-entre archivos):
+Evidencia agregada (sin datos personales):
+[`evidencias/saneamiento-2026-10-21.txt`](evidencias/saneamiento-2026-10-21.txt).
 
-- `docs/auditoria/evidencias/db/00_baseline_antes.txt`
-- `docs/auditoria/evidencias/db/01_baseline_despues.txt`
-- `docs/auditoria/evidencias/responses/B03_seguridad_lectura.txt`
-- `docs/auditoria/evidencias/requests/B03_seguridad_lectura.sh` (1 ID)
-- `docs/auditoria/FASE2_INFORME.md` (fragmento con un pedido)
+Las suites de regresión se volvieron a ejecutar después del cambio:
+**72/72 JUnit sin BD, 90/90 JUnit con BD, 62/62 HTTP RF02 y 80/80 HTTP general**.
 
-No se detectaron correos ni DNI en esos cinco archivos, pero una dirección de
-entrega junto con un ID de pedido sigue siendo información personal.
+## 4. Riesgo residual: el historial anterior
 
-### Historial
+Este saneamiento **no elimina** los valores anteriores del historial de Git.
+Los commits ya publicados en `main` siguen conteniendo el nombre y correo
+personal, los DNI originales (incluidos los que pudieron ser reales) y los
+hashes antiguos. Cualquiera puede consultarlos en el historial público.
 
-- El volcado se incorporó en `7d93b00` (2026-10-17) y se actualizó en
-  `2468111` (2026-10-17).
-- Las evidencias de auditoría se incorporaron en `e72064a` (2026-09-28).
-- `.gitignore` tiene reglas para algunos volcados (`*.dump`, `dump*.sql`),
-  pero no cubre `*_backup.sql`; además, las reglas no aplican a archivos que
-  ya estaban trackeados.
+Además, si el cambio del backup se incluye en el PR, el diff mostrará las
+líneas antiguas eliminadas. No es una exposición nueva —ya estaban en `main`—
+pero sí queda visible en la revisión.
 
-## 2. Por qué es grave
+Para eliminar esos valores del historial haría falta una reescritura coordinada
+(`git filter-repo` o BFG) y un push forzado, o poner el repositorio en privado.
+**No se ejecutó ninguna de las dos acciones**, por indicación expresa de no
+reescribir el historial.
 
-1. El repositorio es público: cualquier persona o crawler pudo descargar los
-   datos, y pueden existir forks, clones o cachés aunque luego se borren.
-2. Los hashes BCrypt de costo 10 permiten ataques de diccionario offline.
-   Un hash no es equivalente a una contraseña, pero tampoco es inocuo.
-3. La combinación nombre + DNI + teléfono + dirección + correo es PII de alto
-   valor para fraude y phishing.
-4. Si los datos son de clientes reales, aplica la Ley 29733 (Perú) de
-   protección de datos personales y podría requerir notificación a los
-   titulares.
+## 5. Qué revisar antes de publicar
 
-## 3. Acciones necesarias (requieren autorización del propietario)
+1. Confirmar que los DNI originales que pudieron ser reales ya no importan en el
+   historial público. Si importan, la reescritura del historial es la única
+   solución efectiva.
+2. Revisar si el correo personal debe seguir apareciendo en commits antiguos.
+3. Decidir si las evidencias de auditoría con direcciones e IDs de pedido se
+   conservan. El propietario confirmó que esos datos son ficticios y no
+   contienen nombre, correo ni DNI; se dejaron para no romper la trazabilidad.
+4. Autorizar el push y el PR solo después de aceptar el riesgo residual del
+   historial.
 
-Ordenadas de mitigación más rápida a más profunda. **Ninguna se ejecutó.**
-
-1. **Poner el repositorio en privado de inmediato** mientras se decide. Es la
-   mitigación más rápida y no reescribe nada. Solo el propietario puede
-   hacerlo desde *Settings → General → Danger Zone → Change visibility*.
-2. **Retirar los archivos del árbol actual** (no del historial):
-
-   ```bash
-   git rm --cached libreria_brenda_backup.sql \
-     docs/auditoria/evidencias/db/00_baseline_antes.txt \
-     docs/auditoria/evidencias/db/01_baseline_despues.txt \
-     docs/auditoria/evidencias/responses/B03_seguridad_lectura.txt \
-     docs/auditoria/evidencias/requests/B03_seguridad_lectura.sh
-   ```
-
-   Esto reduce la exposición futura, pero los blobs siguen en el historial.
-3. **Purgar el historial** con `git filter-repo` (o BFG), coordinando con
-   cualquier colaborador, y forzar el push. Es una operación destructiva:
-   cambia los hashes de todos los commits y requiere que los demás vuelvan a
-   clonar. No debe hacerse sin respaldo y autorización expresa.
-4. **Rotar credenciales** si alguna contraseña del volcado se usó en otro
-   servicio. Forzar el cambio de las cuentas afectadas.
-5. **Evaluar notificación** a los titulares si se confirma que los datos son
-   reales, y revisar logs de acceso, forks y clones.
-6. **Reemplazar las evidencias** de auditoría por versiones redactadas o
-   sintéticas si se quieren conservar en el portafolio.
-
-## 4. Qué se hizo en esta sesión
-
-- Se verificó `git status` y el historial antes de tocar código.
-- No se borró, reescribió ni publicó nada del historial.
-- No se hizo push ni se abrió un Pull Request.
-- Las pruebas nuevas usan exclusivamente `libreria_brenda_test` y datos
-  ficticios creados y eliminados por ejecución.
-- Los archivos con PII **siguen en el repositorio** y en `main`; este documento
-  no los modifica.
-
-## 5. Cómo verificar el alcance sin exponer los datos
+## 6. Comandos de verificación (sin imprimir datos)
 
 ```bash
-git ls-files libreria_brenda_backup.sql
-git log --follow --oneline -- libreria_brenda_backup.sql
-git grep -lE "PED-[0-9]{6,}" -- docs ':!libreria_brenda_backup.sql'
-git grep -lEi "jiron|avenida|calle|urbanizacion" -- docs
+# Importar en una base aislada y comprobar integridad
+mysql -h 127.0.0.1 -P 3307 -u root < libreria_brenda_backup.sql
+mysql -h 127.0.0.1 -P 3307 -u root -N -B <<'SQL'
+USE libreria_brenda;
+SELECT COUNT(*), COUNT(DISTINCT dni), SUM(dni LIKE '999%') FROM clientes;
+SELECT COUNT(*), COUNT(DISTINCT email), SUM(email LIKE '%@example.com') FROM clientes;
+SELECT SUM(password_hash LIKE '$2a$10$%' AND CHAR_LENGTH(password_hash) = 60) FROM clientes;
+SQL
+
+# Buscar restos del nombre/correo personal solo en el árbol actual.
+# Ejecuta git grep con tus propios tokens y no pegues el resultado.
+git grep -n "<token-personal>" -- libreria_brenda_backup.sql || true
 ```
 
-Los comandos listan archivos, no valores. No pegues su salida con datos en
-issues, PRs o capturas.
-
-## 6. Decisión pendiente
-
-Antes de publicar la rama `qa/rf02-login` o abrir el PR, el propietario debe
-elegir entre:
-
-- **A.** Poner el repositorio en privado, retirar los archivos y purgar el
-  historial antes de publicar.
-- **B.** Retirar los archivos del árbol actual y publicar el PR, dejando el
-  historial pendiente y documentado.
-- **C.** No publicar nada todavía y resolver la exposición primero.
-
-Recomendación: **A**, porque el repositorio ya fue público y la purga del
-historial es la única forma de eliminar los blobs de la URL pública.
+No pegues resultados con datos en issues, PRs o capturas.
