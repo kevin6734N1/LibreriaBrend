@@ -158,34 +158,12 @@
 
 <script>
   // ================================================================
-  //  DATOS DEMO — reemplazar por fetch a ClienteServlet cuando
-  //  este conectado a MySQL. Campos alineados con registro.jsp:
-  //  nombres, apellidos, dni, email, telefono, direccion
+  //  Los clientes se cargan SIEMPRE desde ClienteServlet (MySQL).
+  //  No se dejan datos de ejemplo embebidos: si la consulta falla,
+  //  la tabla queda vacia en vez de mostrar registros viejos.
   // ================================================================
-  var clientes = [
-    { id:1, nombres:'Maria',   apellidos:'Garcia Lopez',   dni:'99900002', email:'cliente2@example.com',   telefono:'945123456', direccion:'Av. Arequipa 1234, Miraflores',  fechaRegistro:'2026-01-05', pedidos:5, totalGastado:412.30, activo:true },
-    { id:2, nombres:'Carlos',  apellidos:'Mendoza Ruiz',   dni:'99900003', email:'cliente3@example.com', telefono:'987654321', direccion:'Jr. Huancayo 567, Brena',        fechaRegistro:'2026-02-12', pedidos:3, totalGastado:198.50, activo:true },
-    { id:3, nombres:'Ana',     apellidos:'Torres Vega',    dni:'99900004', email:'cliente4@example.com',     telefono:'912345678', direccion:'Calle Los Pinos 890, Surco',     fechaRegistro:'2026-03-01', pedidos:1, totalGastado:72.50,  activo:true },
-    { id:4, nombres:'Luis',    apellidos:'Rojas Fernandez',dni:'99900005', email:'cliente5@example.com',     telefono:'998877665', direccion:'Av. La Marina 345, San Miguel',  fechaRegistro:'2026-03-18', pedidos:2, totalGastado:108.90, activo:true },
-    { id:5, nombres:'Rosa',    apellidos:'Paredes Quispe', dni:'99900006', email:'cliente6@example.com',   telefono:'934567890', direccion:'Jr. Tacna 201, Cercado de Lima', fechaRegistro:'2026-04-02', pedidos:1, totalGastado:120.00, activo:false },
-    { id:6, nombres:'Jorge',   apellidos:'Salazar Vidal',  dni:'99900007', email:'cliente7@example.com',  telefono:'956789012', direccion:'Av. Brasil 880, Pueblo Libre',   fechaRegistro:'2026-04-20', pedidos:7, totalGastado:589.40, activo:true },
-    { id:7, nombres:'Patricia',apellidos:'Nunez Castro',   dni:'99900008', email:'cliente8@example.com', telefono:'923456789', direccion:'Calle Las Flores 45, San Borja', fechaRegistro:'2026-05-10', pedidos:0, totalGastado:0.00,   activo:true },
-    { id:8, nombres:'Diego',   apellidos:'Ramos Herrera',  dni:'99900009', email:'cliente9@example.com',    telefono:'967890123', direccion:'Av. Angamos 1200, Surquillo',    fechaRegistro:'2026-05-28', pedidos:2, totalGastado:145.80, activo:true },
-    { id:9, nombres:'Valeria', apellidos:'Chavez Morales', dni:'99900010', email:'cliente10@example.com', telefono:'978901234', direccion:'Jr. Cusco 310, La Victoria',     fechaRegistro:'2026-06-03', pedidos:1, totalGastado:65.00,  activo:true },
-    { id:10,nombres:'Fernando',apellidos:'Vargas Soto',    dni:'99900011', email:'cliente11@example.com',telefono:'945678901', direccion:'Av. Colonial 500, Callao',      fechaRegistro:'2026-06-10', pedidos:0, totalGastado:0.00,   activo:false }
-  ];
-
-  // Mini historial de pedidos por cliente (demo) usado en el modal
-  var pedidosPorCliente = {
-    1: [ { id:'PED-1001', fecha:'10/05/2026', total:115.40, estado:'Entregado' }, { id:'PED-0892', fecha:'02/03/2026', total:89.90,  estado:'Entregado' } ],
-    2: [ { id:'PED-1002', fecha:'15/05/2026', total:65.00,  estado:'Enviado' } ],
-    3: [ { id:'PED-1003', fecha:'17/05/2026', total:72.50,  estado:'Pendiente' } ],
-    4: [ { id:'PED-1004', fecha:'18/05/2026', total:70.90,  estado:'Confirmado' } ],
-    5: [ { id:'PED-1005', fecha:'18/05/2026', total:120.00, estado:'Cancelado' } ],
-    6: [ { id:'PED-0950', fecha:'25/05/2026', total:230.00, estado:'Entregado' }, { id:'PED-0810', fecha:'14/04/2026', total:180.40, estado:'Entregado' } ],
-    8: [ { id:'PED-0930', fecha:'30/05/2026', total:145.80, estado:'Enviado' } ],
-    9: [ { id:'PED-1010', fecha:'12/06/2026', total:65.00,  estado:'Pendiente' } ]
-  };
+  var clientes = [];
+  var solicitudPedidos = 0;
 
   // ================================================================
   //  HELPERS
@@ -199,6 +177,7 @@
   }
 
   function formatearFecha(f) {
+    if (!f) return '';
     var partes = f.split('-');
     return partes[2] + '/' + partes[1] + '/' + partes[0];
   }
@@ -342,6 +321,36 @@
   // ================================================================
   //  MODAL DETALLE
   // ================================================================
+  function escaparHtml(valor) {
+    return String(valor == null ? '' : valor).replace(/[&<>"']/g, function(c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function capitalizar(texto) {
+    if (!texto) return '';
+    return texto.charAt(0).toUpperCase() + texto.substring(1).toLowerCase();
+  }
+
+  function renderHistorial(hist) {
+    if (!hist || hist.length === 0) {
+      return '<div style="color:#999;font-size:0.85rem;padding:10px 0;">Este cliente aun no tiene pedidos.</div>';
+    }
+
+    var html = '';
+    for (var i = 0; i < hist.length; i++) {
+      var h = hist[i];
+      html +=
+        '<div class="mini-pedido-row">' +
+          '<span><strong>' + escaparHtml(h.id) + '</strong> &middot; ' +
+            escaparHtml(h.fecha ? formatearFecha(h.fecha) : '') + '</span>' +
+          '<span>S/ ' + Number(h.total || 0).toFixed(2) + ' &middot; ' +
+            escaparHtml(capitalizar(h.estado)) + '</span>' +
+        '</div>';
+    }
+    return html;
+  }
+
   function abrirDetalle(id) {
     var c = buscarPorId(id);
     if (!c) return;
@@ -361,21 +370,24 @@
       '<div class="modal-row"><span class="modal-label">Total de pedidos</span><span class="modal-value">' + c.pedidos + '</span></div>' +
       '<div class="modal-row"><span class="modal-label">Total gastado</span><span class="modal-value">S/ ' + c.totalGastado.toFixed(2) + '</span></div>';
 
-    var hist = pedidosPorCliente[id];
-    var pedidosHtml = '';
-    if (hist && hist.length > 0) {
-      for (var i = 0; i < hist.length; i++) {
-        var h = hist[i];
-        pedidosHtml +=
-          '<div class="mini-pedido-row">' +
-            '<span><strong>' + h.id + '</strong> &middot; ' + h.fecha + '</span>' +
-            '<span>S/ ' + h.total.toFixed(2) + ' &middot; ' + h.estado + '</span>' +
-          '</div>';
-      }
-    } else {
-      pedidosHtml = '<div style="color:#999;font-size:0.85rem;padding:10px 0;">Este cliente aun no tiene pedidos.</div>';
-    }
-    document.getElementById('det-pedidos').innerHTML = pedidosHtml;
+    var contenedor = document.getElementById('det-pedidos');
+    contenedor.innerHTML = '<div style="color:#999;font-size:0.85rem;padding:10px 0;">Cargando pedidos...</div>';
+    var solicitud = ++solicitudPedidos;
+
+    fetch('ClienteServlet?accion=pedidos&id=' + encodeURIComponent(id))
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function(hist) {
+        if (solicitud !== solicitudPedidos) return;
+        contenedor.innerHTML = renderHistorial(hist);
+      })
+      .catch(function(error) {
+        if (solicitud !== solicitudPedidos) return;
+        console.error('Error cargando pedidos:', error);
+        contenedor.innerHTML = '<div style="color:#b00020;font-size:0.85rem;padding:10px 0;">No se pudo cargar el historial de pedidos.</div>';
+      });
 
     document.getElementById('modal-cliente').classList.add('open');
   }
