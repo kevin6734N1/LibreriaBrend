@@ -101,6 +101,7 @@ La primera corrida tuvo 4 fallos; no todos eran defectos de producción:
 | JUnit con `libreria_brenda_test` | `DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=libreria_brenda_test DB_USER=root DB_PASSWORD= bash test/run-junit-tests.sh` | **90/90** |
 | HTTP RF02 | `BASE=... DB_... bash test/integration/rf02-login-tests.sh` | **62/62** |
 | HTTP general (regresión) | `BASE=... DB_... bash test/integration/http-tests.sh` | **80/80** |
+| GitHub Actions | workflow `junit.yml` sobre `32d7179` | **2/2 jobs success** |
 
 Evidencias crudas:
 
@@ -108,6 +109,7 @@ Evidencias crudas:
 - [JUnit con BD](evidencias/junit-db-2026-10-21.txt)
 - [HTTP RF02](evidencias/rf02-http-2026-10-21.txt)
 - [HTTP general](evidencias/http-general-2026-10-21.txt)
+- [GitHub Actions](evidencias/ci-2026-10-21.txt)
 
 No se midió cobertura con JaCoCo ni se afirma ningún porcentaje.
 
@@ -162,9 +164,9 @@ El script HTTP crea sus propios clientes y administrador ficticios con correos
    el login CSRF queda fuera de este incremento.
 8. **Sin auditoría de accesos:** no se registra quién intentó entrar, desde
    qué IP ni el resultado.
-9. **CI no ejecutado en GitHub:** el workflow existe, pero solo se validaron
-   localmente los comandos y el YAML. No se afirma que GitHub Actions esté en
-   verde.
+9. **Cobertura de CI:** el workflow se ejecutó en GitHub sobre `32d7179` y
+   ambos jobs pasaron (unitarios y DAO con MariaDB). No incluye la suite HTTP
+   ni pruebas de carga.
 10. **Suite HTTP fuera de CI:** requiere Tomcat y MariaDB; no se automatizó en
     el workflow para no prometer una ejecución no verificada.
 11. **Sin pruebas de carga:** no se evaluó concurrencia HTTP real ni latencia

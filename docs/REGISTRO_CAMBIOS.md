@@ -425,7 +425,7 @@ general.** Evidencias, matriz y límites en
 
 ### Pendiente
 
-- CI versionado pero **no ejecutado en GitHub**.
+- CI ejecutado en GitHub sobre `32d7179`: **2/2 jobs en success** (unitarios y DAO con MariaDB), ver [evidencia](QA/evidencias/ci-2026-10-21.txt).
 - Bloqueo de login en memoria, por correo y compartido entre roles (riesgo de
   DoS sobre una cuenta admin); sin límite por IP ni TTL de entradas.
 - Saneamiento aplicado en el árbol actual (DNI, correos, nombre personal y

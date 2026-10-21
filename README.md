@@ -9,7 +9,7 @@ Este repositorio contiene solo el producto y sus pruebas. Los informes, rúbrica
 - **JUnit 5:** 90 pruebas. 72 corren sin motor de base de datos; 18 prueban los DAO de login contra `libreria_brenda_test`.
 - **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
 - **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados y rotación de sesión. Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
-- **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (workflow versionado; aún no ejecutado en GitHub).
+- **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (dos jobs verificados en el PR #3).
 - **Detalle:** [matriz y evidencias de RF02](docs/QA/RF02_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Stack y arquitectura
@@ -166,7 +166,7 @@ La suite de RF02 crea correos `rf02.*@test.local` por ejecución y los elimina a
 - Pruebas de carga y concurrencia; cobertura instrumentada (JaCoCo). No se afirma ningún porcentaje.
 - Tokens CSRF y atributo `SameSite` en cookies (QA-15).
 - Bloqueo de login en memoria: es por correo y compartido entre roles, por lo que cinco fallos pueden bloquear temporalmente a un administrador (DoS). Está documentado en [RF02](docs/QA/RF02_LOGIN.md#6-limitaciones-y-riesgos-abiertos).
-- GitHub Actions: el workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) está versionado y sus comandos se verificaron localmente, pero **aún no se ejecutó en GitHub**.
+- GitHub Actions: el workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) se ejecutó en GitHub sobre el commit `32d7179`; los dos jobs terminaron en `success` ([evidencia](docs/QA/evidencias/ci-2026-10-21.txt)). La suite HTTP sigue fuera de CI.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.
 
 **Saneamiento de datos:** el backup del árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. **El historial de Git no se reescribió**, así que los valores anteriores siguen en commits públicos; el alcance y el riesgo residual están en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
