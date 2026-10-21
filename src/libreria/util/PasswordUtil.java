@@ -2,6 +2,8 @@ package libreria.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.regex.Pattern;
+
 /**
  * PasswordUtil - Libreria Brenda
  *
@@ -16,6 +18,9 @@ import org.mindrot.jbcrypt.BCrypt;
 public class PasswordUtil {
 
     private static final int COSTO = 10; // factor de trabajo de BCrypt (10-12 es razonable para un proyecto academico)
+
+    /** Formato completo que produce jBCrypt 0.4: $2a$ + costo + 53 caracteres. */
+    private static final Pattern HASH_BCRYPT = Pattern.compile("^\\$2a\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
 
     private PasswordUtil() {
         // clase utilitaria, no se instancia
@@ -35,10 +40,14 @@ public class PasswordUtil {
         if (passwordPlano == null || hashGuardado == null || hashGuardado.isEmpty()) {
             return false;
         }
+        if (!HASH_BCRYPT.matcher(hashGuardado).matches()) {
+            // Texto plano antiguo o hash truncado: se rechaza sin llamar a jBCrypt,
+            // que con un hash incompleto lanza StringIndexOutOfBoundsException.
+            return false;
+        }
         try {
             return BCrypt.checkpw(passwordPlano, hashGuardado);
         } catch (IllegalArgumentException formatoInvalido) {
-            // El valor guardado no es un hash BCrypt (ej. cuenta antigua no migrada)
             return false;
         }
     }

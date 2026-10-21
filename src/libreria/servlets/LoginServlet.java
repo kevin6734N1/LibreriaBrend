@@ -6,13 +6,13 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.regex.Pattern;
 
 import libreria.dao.AdministradorDAO;
 import libreria.dao.ClienteDAO;
 import libreria.models.Administrador;
 import libreria.models.Cliente;
 import libreria.util.ControlIntentosLogin;
+import libreria.util.ValidadorEmail;
 
 /**
  * LoginServlet - Libreria Brenda
@@ -29,10 +29,6 @@ import libreria.util.ControlIntentosLogin;
 public class LoginServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-
-    // Validacion basica de formato (no pretende ser 100% RFC 5322, solo
-    // filtrar entradas obviamente invalidas antes de tocar la BD).
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -54,7 +50,7 @@ public class LoginServlet extends HttpServlet {
 
         email = email.trim();
 
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
+        if (!ValidadorEmail.esValido(email)) {
             out.print("{\"ok\":false,\"error\":\"Ingresa un correo con formato válido.\"}");
             return;
         }
@@ -73,9 +69,7 @@ public class LoginServlet extends HttpServlet {
 
             if (cliente != null) {
                 ControlIntentosLogin.registrarExito(email);
-                HttpSession session = request.getSession();
-                session.setAttribute("usuario", email);
-                session.setAttribute("rol", "cliente");
+                HttpSession session = SesionAutenticada.iniciar(request, "cliente", email);
                 session.setAttribute("clienteEmail", email);
                 session.setAttribute("clienteNombre", cliente.getNombreCompleto());
                 out.print("{\"ok\":true,\"redirect\":\"index.jsp\"}");
@@ -90,9 +84,7 @@ public class LoginServlet extends HttpServlet {
 
             if (admin != null) {
                 ControlIntentosLogin.registrarExito(email);
-                HttpSession session = request.getSession();
-                session.setAttribute("usuario", email);
-                session.setAttribute("rol", "admin");
+                HttpSession session = SesionAutenticada.iniciar(request, "admin", email);
                 session.setAttribute("adminNombre", admin.getNombre());
                 out.print("{\"ok\":true,\"redirect\":\"admin.jsp\"}");
             } else {
