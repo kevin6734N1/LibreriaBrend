@@ -1,0 +1,78 @@
+== Preparacion: base de pruebas aislada ==
+PASS  La conexion apunta a libreria_brenda_test
+PASS  Fixture de clientes cargado
+PASS  Fixture de administradores cargado
+PASS  Cuenta activa ficticia creada
+PASS  Cuenta inactiva ficticia creada
+PASS  Administrador ficticio creado
+
+== RF02-CL: inicio de sesion de cliente ==
+PASS  RF02-CL-01 credenciales validas -> ok
+PASS  RF02-CL-01 redirige al catalogo
+PASS  RF02-CL-02 la sesion de cliente da acceso a sus pedidos
+PASS  RF02-CL-03 contrasena incorrecta -> rechazo
+PASS  RF02-CL-03 mensaje sin revelar el campo fallido
+PASS  RF02-CL-03 no se crea sesion autenticada
+PASS  RF02-CL-04 cuenta inactiva con contrasena correcta -> rechazo
+PASS  RF02-CL-04 cuenta inactiva no obtiene sesion
+PASS  RF02-CL-05 correo inexistente -> rechazo
+PASS  RF02-CL-05 mismo mensaje que contrasena incorrecta
+PASS  RF02-CL-06 correo invalido 'sin-arroba' rechazado por formato
+PASS  RF02-CL-06 correo invalido 'sin-dominio@test' rechazado por formato
+PASS  RF02-CL-06 correo invalido 'con espacio@test.local' rechazado por formato
+PASS  RF02-CL-06 correo invalido '@test.local' rechazado por formato
+PASS  RF02-CL-06 correo invalido 'doble@@test.local' rechazado por formato
+PASS  RF02-CL-07 correo de 121 caracteres rechazado (limite de columna 120)
+PASS  RF02-CL-08 contrasena vacia -> campos incompletos
+PASS  RF02-CL-08 correo vacio -> campos incompletos
+PASS  RF02-CL-09 rol ausente -> campos incompletos
+PASS  RF02-CL-10 rol desconocido rechazado
+PASS  RF02-CL-11 espacios externos en el correo se ignoran
+PASS  RF02-CL-12 el correo no distingue mayusculas (collation de la BD)
+PASS  RF02-CL-13 hash BCrypt truncado no autentica
+PASS  RF02-CL-13 hash truncado responde error controlado, no 500
+PASS  RF02-CL-14 hash en texto plano no autentica
+
+== RF02-AD: inicio de sesion de administrador ==
+PASS  RF02-AD-01 correo + contrasena + codigo validos -> ok
+PASS  RF02-AD-01 redirige al panel
+PASS  RF02-AD-02 la sesion de admin abre admin.jsp
+PASS  RF02-AD-02 la sesion de admin puede listar clientes
+PASS  RF02-AD-02 un admin no obtiene sesion de cliente
+PASS  RF02-AD-09 correo de admin no distingue mayusculas
+PASS  RF02-AD-03 codigo de empleado incorrecto -> rechazo
+PASS  RF02-AD-03 mensaje de credenciales de empleado
+PASS  RF02-AD-03 codigo incorrecto no crea sesion
+PASS  RF02-AD-04 contrasena incorrecta con codigo correcto -> rechazo
+PASS  RF02-AD-05 codigo de empleado ausente -> rechazo
+PASS  RF02-AD-06 codigo de empleado vacio -> rechazo
+PASS  RF02-AD-07 una cuenta de cliente no entra como administrador
+PASS  RF02-AD-08 un administrador no entra con el rol cliente
+
+== RF02-AZ: control de acceso ligado a la sesion ==
+PASS  RF02-AZ-01 admin.jsp anonimo redirige al login
+PASS  RF02-AZ-02 admin.jsp con sesion de cliente redirige al login
+PASS  RF02-AZ-03 listado de clientes anonimo -> 401
+PASS  RF02-AZ-04 crear producto con sesion de cliente -> 401
+PASS  RF02-AZ-05 crear producto sin sesion -> 401
+PASS  RF02-AZ-06 logout invalida la sesion
+
+== RF02-SES: higiene de sesion ==
+PASS  RF02-SES-01 sesion previa identificada antes del login
+PASS  RF02-SES-02 el login rota el identificador de sesion (anti session fixation)
+PASS  RF02-SES-03 el registro crea la sesion del cliente
+PASS  RF02-SES-04 el registro rota el identificador de sesion
+PASS  RF02-SES-04 la sesion del registro permite ver pedidos
+
+== RF02-BR: bloqueo por intentos fallidos ==
+PASS  RF02-BR-01 el 5.º intento aun procesa credenciales
+PASS  RF02-BR-02 el 6.º intento queda bloqueado
+PASS  RF02-BR-03 el bloqueo no afecta a otros correos
+PASS  RF02-BR-04 login exitoso tras 4 fallos
+PASS  RF02-BR-05 el exito reinicia el contador de fallos
+
+== Limpieza ==
+PASS  Cuentas ficticias RF02 eliminadas
+
+==============================================
+RESULTADO RF02: PASS=62 FAIL=0

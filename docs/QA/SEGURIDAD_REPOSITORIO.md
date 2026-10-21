@@ -55,7 +55,7 @@ Evidencia agregada (sin datos personales):
 [`evidencias/saneamiento-2026-10-21.txt`](evidencias/saneamiento-2026-10-21.txt).
 
 Las suites de regresión se volvieron a ejecutar después del cambio:
-**72/72 JUnit sin BD, 90/90 JUnit con BD, 62/62 HTTP RF02 y 80/80 HTTP general**.
+**72/72 JUnit sin BD, 91/91 JUnit con BD, 62/62 HTTP RF02 y 80/80 HTTP general**.
 
 ## 4. Riesgo residual: el historial anterior
 

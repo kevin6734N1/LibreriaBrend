@@ -1,16 +1,22 @@
 # LibreriaBrend
 
-Maqueta académica de una tienda en línea para la **Librería Brenda** (Lima, 2026), desarrollada para el curso **Calidad y Pruebas de Software** de la UPN. Incluye catálogo, cuentas de cliente, carrito, pedidos y un panel administrativo.
+Aplicación web de una tienda en línea para la **Librería Brenda** (Lima, 2026). Incluye catálogo, cuentas de cliente, carrito, pedidos y panel administrativo.
 
-Este repositorio contiene solo el producto y sus pruebas. Los informes, rúbricas, capturas y entregas del curso se conservan **fuera** del repositorio.
+Nació como proyecto del curso **Calidad y Pruebas de Software** de la UPN y se mantiene como **un único proyecto** que también sirve como entorno práctico de **QA Automation**. No hay una versión universitaria separada de una versión de portafolio: el mismo código, las mismas pruebas y las mismas evidencias se usan para ambos fines. La demo es local y reproducible; no se presenta como un servicio público ni como software certificado para producción.
+
+Este repositorio contiene el producto, las pruebas y la documentación técnica. Los informes, rúbricas y entregas del curso se conservan **fuera** del repositorio.
+
+## Origen y atribución
+
+El desarrollo base fue un trabajo grupal del curso. La atribución completa está en [Roles académicos](#roles-académicos). Mi aporte principal en esta etapa fue el trabajo de **QA**: matriz de RF02, pruebas JUnit y HTTP, ciclos TDD, automatización de CI, saneamiento del backup y documentación de evidencias. El README no atribuye todo el desarrollo a una sola persona.
 
 ## Enfoque QA (portafolio)
 
-- **JUnit 5:** 90 pruebas. 72 corren sin motor de base de datos; 18 prueban los DAO de login contra `libreria_brenda_test`.
+- **JUnit 5:** 91 pruebas. 72 se ejecutan sin motor de base de datos; 19 prueban los DAO contra `libreria_brenda_test` (login e historial de pedidos del modal).
 - **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
 - **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados y rotación de sesión. Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
 - **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (dos jobs verificados en el PR #3).
-- **Detalle:** [matriz y evidencias de RF02](docs/QA/RF02_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
+- **Mapa de evidencias:** [docs/QA/README.md](docs/QA/README.md) · [matriz RF02](docs/QA/RF02_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Stack y arquitectura
 
@@ -101,6 +107,119 @@ cp -r build/classes/. <TOMCAT>/webapps/LibreriaBrend/WEB-INF/classes/
 
 Abrir `http://localhost:8080/LibreriaBrend/index.jsp`.
 
+### 4. Demo local con datos sintéticos
+
+El script [`database/demo/libreria_brenda_demo.sql`](database/demo/libreria_brenda_demo.sql) crea una base **independiente** llamada `libreria_brenda_demo` y la carga con 16 clientes ficticios, 16 pedidos, 31 ítems y 8 comprobantes. Conserva los IDs y las claves foráneas, pero **no toca** `libreria_brenda` ni `libreria_brenda_test`.
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -u root -p < database/demo/libreria_brenda_demo.sql
+```
+
+El seed es reejecutable: recrea las tablas **dentro de `libreria_brenda_demo`** y vuelve a dejar los datos de demostración. No lo ejecutes contra una base comercial.
+
+| Dato | Valor sintético |
+|---|---|
+| Nombres | `Cliente Demo` + `Apellido 01`…`Apellido 16` |
+| DNI | `99900001`…`99900016` |
+| Correos | `cliente01@example.com`…`cliente16@example.com` |
+| Teléfonos | `900000101`…`900000116` |
+| Direcciones | `Av. Demo 101, Lima`…`Av. Demo 116, Lima` |
+| Pedidos | mismos IDs, montos y estados; dirección de entrega sintética |
+
+Para que Tomcat use la demo, apunta `db.properties` **y cualquier variable de entorno o `setenv.bat` que defina `DB_*`** (las variables tienen prioridad sobre el archivo) a:
+
+```properties
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=libreria_brenda_demo
+DB_USER=libreria_demo_app
+DB_PASSWORD=tu_clave_local
+```
+
+La cuenta de aplicación no debe ser `root` ni `libaas_app`: el paso 5 crea
+`libreria_demo_app` con permisos solo sobre `libreria_brenda_demo`. Reinicia
+Tomcat y abre `http://localhost:8080/LibreriaBrend/login.jsp`.
+
+> Si arrancas Tomcat desde VS Code, la extensión lanza Java directamente y
+> **no ejecuta `bin/setenv.bat`**. En ese caso manda `WEB-INF/db.properties`:
+> comprueba que apunte a `libreria_brenda_demo` antes de probar las cuentas demo.
+
+| Rol | Correo | Contraseña | Código |
+|---|---|---|---|
+| Administrador | `admin@example.com` | `Admin#2026` | `EMP-DEMO` |
+| Cliente | `cliente01@example.com` | `Cliente#2026` | — |
+
+`clientes.jsp` ya no contiene clientes embebidos: el listado sale siempre de `ClienteServlet`/`ClienteDAO`. Si la consulta falla, la tabla queda vacía en vez de mostrar datos viejos. La verificación de este procedimiento (login, 16 filas sintéticas, modal con pedidos y regresión) está en [la evidencia de demo](docs/QA/evidencias/demo-sintetica-2026-10-21.txt).
+
+Para volver a la base real, restaura los valores anteriores de `db.properties`/`setenv.bat` y reinicia Tomcat; la demo no modifica ninguna otra base.
+
+### 5. Entorno aislado con Tomcat propio (`:8082`)
+
+Este entorno no reutiliza el Tomcat de LibaaS ni sus credenciales. Vive en
+`.tools-libreria/` (ignorado por Git) y escucha en `8082`, así que puede
+convivir con el Tomcat antiguo de `:8080` sin detenerlo.
+
+```bash
+# 1. Descarga y descomprime Apache Tomcat 11 en .tools-libreria/
+#    (no reutilices .tools/: en este checkout es un symlink a LibaaS).
+mkdir -p .tools-libreria
+# descomprime apache-tomcat-11.0.26.zip o .tar.gz aquí
+
+# 2. Ajusta los puertos en conf/server.xml: HTTP 8082, shutdown 8006, AJP 8010.
+
+# 3. Carga la base demo y crea un usuario limitado a ella.
+mysql -h 127.0.0.1 -P 3306 -u root -p < database/demo/libreria_brenda_demo.sql
+mysql -h 127.0.0.1 -P 3306 -u root -p <<'SQL'
+CREATE USER 'libreria_demo_app'@'%' IDENTIFIED BY 'CAMBIA_ESTA_CLAVE';
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW
+  ON libreria_brenda_demo.* TO 'libreria_demo_app'@'%';
+SQL
+```
+
+El host `%` es necesario cuando MariaDB corre en Docker y la conexión del host
+llega como `172.17.0.1`; el permiso sigue limitado exclusivamente a
+`libreria_brenda_demo` (sin `CREATE`, `DROP`, `ALTER` ni privilegios globales).
+
+```bash
+TOMCAT=.tools-libreria/apache-tomcat-11.0.26
+
+# 4. Compila y publica el contexto.
+javac -encoding UTF-8 -cp "WebContent/WEB-INF/lib/mysql-connector-j-9.7.0.jar;WebContent/WEB-INF/lib/jbcrypt-0.4.jar;lib/tomcat-11/*" \
+  -d build/classes $(find src -name '*.java')
+cp -r WebContent/. "$TOMCAT/webapps/LibreriaBrend/"
+cp -r build/classes/. "$TOMCAT/webapps/LibreriaBrend/WEB-INF/classes/"
+
+# 5. Credenciales solo en el contexto desplegado (nunca en Git).
+cat > "$TOMCAT/webapps/LibreriaBrend/WEB-INF/db.properties" <<'EOF'
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=libreria_brenda_demo
+DB_USER=libreria_demo_app
+DB_PASSWORD=CAMBIA_ESTA_CLAVE
+EOF
+
+# 6. Define JAVA_HOME y arranca (Windows: startup.bat; Linux/macOS: startup.sh).
+export JAVA_HOME=/ruta/a/jdk-21   # Windows: set "JAVA_HOME=C:\ruta\a\jdk-21"
+"$TOMCAT/bin/startup.sh"
+```
+
+Comprueba `http://localhost:8082/LibreriaBrend/login.jsp`. No definas `DB_*`
+en el entorno ni en `setenv.bat`: tienen prioridad sobre `db.properties` y
+podrían redirigir la aplicación a otra base. Para detener este Tomcat usa su
+`shutdown.sh`/`shutdown.bat`; no detengas el de `:8080`.
+
+| Comprobación | Resultado esperado |
+|---|---|
+| Login admin | `admin@example.com` / `Admin#2026` / `EMP-DEMO` |
+| Login cliente | `cliente01@example.com` / `Cliente#2026` |
+| `clientes.jsp` | 16 filas `Cliente Demo`, DNI `999000xx` |
+| Pedidos del cliente 01 | 8 pedidos en `pedidos.jsp` y en el modal |
+| Catálogo | 11 productos activos desde `ProductoServlet` |
+| Aislamiento SQL | `SELECT` sobre `libreria_brenda` y `libreria_brenda_test` denegado |
+
+La evidencia de esta ejecución está en
+[`docs/QA/evidencias/entorno-aislado-2026-10-21.txt`](docs/QA/evidencias/entorno-aislado-2026-10-21.txt).
+
 ## Módulos principales
 
 - **Catálogo y búsqueda:** `index.jsp` y `ProductoServlet` (GET público).
@@ -117,15 +236,15 @@ Abrir `http://localhost:8080/LibreriaBrend/index.jsp`.
 
 ## Cómo correr los tests
 
-### JUnit 5 (72 sin BD / 90 con BD)
+### JUnit 5 (72 sin BD / 91 con BD)
 
-Un solo script compila todo el proyecto y ejecuta la suite. Sin `DB_NAME`, las pruebas de `libreria.dao` se omiten con `Assumptions`; con `DB_NAME=libreria_brenda_test` se ejecutan las 18 pruebas de los DAO de login.
+Un solo script compila todo el proyecto y ejecuta la suite. Sin `DB_NAME`, las 3 clases de `libreria.dao` se omiten con `Assumptions` (se ejecutan 72 pruebas); con `DB_NAME=libreria_brenda_test` se ejecutan las 19 pruebas de DAO, incluidas las de login y el historial del modal.
 
 ```bash
-# Suite rápida, sin motor de base de datos: 72/72
+# Suite rápida, sin motor de base de datos: 72 ejecutadas, 0 fallos
 JUNIT_EXCLUDE='libreria\.dao\..*' bash test/run-junit-tests.sh
 
-# Suite completa contra la base ficticia: 90/90
+# Suite completa contra la base ficticia: 91/91
 DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=libreria_brenda_test \
 DB_USER=root DB_PASSWORD=tu_clave bash test/run-junit-tests.sh
 ```
@@ -150,12 +269,22 @@ bash test/integration/http-tests.sh
 
 La suite de RF02 crea correos `rf02.*@test.local` por ejecución y los elimina al terminar, para no acumular bloqueos ni depender de reiniciar Tomcat.
 
+### CI en GitHub Actions
+
+El workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) se ejecuta en cada push a `main` o a ramas `qa/**`, en pull requests y de forma manual. Tiene dos jobs independientes:
+
+1. **Tests unitarios (sin BD):** compila y ejecuta la suite excluyendo `libreria.dao`; no necesita MariaDB.
+2. **Login de clientes y administradores (DAO + BD):** levanta MariaDB 11.8 como servicio, carga `database/schema_test.sql` y `database/fixtures_test.sql`, y ejecuta las pruebas de DAO contra `libreria_brenda_test`.
+
+Los resultados de la última ejecución se consultan en la pestaña **Checks** del PR #3. La suite HTTP no está en CI porque requiere un Tomcat desplegado; se ejecuta localmente contra `:8091` y la base de pruebas.
+
 ## Estado verificado y limitaciones
 
 **Verificado en ejecución el 21/10/2026** (OpenJDK 21.0.12, Tomcat 11.0.26, MariaDB 11.8.9 en WSL2):
 
-- **72/72 tests JUnit** sin base de datos y **90/90** con `libreria_brenda_test` (incluye 18 pruebas de DAO de login).
+- **72 tests JUnit ejecutados sin base de datos** (0 fallos) y **91/91** con `libreria_brenda_test` (incluye 19 pruebas de DAO: login y pedidos del modal).
 - **62/62 comprobaciones HTTP de RF02** y **80/80 comprobaciones HTTP generales** contra la base ficticia.
+- **CI:** dos jobs de GitHub Actions en verde sobre el PR #3; el detalle de la corrida se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-21.txt).
 - RF02 cubre cliente activo/inactivo, contraseña incorrecta, correo inexistente y mal formado, límite de 120 caracteres, BCrypt, separación de roles, autorización y rotación de sesión en login y registro.
 - Se corrigieron session fixation, el fallo con hashes BCrypt truncados y la aceptación de correos más largos que la columna.
 - Regresión general en verde: acceso anónimo, validación de productos, compra, cupones, cancelación, stock, límite de 10 productos y payloads malformados.
@@ -166,7 +295,8 @@ La suite de RF02 crea correos `rf02.*@test.local` por ejecución y los elimina a
 - Pruebas de carga y concurrencia; cobertura instrumentada (JaCoCo). No se afirma ningún porcentaje.
 - Tokens CSRF y atributo `SameSite` en cookies (QA-15).
 - Bloqueo de login en memoria: es por correo y compartido entre roles, por lo que cinco fallos pueden bloquear temporalmente a un administrador (DoS). Está documentado en [RF02](docs/QA/RF02_LOGIN.md#6-limitaciones-y-riesgos-abiertos).
-- GitHub Actions: el workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) se ejecutó en GitHub sobre el commit `32d7179`; los dos jobs terminaron en `success` ([evidencia](docs/QA/evidencias/ci-2026-10-21.txt)). La suite HTTP sigue fuera de CI.
+- GitHub Actions cubre los jobs unitarios y DAO; la suite HTTP sigue fuera de CI porque requiere Tomcat. La corrida verificada del PR #3 se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-21.txt).
+- La demo es local (`localhost`), no una URL pública; no se afirma disponibilidad para reclutadores ni despliegue en producción.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.
 
 **Saneamiento de datos:** el backup del árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. **El historial de Git no se reescribió**, así que los valores anteriores siguen en commits públicos; el alcance y el riesgo residual están en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).

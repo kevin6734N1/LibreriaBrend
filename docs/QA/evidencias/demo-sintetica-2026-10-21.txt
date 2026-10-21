@@ -1,0 +1,130 @@
+DEMO LOCAL CON DATOS SINTÉTICOS — Librería Brenda
+Fecha: 2026-10-21
+Entorno: Windows 11, OpenJDK 21.0.12, Tomcat 11.0.26 (:8080),
+          MariaDB de desarrollo (:3306) para la demo,
+          MariaDB de pruebas en WSL2 (:3307) para la regresión.
+
+1. DIAGNÓSTICO
+--------------
+El Tomcat de :8080 no leía el backup del repositorio. `setenv.bat` definía
+DB_HOST=127.0.0.1, DB_PORT=3307 y DB_NAME=libreria_brenda; esas variables
+tienen prioridad sobre WEB-INF/db.properties. La base real de esa instancia
+tenía 32 clientes y 29 pedidos, por eso el panel seguía mostrando los datos
+originales.
+
+La base real de 3307 NO se modificó. Comprobación de solo lectura:
+
+  clientes        32
+  pedidos         29
+  emails_example   0
+  nombres_demo     0
+
+2. CARGA DE LA BASE DEMO AISLADA
+--------------------------------
+Archivo: database/demo/libreria_brenda_demo.sql
+Destino: libreria_brenda_demo en 127.0.0.1:3306
+
+Salida real:
+
+  clientes                  16
+  pedidos                   16
+  items                     31
+  comprobantes               8
+  dnis_unicos               16
+  emails_example            16
+  nombres_demo              16
+  telefonos_demo            16
+  direcciones_demo          16
+  pedidos_direccion_demo    16
+  huerfanos_pedidos          0
+  huerfanos_items            0
+  huerfanos_comprobantes     0
+
+Consultas de control (todas deben dar 0):
+
+  clientes_no_demo           0
+  emails_no_example          0
+  dnis_no_999                0
+  telefonos_no_demo          0
+  direcciones_no_demo        0
+  pedidos_dir_no_demo        0
+  admin_no_demo              0
+
+La base `libreria_brenda` de 3306 también quedó intacta: 16 clientes y
+16 pedidos antes y después de cargar la demo.
+
+3. LOGIN DE ADMINISTRADOR
+-------------------------
+POST http://localhost:8080/LibreriaBrend/LoginServlet
+  email=admin@example.com
+  password=Admin#2026
+  rol=admin
+  codigo=EMP-DEMO
+
+Respuesta real:
+
+  HTTP/1.1 200
+  Content-Type: application/json;charset=UTF-8
+  {"ok":true,"redirect":"admin.jsp"}
+
+4. LISTADO DESDE ClienteServlet
+--------------------------------
+GET http://localhost:8080/LibreriaBrend/ClienteServlet (con sesión admin)
+
+  HTTP 200
+  filas 16
+  nombres "Cliente Demo": 16
+  correos @example.com: 16
+  DNI 999000xx: 16
+  teléfonos 9000001xx: 16
+  direcciones "Av. Demo ...": 16
+  coincidencias con nombres/direcciones antiguas: 0
+
+5. PANEL EN NAVEGADOR
+---------------------
+Página: http://localhost:8080/LibreriaBrend/clientes.jsp
+Sesión: Administrador Demo (ADMIN)
+
+  Filas renderizadas: 16
+  Filas con datos antiguos: 0
+  Primera fila: Cliente Demo Apellido 01 · 99900001 ·
+                cliente01@example.com · 900000101 · Av. Demo 101, Lima
+  Modal del cliente 01: 8 pedidos del seed
+    PED-1788638730511  05/09/2026  S/ 102.00  Confirmado
+    PED-1783390538284  06/07/2026  S/ 42.84   Pendiente
+    PED-1783106072691  03/07/2026  S/ 43.78   Pendiente
+    PED-1783104538829  03/07/2026  S/ 3.00    Pendiente
+    PED-1783047700759  02/07/2026  S/ 8.50    Pendiente
+    PED-1783046974349  02/07/2026  S/ 9.00    Enviado
+    PED-1783026074772  02/07/2026  S/ 85.50   Confirmado
+    PED-1783021834713  02/07/2026  S/ 248.80  Enviado
+
+6. REGRESIÓN
+------------
+Entorno de pruebas separado: Tomcat :8091, MariaDB :3307,
+DB_NAME=libreria_brenda_test.
+
+  JUnit sin BD:
+    72 tests found
+    72 tests successful
+    0 tests failed
+
+  JUnit con BD:
+    90 tests found
+    90 tests successful
+    0 tests failed
+
+  HTTP RF02:
+    RESULTADO RF02: PASS=62 FAIL=0
+
+  HTTP general:
+    RESULTADO: PASS=80 FAIL=0
+
+7. ALCANCE
+----------
+- La demo usa una base nueva y aislada; no se sobrescribió ni eliminó ninguna
+  base existente.
+- `libreria_brenda_test` se usó solo para las suites automatizadas.
+- No se hizo merge del PR #3 ni se reescribió el historial de Git.
+- El historial anterior sigue conteniendo los valores antiguos; el riesgo
+  residual está documentado en docs/QA/SEGURIDAD_REPOSITORIO.md.

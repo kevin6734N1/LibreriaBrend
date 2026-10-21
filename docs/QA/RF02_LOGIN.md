@@ -36,7 +36,7 @@ preparación/limpieza). Todas en verde.
 | `RF02-AZ-01..06` | acceso anónimo/cliente/admin a recursos protegidos y logout | Integración / autorización | 6/6 |
 | `RF02-SES-01..04` | rotación de sesión en login y registro | TDD / seguridad | 5/5 |
 | `RF02-BR-01..05` | 5.º y 6.º intento, aislamiento por correo, reset tras éxito | Integración / regresión | 5/5 |
-| `libreria.dao.*` (JUnit) | 18 pruebas de `ClienteDAO` y `AdministradorDAO` | Caracterización / regresión | 18/18 |
+| `libreria.dao.*` (JUnit) | 19 pruebas de `ClienteDAO`, `AdministradorDAO` y `ClienteDAOPedidosTest` | Caracterización / regresión | 19/19 |
 | `ValidadorEmailTest` (JUnit) | 16 pruebas de formato y longitud | TDD / unitaria | 16/16 |
 | `PasswordUtilTest` (JUnit) | 12 pruebas, incluidas 2 nuevas de hash malformado | Regresión / defecto corregido | 12/12 |
 | `ControlIntentosLoginTest` (JUnit) | 12 pruebas, incluida concurrencia de 5 fallos | Regresión / concurrencia | 12/12 |
@@ -67,7 +67,7 @@ No se inventó una fase RED para comportamiento que ya funcionaba.
 - **GREEN:** se valida el formato completo (`$2a$` + costo + 53 caracteres)
   antes de llamar a jBCrypt. Un dato legado ya no puede tumbar el login con
   un 500; se rechaza como credencial inválida.
-- **Resultado:** 90/90 JUnit con base de datos.
+- **Resultado:** 91/91 JUnit con base de datos.
 
 ### 3.3 Session fixation (defecto real)
 
@@ -98,17 +98,17 @@ La primera corrida tuvo 4 fallos; no todos eran defectos de producción:
 | Suite | Comando | Resultado |
 |---|---|---|
 | JUnit sin BD (DAO excluidos) | `JUNIT_EXCLUDE='libreria\.dao\..*' bash test/run-junit-tests.sh` | **72/72** |
-| JUnit con `libreria_brenda_test` | `DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=libreria_brenda_test DB_USER=root DB_PASSWORD= bash test/run-junit-tests.sh` | **90/90** |
+| JUnit con `libreria_brenda_test` | `DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=libreria_brenda_test DB_USER=root DB_PASSWORD= bash test/run-junit-tests.sh` | **91/91** |
 | HTTP RF02 | `BASE=... DB_... bash test/integration/rf02-login-tests.sh` | **62/62** |
 | HTTP general (regresión) | `BASE=... DB_... bash test/integration/http-tests.sh` | **80/80** |
-| GitHub Actions | workflow `junit.yml` sobre `32d7179` | **2/2 jobs success** |
+| GitHub Actions | workflow `junit.yml` en el PR #3 | **2/2 jobs success** |
 
 Evidencias crudas:
 
-- [JUnit sin BD](evidencias/junit-unit-2026-10-21.txt)
-- [JUnit con BD](evidencias/junit-db-2026-10-21.txt)
-- [HTTP RF02](evidencias/rf02-http-2026-10-21.txt)
-- [HTTP general](evidencias/http-general-2026-10-21.txt)
+- [JUnit sin BD](evidencias/junit-unit-2026-10-21-final.txt)
+- [JUnit con BD](evidencias/junit-db-2026-10-21-final.txt)
+- [HTTP RF02](evidencias/rf02-http-2026-10-21-final.txt)
+- [HTTP general](evidencias/http-general-2026-10-21-final.txt)
 - [GitHub Actions](evidencias/ci-2026-10-21.txt)
 
 No se midió cobertura con JaCoCo ni se afirma ningún porcentaje.
@@ -164,9 +164,8 @@ El script HTTP crea sus propios clientes y administrador ficticios con correos
    el login CSRF queda fuera de este incremento.
 8. **Sin auditoría de accesos:** no se registra quién intentó entrar, desde
    qué IP ni el resultado.
-9. **Cobertura de CI:** el workflow se ejecutó en GitHub sobre `32d7179` y
-   ambos jobs pasaron (unitarios y DAO con MariaDB). No incluye la suite HTTP
-   ni pruebas de carga.
+9. **Cobertura de CI:** el workflow se ejecuta en el PR #3 con dos jobs
+   (unitarios y DAO con MariaDB). No incluye la suite HTTP ni pruebas de carga.
 10. **Suite HTTP fuera de CI:** requiere Tomcat y MariaDB; no se automatizó en
     el workflow para no prometer una ejecución no verificada.
 11. **Sin pruebas de carga:** no se evaluó concurrencia HTTP real ni latencia
