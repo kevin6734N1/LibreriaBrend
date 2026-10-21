@@ -59,4 +59,14 @@ class PasswordUtilTest {
     void verificar_hashEnTextoPlano_noLanzaExcepcionYDevuelveFalse() {
         assertFalse(PasswordUtil.verificar("MiClave123", "MiClave123"));
     }
+
+    @Test
+    void verificar_hashBCryptTruncado_noLanzaExcepcionYDevuelveFalse() {
+        assertFalse(PasswordUtil.verificar("MiClave123", "$2a$10$abc"));
+    }
+
+    @Test
+    void verificar_hashConPrefijoDesconocido_noLanzaExcepcionYDevuelveFalse() {
+        assertFalse(PasswordUtil.verificar("MiClave123", "$9x$10$abcdefghijklmnopqrstuv"));
+    }
 }
