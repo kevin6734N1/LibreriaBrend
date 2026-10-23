@@ -1,8 +1,8 @@
 # Saneamiento de datos del repositorio
 
-**Fecha:** 2026-10-21
-**Estado:** árbol de trabajo saneado. **El historial de Git no se reescribió.**
-**Alcance:** `libreria_brenda_backup.sql` y credenciales locales de la documentación.
+**Fecha de saneamiento del árbol:** 2026-10-21. **Actualización del historial:** 2026-10-23.
+**Estado:** el árbol y los historiales de `main` y `qa/rf02-login` fueron saneados y publicados en un repositorio **privado**. **Persisten referencias y objetos históricos accesibles mediante GitHub**, por lo que todavía no debe hacerse público.
+**Alcance:** respaldo SQL, datos antiguos en `WebContent/clientes.jsp`, documentación de credenciales locales e historial de las ramas publicables.
 
 ## 1. Confirmación del propietario
 
@@ -13,8 +13,9 @@ El propietario revisó visualmente los clientes y confirmó:
 - Su DNI y teléfono mostrados también son ficticios.
 - El propietario advirtió que no podía garantizar que todos los DNI fueran
   ficticios, por eso se pidió reemplazar todos los DNI.
-- Se autorizó un saneamiento mínimo: sin borrar el backup, sin reescribir el
-  historial y conservando los tres commits de `qa/rf02-login`.
+- El **21 de octubre** se autorizó inicialmente un saneamiento mínimo sin reescribir
+  el historial. **El 23 de octubre**, una autorización posterior permitió la
+  reescritura controlada de las ramas publicables y su publicación privada.
 
 ## 2. Cambios aplicados en el árbol actual
 
@@ -57,49 +58,71 @@ Evidencia agregada (sin datos personales):
 Las suites de regresión se volvieron a ejecutar después del cambio:
 **72/72 JUnit sin BD, 91/91 JUnit con BD, 62/62 HTTP RF02 y 80/80 HTTP general**.
 
-## 4. Riesgo residual: el historial anterior
+## 4. Reescritura histórica ejecutada el 2026-10-23 y riesgo residual
 
-Este saneamiento **no elimina** los valores anteriores del historial de Git.
-Los commits ya publicados en `main` siguen conteniendo el nombre y correo
-personal, los DNI originales (incluidos los que pudieron ser reales) y los
-hashes antiguos. Cualquiera puede consultarlos en el historial público.
+Con autorización expresa, se creó un espejo privado de respaldo y se reescribió
+el historial de las ramas publicables. El saneamiento histórico sustituyó **41
+valores identificados** en `libreria_brenda_backup.sql` y
+`WebContent/clientes.jsp`, preservando las pruebas, el código y las evidencias.
 
-Además, si el cambio del backup se incluye en el PR, el diff mostrará las
-líneas antiguas eliminadas. No es una exposición nueva —ya estaban en `main`—
-pero sí queda visible en la revisión.
+El 2026-10-23 se publicaron **en una única transacción atómica** las ramas:
 
-Para eliminar esos valores del historial haría falta una reescritura coordinada
-(`git filter-repo` o BFG) y un push forzado, o poner el repositorio en privado.
-**No se ejecutó ninguna de las dos acciones**, por indicación expresa de no
-reescribir el historial.
+- `main` → `965b34bc5a435c938a70620fdb4e859608a7beb8`.
+- `qa/rf02-login` → `7cec57b145cfc32050ec9a76d9789e5b65eebd47`.
 
-## 5. Qué revisar antes de publicar
+Se utilizó `git push --atomic` con candados `--force-with-lease` explícitos,
+sin `--force` simple. El repositorio **permaneció privado**.
+El PR #3 recalculó su comparación: **cero coincidencias de los 41 valores
+buscados** y ninguna ruta de archivos de LibaaS; conservó el código y las
+evidencias de RF02. Las ejecuciones nuevas de GitHub Actions #9, #10 y #11
+terminaron correctamente, con sus dos jobs cada una.
 
-1. Confirmar que los DNI originales que pudieron ser reales ya no importan en el
-   historial público. Si importan, la reescritura del historial es la única
-   solución efectiva.
-2. Revisar si el correo personal debe seguir apareciendo en commits antiguos.
-3. Decidir si las evidencias de auditoría con direcciones e IDs de pedido se
-   conservan. El propietario confirmó que esos datos son ficticios y no
-   contienen nombre, correo ni DNI; se dejaron para no romper la trazabilidad.
-4. Autorizar el push y el PR solo después de aceptar el riesgo residual del
-   historial.
+**Importante: esto no equivale a una purga completa de GitHub.** Aunque las
+puntas actuales están saneadas, el commit original de `main` seguía siendo
+consultable con autenticación después de la reescritura. Las referencias
+internas de los PR #1 y #2 todavía apuntaban a commits antiguos. También
+pueden subsistir diffs cacheados, ejecuciones anteriores de Actions, clones y
+copias externas. El escaneo de 41 valores conocidos tampoco demuestra la
+ausencia de cualquier otro dato personal.
 
-## 6. Comandos de verificación (sin imprimir datos)
+Los respaldos que conservan el historial anterior y los mapas de sustitución
+están **fuera del repositorio rastreado** y deben permanecer privados.
+
+## 5. Pendientes antes de volver a hacer público el repositorio
+
+1. Comprobar y tratar los **objetos antiguos todavía accesibles en GitHub**,
+   especialmente por SHA y referencias internas de PR. Evaluar una solicitud a
+   GitHub Support; no asumir que la reescritura o el cierre de un PR los elimina.
+2. Coordinar con los colaboradores la sustitución de clones antiguos después
+   de respaldar su trabajo propio. No republicar ramas `backup/*` o `recovery/*`.
+3. Revisar `screenshots/` antes de versionarla. Al cierre de este saneamiento
+   seguía fuera de Git.
+4. Mantener la decisión consciente sobre metadatos de autor y datos sintéticos
+   de demostración (nombres, teléfonos y direcciones). Los metadatos de autor
+   se conservaron; las credenciales demo no deben reutilizarse.
+5. Conservar las evidencias históricas tal como fueron capturadas. Algunos SHA
+   originales allí mencionados ya no resuelven mediante las ramas nuevas;
+   el mapeo de equivalencias se mantiene **privado**.
+
+La privacidad actual del repositorio es una protección temporal, no una garantía
+de que desaparezcan clones o cachés ya existentes.
+
+## 6. Comandos de verificación no destructivos
 
 ```bash
-# Importar en una base aislada y comprobar integridad
-mysql -h 127.0.0.1 -P 3307 -u root < libreria_brenda_backup.sql
-mysql -h 127.0.0.1 -P 3307 -u root -N -B <<'SQL'
-USE libreria_brenda;
-SELECT COUNT(*), COUNT(DISTINCT dni), SUM(dni LIKE '999%') FROM clientes;
-SELECT COUNT(*), COUNT(DISTINCT email), SUM(email LIKE '%@example.com') FROM clientes;
-SELECT SUM(password_hash LIKE '$2a$10$%' AND CHAR_LENGTH(password_hash) = 60) FROM clientes;
-SQL
+# Confirmar las dos puntas remotas sin alterar el repositorio
+git ls-remote --heads origin
 
-# Buscar restos del nombre/correo personal solo en el árbol actual.
-# Ejecuta git grep con tus propios tokens y no pegues el resultado.
-git grep -n "<token-personal>" -- libreria_brenda_backup.sql || true
+# Comprobar la rama local y los cambios pendientes
+git status -sb
+
+# Verificar integridad del repositorio local
+git fsck --full
 ```
 
-No pegues resultados con datos en issues, PRs o capturas.
+Las pruebas SQL de importación se realizaron previamente **en instancias
+aisladas**, no en la base comercial ni en la demo. No ejecutar importaciones
+sobre un puerto o servidor preexistente sin verificar expresamente que sea un
+entorno de pruebas desechable.
+
+No pegar datos personales ni resultados sensibles en issues, PR o capturas.
