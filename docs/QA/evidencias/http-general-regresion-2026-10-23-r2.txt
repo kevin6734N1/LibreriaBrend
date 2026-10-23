@@ -1,0 +1,107 @@
+# Ejecución: 2026-10-23T17:13:03-05:00 — HTTP general (regresión tras corrección RF03)
+# Comando: BASE=http://localhost:8091/LibreriaBrend DB_PORT=3307 bash test/integration/http-tests.sh
+
+== Reiniciando fixtures de prueba ==
+PASS  BD de prueba inicia sin pedidos
+PASS  BD de prueba tiene 14 productos ficticios
+
+== IT-01 / QA-02: acceso sin sesión ==
+PASS  GET PedidoServlet anónimo -> 401
+PASS  GET anónimo no expone pedidos
+PASS  Cancelar pedido anónimo -> 401
+PASS  Crear pedido anónimo -> 401
+PASS  Ningún pedido creado por anónimos
+PASS  POST producto sin sesión admin -> 401
+PASS  admin.jsp sin sesión -> 302
+
+== IT-02: usuario inactivo ==
+PASS  Login de cliente inactivo rechazado
+PASS  Sesión no creada para inactivo
+
+== IT-03: bloqueo tras 5 fallos ==
+PASS  Tras 4 fallos aún no bloquea
+PASS  El 5.º fallo procesa credenciales y activa el bloqueo
+PASS  Tras 5 fallos el 6.º intento queda bloqueado
+
+== IT-04 / IT-05 / QA-06 / QA-10: validación de productos ==
+PASS  Login admin de prueba
+PASS  Precio 0 -> 400
+PASS  Precio 0 no inserta
+PASS  Precio -1 -> 400
+PASS  Precio -1 no inserta
+PASS  Stock -1 -> 400
+PASS  Stock -1 no inserta
+PASS  Stock abc -> 400
+PASS  Stock abc no inserta ni vale 0
+PASS  Precio abc -> 400
+PASS  Precio abc no inserta
+PASS  Nombre vacío -> 400
+PASS  Categoría vacía -> 400
+PASS  Categoría inexistente -> 400
+PASS  Categoría inexistente da error explícito
+PASS  Categoría inexistente no usa fallback ni inserta
+PASS  Ninguna fila quedó en categoría 1 por fallback
+
+== Caso válido de producto y edición ==
+PASS  Crear producto válido -> 200
+PASS  Producto válido insertado (id=20)
+PASS  Categoría asignada correctamente
+PASS  Editar con stock 0 (válido) -> 200
+PASS  Stock 0 aceptado
+PASS  Editar stock abc -> 400
+PASS  Edición inválida no modifica stock
+PASS  Editar con categoría inexistente -> 400
+PASS  Edición inválida no cambia categoría
+
+== IT-06 / IT-07 / IT-09 / IT-10: pedidos ==
+PASS  Crear pedido con sesión -> 200
+PASS  Pedido creado (PED-1792793599043)
+PASS  Precio recalculado desde BD (15.00+10.00=25.00)
+PASS  Stock descontado (100-3)
+PASS  Cliente A ve su pedido
+PASS  Cliente B NO ve el pedido de A
+PASS  B no puede cancelar pedido de A -> 400
+PASS  Pedido de A sigue PENDIENTE
+PASS  Stock no cambia por cancelación ajena
+PASS  A cancela su pedido PENDIENTE -> 200
+PASS  Pedido queda CANCELADO
+PASS  Stock repuesto al cancelar (97+3)
+PASS  Segunda cancelación -> 400
+PASS  Segunda cancelación no infla stock
+
+== Cupón y cancelación ==
+PASS  Pedido con cupón -> 200
+PASS  Total con 10% de descuento (15-1.50+10=23.50)
+PASS  Uso de cupón registrado
+PASS  Cancelar pedido con cupón -> 200
+PASS  Cupón liberado al cancelar
+PASS  Stock repuesto tras cupón
+
+== IT-08: límite de productos distintos ==
+PASS  11 productos distintos -> 400
+PASS  Rechazo por máximo de 10
+PASS  No se creó pedido con 11
+PASS  10 productos distintos -> 200
+PASS  10 productos: subtotal 50 y envío gratis
+
+== QA-09: stock insuficiente y payload malformado ==
+PASS  Stock insuficiente -> 400
+PASS  Mensaje de stock insuficiente
+PASS  Stock no se modifica
+PASS  No se crea pedido sin stock
+PASS  item_id sin item_qty -> 400
+PASS  Sin mensajes internos de JVM
+PASS  Sin 'Index out of bounds'
+PASS  Sin 'Cannot load from object array'
+PASS  item_id no numérico -> 400
+PASS  Cantidad 0 -> 400
+PASS  Carrito vacío -> 400
+
+== IT-07: pedido confirmado no se cancela ==
+PASS  Admin confirma pedido -> 302
+PASS  Pedido CONFIRMADO en BD
+PASS  Cliente no cancela pedido confirmado -> 400
+PASS  Pedido confirmado sigue CONFIRMADO
+
+==============================================
+RESULTADO: PASS=80 FAIL=0

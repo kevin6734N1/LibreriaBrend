@@ -5,8 +5,19 @@
 # en tiempo real: esa frontera se valida de forma determinista con reloj
 # inyectado en test/libreria/util/ControlIntentosLoginExpiracionTest.java.
 #
+# SEGURIDAD DE DATOS (correccion posterior a la revision del PR #4):
+#   - Toda precondicion de aislamiento es FATAL: si alguna falla, el script
+#     termina con exit 1 ANTES de registrar el trap y ANTES de cualquier
+#     INSERT/DELETE. El trap de limpieza unicamente se instala despues de
+#     que todas las precondiciones pasan.
+#   - Exige literalmente DB_NAME=libreria_brenda_test (no una comparacion
+#     contra la propia variable) y que SELECT DATABASE() devuelva ese
+#     mismo esquema.
+#   - El cleanup elimina SOLO los correos creados por ESTA ejecucion
+#     (nunca un LIKE generico sobre rf03.*@test.local).
+#
 # Requisitos:
-#   - Tomcat de pruebas con el contexto /LibreriaBrend desplegado (8091).
+#   - Tomcat de pruebas con el contexto /LibreriaBrend desplegado en :8091.
 #   - Base libreria_brenda_test creada con database/schema_test.sql + fixtures.
 #   - Cliente mysql accesible.
 #
@@ -14,9 +25,6 @@
 #   BASE=http://localhost:8091/LibreriaBrend \
 #   DB_PORT=3307 DB_USER=root DB_PASSWORD= \
 #   bash test/integration/rf03-bloqueo-tests.sh
-#
-# Crea clientes/administrador sinteticos unicos rf03.*@test.local por
-# ejecucion, por lo que no contamina RF02 ni las demas suites.
 set -u
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -42,6 +50,14 @@ ko()  { FAIL=$((FAIL+1)); FAILS+=("$1"); echo "FAIL  $1 | esperado=[$2] actual=[
 eq()  { if [ "$2" = "$3" ]; then ok "$1"; else ko "$1" "$2" "$3"; fi; }
 contains()    { case "$3" in *"$2"*) ok "$1";; *) ko "$1" "contiene '$2'" "$3";; esac; }
 notcontains() { case "$3" in *"$2"*) ko "$1" "NO contiene '$2'" "$3";; *) ok "$1";; esac; }
+
+# FATAL para precondiciones: aborta sin escrituras ni limpieza.
+abortar() {
+  echo "FALLO DE PRECONDICION: $1"
+  echo "ABORTADO: no se ejecuto ningun INSERT ni DELETE."
+  rm -rf "$TMP"
+  exit 1
+}
 
 login() { # jar email password rol [codigo]
   local jar=$1 email=$2 pass=$3 rol=$4 codigo=${5-}
@@ -71,24 +87,58 @@ DNI_INDEP="$(printf '1%07d' $(( (RANDOM * 32768 + RANDOM) % 10000000 )))"
 DNI_RESET="$(printf '0%07d' $(( (RANDOM * 32768 + RANDOM) % 10000000 )))"
 DNI_ROL="$(printf '6%07d' $(( (RANDOM * 32768 + RANDOM) % 10000000 )))"
 
+# Solo los correos de ESTA ejecucion (para cleanup y verificaciones).
+MIS_CLIENTES="'$EMAIL_CUATRO','$EMAIL_BLOQ','$EMAIL_INDEP','$EMAIL_RESET','$EMAIL_ROL'"
+MIS_ADMINS="'$EMAIL_ROL'"
+
 HASH_CLI="$(sed -n "/INSERT INTO clientes/,/;/p" "$ROOT/database/fixtures_test.sql" | grep -oE '\$2a\$10\$[./A-Za-z0-9]+' | head -1)"
 HASH_ADMIN="$(sed -n "/INSERT INTO administradores/,/;/p" "$ROOT/database/fixtures_test.sql" | grep -oE '\$2a\$10\$[./A-Za-z0-9]+' | head -1)"
 
 cleanup() {
-  q "DELETE FROM clientes WHERE email LIKE 'rf03.%@test.local'" >/dev/null
-  q "DELETE FROM administradores WHERE email LIKE 'rf03.%@test.local'" >/dev/null
+  q "DELETE FROM administradores WHERE email IN ($MIS_ADMINS)" >/dev/null
+  q "DELETE FROM clientes WHERE email IN ($MIS_CLIENTES)" >/dev/null
   rm -rf "$TMP"
 }
-trap cleanup EXIT
 
-echo "== Preparacion: aislamiento obligatorio (base de pruebas) =="
-eq "La conexion apunta a libreria_brenda_test" "$DB_NAME" "$(q 'SELECT DATABASE()')"
-eq "Fixture de clientes cargado" "3" "$(q 'SELECT COUNT(*) FROM clientes')"
-eq "Fixture de administradores cargado" "1" "$(q 'SELECT COUNT(*) FROM administradores')"
-eq "En este motor NO existe la base comercial libreria_brenda" "" \
-   "$(q "SHOW DATABASES LIKE 'libreria_brenda'")"
-eq "En este motor NO existe la base demo" "" \
-   "$(q "SHOW DATABASES LIKE 'libreria_brenda_demo'")"
+echo "== Preparacion: aislamiento obligatorio (todas las condiciones son fatales) =="
+
+# 1) El esquema exigido es literal, no la propia variable.
+if [ "$DB_NAME" != "libreria_brenda_test" ]; then
+  abortar "DB_NAME='$DB_NAME' (se exige literalmente libreria_brenda_test)"
+fi
+ok "DB_NAME literalmente libreria_brenda_test"
+
+# 2) El Tomcat debe ser el de pruebas aislado (:8091).
+case "$BASE" in
+  *:8091*) ok "BASE apunta al Tomcat de pruebas aislado (:8091)" ;;
+  *) abortar "BASE='$BASE' no apunta al Tomcat de pruebas :8091" ;;
+esac
+
+# 3) La conexion activa debe devolver ese mismo esquema.
+DB_ACTUAL="$(q 'SELECT DATABASE()')"
+if [ "$DB_ACTUAL" != "libreria_brenda_test" ]; then
+  abortar "SELECT DATABASE()='$DB_ACTUAL' (se exige libreria_brenda_test)"
+fi
+ok "SELECT DATABASE() = libreria_brenda_test"
+
+# 4) Fixtures de la base de pruebas presentes.
+[ "$(q 'SELECT COUNT(*) FROM clientes')" = "3" ] \
+  || abortar "fixtures de clientes ausentes o alterados en libreria_brenda_test"
+ok "Fixture de clientes cargado (3)"
+[ "$(q 'SELECT COUNT(*) FROM administradores')" = "1" ] \
+  || abortar "fixtures de administradores ausentes o alterados en libreria_brenda_test"
+ok "Fixture de administradores cargado (1)"
+
+# 5) En este motor NO existen las bases prohibidas.
+[ -z "$(q "SHOW DATABASES LIKE 'libreria_brenda'")" ] \
+  || abortar "el motor expone la base comercial libreria_brenda"
+ok "En este motor NO existe la base comercial libreria_brenda"
+[ -z "$(q "SHOW DATABASES LIKE 'libreria_brenda_demo'")" ] \
+  || abortar "el motor expone la base demo libreria_brenda_demo"
+ok "En este motor NO existe la base demo"
+
+# Precondiciones superadas: a partir de aqui si se instala el trap de limpieza.
+trap cleanup EXIT
 
 q "INSERT INTO clientes (nombres, apellidos, dni, email, telefono, direccion, password_hash, activo)
    VALUES ('Cliente', 'RF03 Cuatro', '$DNI_CUATRO', '$EMAIL_CUATRO', '900000301', 'Av. Pruebas 301, Lima', '$HASH_CLI', 1)"
@@ -102,13 +152,13 @@ q "INSERT INTO clientes (nombres, apellidos, dni, email, telefono, direccion, pa
    VALUES ('Cliente', 'RF03 Roles', '$DNI_ROL', '$EMAIL_ROL', '900000305', 'Av. Pruebas 305, Lima', '$HASH_CLI', 1)"
 q "INSERT INTO administradores (nombre, email, password_hash, codigo_empleado)
    VALUES ('Admin RF03 Roles', '$EMAIL_ROL', '$HASH_ADMIN', '$CODIGO_ROL')"
-eq "Cuentas sinteticas rf03 creadas (4 clientes +1 cliente/admin compartido)" "5" \
-   "$(q "SELECT COUNT(*) FROM clientes WHERE email LIKE 'rf03.%@test.local'")"
-eq "Administrador sintetico rf03 creado (mismo correo que un cliente)" "1" \
-   "$(q "SELECT COUNT(*) FROM administradores WHERE email LIKE 'rf03.%@test.local'")"
+eq "Cuentas sinteticas de ESTA ejecucion creadas (5 clientes)" "5" \
+   "$(q "SELECT COUNT(*) FROM clientes WHERE email IN ($MIS_CLIENTES)")"
+eq "Administrador sintetico creado (mismo correo que un cliente)" "1" \
+   "$(q "SELECT COUNT(*) FROM administradores WHERE email IN ($MIS_ADMINS)")"
 
 echo
-echo "== RF03-BL-01/02: cuatro fallos permiten seguir; el 5.º activa el bloqueo =="
+echo "== RF03-BL-01: cuatro fallos no bloquean y permiten autenticar =="
 J_CUATRO="$TMP/cuatro.jar"
 for _ in 1 2 3; do login "$J_CUATRO" "$EMAIL_CUATRO" 'mala' cliente >/dev/null; done
 BODY=$(login "$J_CUATRO" "$EMAIL_CUATRO" 'mala' cliente)
@@ -116,16 +166,19 @@ notcontains "RF03-BL-01 tras 3 fallos el 4.º aun no encuentra bloqueo" 'Demasia
 BODY=$(login "$J_CUATRO" "$EMAIL_CUATRO" 'Cliente#2026' cliente)
 contains "RF03-BL-01 cuatro fallos: autenticacion correcta posible" '"ok":true' "$BODY"
 
-BODY=$(login "$J_CUATRO" "$EMAIL_CUATRO" 'mala' cliente)
+echo
+echo "== RF03-BL-02: el 5.º fallo PROPIO activa el bloqueo =="
+J_BLOQ="$TMP/bloq.jar"
+for _ in 1 2 3 4; do login "$J_BLOQ" "$EMAIL_BLOQ" 'mala' cliente >/dev/null; done
+# Quinto fallo consecutivo de este ciclo (sin ningun exito intermedio):
+BODY=$(login "$J_BLOQ" "$EMAIL_BLOQ" 'mala' cliente)
 notcontains "RF03-BL-02 el 5.º fallo procesa credenciales (no esta bloqueado aun)" 'Demasiados' "$BODY"
 contains "RF03-BL-02 el 5.º fallo informa credenciales incorrectas" 'incorrectos' "$BODY"
 
 echo
 echo "== RF03-BL-03/04/05: bloqueo activo, minutos restantes y password correcta =="
-J_BLOQ="$TMP/bloq.jar"
-for _ in 1 2 3 4 5; do login "$J_BLOQ" "$EMAIL_BLOQ" 'mala' cliente >/dev/null; done
 BODY=$(login "$J_BLOQ" "$EMAIL_BLOQ" 'mala' cliente)
-contains "RF03-BL-03 el 6.º intento queda bloqueado" 'Demasiados intentos' "$BODY"
+contains "RF03-BL-03 el 6.º intento recibe el mensaje de bloqueo" 'Demasiados intentos' "$BODY"
 contains "RF03-BL-03 el bloqueo responde JSON ok:false" '"ok":false' "$BODY"
 eq "RF03-BL-03 el bloqueo conserva el contrato HTTP 200" "200" "$(login_code "$TMP/code.jar" "$EMAIL_BLOQ" 'mala' cliente)"
 BODY=$(login "$J_BLOQ" "$EMAIL_BLOQ" 'mala' cliente)
@@ -164,11 +217,11 @@ BODY=$(login "$TMP/adminlibre.jar" "rf03.adminlibre.${RUN}@test.local" 'Admin#20
 notcontains "RF03-BL-08 control: otro correo no esta bloqueado (fallo de credenciales normal)" 'Demasiados' "$BODY"
 
 echo
-echo "== Limpieza =="
+echo "== Limpieza (solo correos de esta ejecucion) =="
 cleanup
 trap - EXIT
-eq "Cuentas sinteticas RF03 eliminadas" "0" \
-   "$(q "SELECT (SELECT COUNT(*) FROM clientes WHERE email LIKE 'rf03.%@test.local') + (SELECT COUNT(*) FROM administradores WHERE email LIKE 'rf03.%@test.local')")"
+eq "Cuentas de ESTA ejecucion eliminadas" "0" \
+   "$(q "SELECT (SELECT COUNT(*) FROM clientes WHERE email IN ($MIS_CLIENTES)) + (SELECT COUNT(*) FROM administradores WHERE email IN ($MIS_ADMINS))")"
 
 echo
 echo "=============================================="

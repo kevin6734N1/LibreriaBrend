@@ -148,10 +148,17 @@ público intacto.
 Casos límite complementarios ya existentes que se mantienen: correo nulo,
 mayúsculas/espacios,5 fallos concurrentes,6+ fallos.
 
-### HTTP (nueva suite `test/integration/rf03-bloqueo-tests.sh`,27 comprobaciones)
+### HTTP (suite `test/integration/rf03-bloqueo-tests.sh`,29 comprobaciones tras la corrección de revisión)
 
+- Precondiciones de aislamiento **fatales** (anteriores a cualquier
+  escritura): `DB_NAME` literal `libreria_brenda_test`, `BASE` en `:8091`,
+  `SELECT DATABASE()` = `libreria_brenda_test`, fixtures intactos y
+  ausencia de las bases comercial/demo. El `trap` de limpieza **solo se
+  instala después** de superarlas y el `cleanup` borra únicamente los
+  correos creados por la ejecución actual (nunca un `LIKE` genérico).
 - `RF03-BL-01`:4 fallos y autenticación posible.
-- `RF03-BL-02`: el5.º fallo procesa credenciales y activa el bloqueo.
+- `RF03-BL-02`: el **5.º fallo consecutivo propio** (sin éxitos intermedios)
+  procesa credenciales y deja el correo preparado para bloqueo.
 - `RF03-BL-03`:6.º intento bloqueado, JSON `ok:false`, **HTTP200** (contrato
   existente intacto, sin cambiar a401/429).
 - `RF03-BL-04`: el JSON informa `en 2 minuto(s)`.
@@ -163,7 +170,33 @@ mayúsculas/espacios,5 fallos concurrentes,6+ fallos.
 **La expiración real de120 s NO se prueba por HTTP**: se valida de forma
 determinista en unidad con reloj inyectado (misma especificación, sin
 esperas, sin tocar el servidor). Cuentas sintéticas `rf03.*@test.local` con
-limpieza automática: no contamina RF02 ni otras suites.
+limpieza automática acotada a la ejecución: no contamina RF02 ni otras suites.
+
+### Corrección posterior a la revisión del PR #4 (23/10/2026)
+
+La revisión detectó2 defectos en el script, corregidos **sin tocar**
+`ControlIntentosLogin.java` ni las6 pruebas JUnit:
+
+1. **Precondiciones no bloqueantes.** Las verificaciones usaban `eq`
+   (registraban FAIL) y seguían ejecutando; comparaban `SELECT DATABASE()`
+   contra la propia variable `DB_NAME` en vez del literal; y el `trap` con
+   `DELETE … LIKE 'rf03.%@test.local'` estaba instalado **antes** de las
+   precondiciones, de modo que un aborto habría ejecutado borrados genéricos.
+   Corregido: condiciones fatales (`abortar`, exit1 sin escrituras),
+   `DB_NAME` literal, `trap` posterior y `cleanup` acotado a esta ejecución.
+2. **BL-02 mal secuenciado.** Se ejecutaban4 fallos, un **éxito** (que
+   reinicia el contador) y un fallo etiquetado como5.º — que era en realidad
+   el1.º de un ciclo nuevo. Corregido:5 fallos consecutivos propios en
+   `EMAIL_BLOQ` con aserción del5.º (procesa credenciales) y del6.º
+   (recibe el mensaje de bloqueo).
+
+**Pruebas negativas de aislamiento** (evidencia
+[rf03-aislamiento-negativo-2026-10-23.txt](evidencias/rf03-aislamiento-negativo-2026-10-23.txt)):
+`DB_NAME=libreria_brenda` → exit1 en la condición literal;
+`DB_PORT=3399` → exit1 en `SELECT DATABASE()`; recuento de filas idéntico
+antes/después (5 = 5) y **fila canario `rf03.canario.previo@test.local`
+intacta** tras ambas corridas (con el trap antiguo el `LIKE` la habría
+borrado).
 
 ## 6. Resultados ejecutados (2026-10-23, local)
 
@@ -171,7 +204,9 @@ limpieza automática: no contamina RF02 ni otras suites.
 |---|---|---|
 | JUnit sin BD | **78/78** (97 detectadas;19 DAO omitidas por `Assumptions`) | [junit-unit-rf03-2026-10-23.txt](evidencias/junit-unit-rf03-2026-10-23.txt) |
 | JUnit con `libreria_brenda_test` | **97/97** | [junit-db-rf03-2026-10-23.txt](evidencias/junit-db-rf03-2026-10-23.txt) |
-| HTTP RF03 | **27/27** | [rf03-http-2026-10-23.txt](evidencias/rf03-http-2026-10-23.txt) |
+| HTTP RF03 (1.ª corrida) | **27/27** | [rf03-http-2026-10-23.txt](evidencias/rf03-http-2026-10-23.txt) |
+| HTTP RF03 corregido (tras revisión PR #4) | **29/29** | [rf03-http-corregido-2026-10-23.txt](evidencias/rf03-http-corregido-2026-10-23.txt) |
+| Pruebas negativas de aislamiento | **2/2 abortos correctos,0 escrituras, canario intacto** | [rf03-aislamiento-negativo-2026-10-23.txt](evidencias/rf03-aislamiento-negativo-2026-10-23.txt) |
 | RED (antes de la corrección) |2 fallidas de78 (G1) | [rf03-red-2026-10-23.txt](evidencias/rf03-red-2026-10-23.txt) |
 
 Aislamiento verificado antes y dentro de las suites: MariaDB11.8.9 propia en
@@ -190,7 +225,12 @@ comercial ni en la demo.**
 | HTTP general |80/80 | **80/80** | [http-general-regresion-2026-10-23.txt](evidencias/http-general-regresion-2026-10-23.txt) |
 
 **0 regresiones.** RF01/RF02 no se modificaron (el único cambio funcional es
-`minutosRestantes()` de RF03).
+`minutosRestantes()` de RF03). Reconfirmadas tras la corrección del script,
+con el mismo entorno: RF02 **62/62**
+([r2](evidencias/rf02-http-regresion-2026-10-23-r2.txt)) y general **80/80**
+([r2](evidencias/http-general-regresion-2026-10-23-r2.txt)). JUnit no se
+repitió: ningún `.java` cambió en esta corrección (la re-verificación de CI
+queda en los jobs del push).
 
 ## 8. Pruebas locales vs CI (diferencia obligatoria)
 
@@ -198,7 +238,7 @@ comercial ni en la demo.**
   (`JUNIT_EXCLUDE=libreria.dao.*`) y con BD (MariaDB de servicio en3306,
   `schema_test.sql` + `fixtures_test.sql`). En CI correrán las78 (unitario) y
  97 (DAO) pruebas.
-- **Las suites HTTP (RF0327, RF0262, general80) NO se ejecutan en GitHub
+- **Las suites HTTP (RF0329, RF0262, general80) NO se ejecutan en GitHub
   Actions**: se corren exclusivamente en local contra el Tomcat aislado. No
   deben citarse como "CI verde".
 - La expiración de120 s tampoco se ejercita en CI más allá de las pruebas
@@ -231,7 +271,7 @@ bash test/run-junit-tests.sh
 DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=libreria_brenda_test \
 DB_USER=root DB_PASSWORD= bash test/run-junit-tests.sh
 
-# 3) HTTP RF03 (27) — Tomcat de pruebas con el contexto /LibreriaBrend
+# 3) HTTP RF03 (29) — Tomcat de pruebas con el contexto /LibreriaBrend
 BASE=http://localhost:8091/LibreriaBrend DB_PORT=3307 DB_USER=root \
 DB_PASSWORD= bash test/integration/rf03-bloqueo-tests.sh
 
@@ -251,12 +291,12 @@ Nunca apuntar estas ejecuciones a `libreria_brenda` ni a
 |---|---|
 | `src/libreria/util/ControlIntentosLogin.java` | Corrección G1 + reloj inyectable (paquete-private) |
 | `test/libreria/util/ControlIntentosLoginExpiracionTest.java` | Nuevo:6 pruebas de frontera/expiración |
-| `test/integration/rf03-bloqueo-tests.sh` | Nuevo:27 comprobaciones HTTP |
+| `test/integration/rf03-bloqueo-tests.sh` | Nuevo; corregido en la revisión:29 comprobaciones, precondiciones fatales, cleanup por ejecución y BL-02 real |
 | `docs/QA/RF03_BLOQUEO_LOGIN.md` | Este documento |
 | `docs/QA/README.md` | Índice y última ejecución |
 | `docs/REGISTRO_CAMBIOS.md` | Entrada RF03 |
 | `README.md` | Enlace a la matriz RF03 y cifras de tests |
-| `docs/QA/evidencias/rf03-*.txt`, `junit-*-rf03-*.txt`, `*-regresion-2026-10-23.txt` | Salidas crudas |
+| `docs/QA/evidencias/rf03-*.txt`, `junit-*-rf03-*.txt`, `*-regresion-2026-10-23*.txt` | Salidas crudas (incluye corrida corregida, negativas y regresiones r2) |
 
 No se modificaron: RF01/RF02, workflows de GitHub Actions, evidencias
 históricas, respaldos ni `screenshots/`.
@@ -266,7 +306,8 @@ históricas, respaldos ni `screenshots/`.
 | Commit | Contenido |
 |---|---|
 | `f813536` | `fix(rf03)`: corrección G1 + reloj +6 pruebas unitarias (RED→GREEN) |
-| `772c54d` | `test(rf03)`: suite HTTP `rf03-bloqueo-tests.sh` (27 comprobaciones) |
+| `772c54d` | `test(rf03)`: suite HTTP `rf03-bloqueo-tests.sh` (27 comprobaciones en la versión original) |
+| *(commit correctivo posterior a la revisión del PR #4; SHA en el PR y en el informe de checkpoint)* | Precondiciones fatales de aislamiento, cleanup por ejecución, BL-02 con5.º fallo real (29/29), pruebas negativas y regresiones r2 |
 
 (El commit de documentación se añade después; los SHA de implementación son
 los que certifican código y pruebas.)

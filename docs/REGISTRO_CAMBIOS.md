@@ -25,6 +25,7 @@
 | 2026-10-21 | `47b73db` | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
 | 2026-10-21 | `4db4786` | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
 | 2026-10-23 | `f813536` + `772c54d` | **RF03 — bloqueo temporal:** corrección de `minutosRestantes()` en bloqueo vencido (RED→GREEN), 6 pruebas de frontera con reloj inyectado y 27 comprobaciones HTTP de integración |
+| 2026-10-23 | *(commit correctivo en `qa/rf03-bloqueo-login`, ver PR #4)* | **RF03 corrección de revisión:** precondiciones de aislamiento fatales antes de escribir (`DB_NAME` literal, `SELECT DATABASE()`, `BASE :8091`), `trap` posterior, cleanup acotado a la ejecución y BL-02 con el5.º fallo real —29/29 + pruebas negativas |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.26 en `:8080` sirviendo LibreriaBrend
 con la base `libreria_brenda_demo` y el usuario `libreria_demo_app`; el Tomcat
@@ -624,11 +625,14 @@ tras un acceso exitoso (RF03, prioridad ALTA; numeración oficial RF01–RF17).
   nuevas en `ControlIntentosLoginExpiracionTest` que cubren119 999 /
   120 000 / 120 001 ms, el techo de60 001/60 000 ms, la limpieza del
   registro expirado y el nuevo ciclo de intentos — sin esperas reales.
-- **Suite HTTP nueva:** `test/integration/rf03-bloqueo-tests.sh` con27
-  comprobaciones (4 fallos, activación en el5.º, rechazo en el6.º, minutos
-  en el JSON, contraseña correcta durante bloqueo, reinicio tras éxito,
-  independencia por correo y coherencia entre roles), siempre sobre
-  `libreria_brenda_test` con limpieza de cuentas `rf03.*`.
+- **Suite HTTP nueva:** `test/integration/rf03-bloqueo-tests.sh` con29
+  comprobaciones (4 fallos, activación en el5.º fallo propio, rechazo en
+  el6.º, minutos en el JSON, contraseña correcta durante bloqueo, reinicio
+  tras éxito, independencia por correo y coherencia entre roles), siempre
+  sobre `libreria_brenda_test` con limpieza acotada a los correos de la
+  ejecución actual. Tras la revisión del PR #4, las precondiciones de
+  aislamiento son fatales (`abortar`, exit1) y el `trap` se instala
+  únicamente después de superarlas.
 
 ### Pruebas y regresión (23/10/2026)
 
@@ -636,7 +640,7 @@ tras un acceso exitoso (RF03, prioridad ALTA; numeración oficial RF01–RF17).
 |---|---|
 | JUnit sin BD | **78/78** (antes72) |
 | JUnit con `libreria_brenda_test` | **97/97** (antes91) |
-| HTTP RF03 | **27/27** |
+| HTTP RF03 | **29/29** (corregido; 1.ª corrida27/27) |
 | HTTP RF02 (regresión) | **62/62** |
 | HTTP general (regresión) | **80/80** |
 
