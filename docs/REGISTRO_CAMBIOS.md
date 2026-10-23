@@ -24,6 +24,7 @@
 | 2026-10-21 | `4db4786` | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
 | 2026-10-21 | `47b73db` | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
 | 2026-10-21 | `4db4786` | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
+| 2026-10-23 | `f813536` + `772c54d` | **RF03 — bloqueo temporal:** corrección de `minutosRestantes()` en bloqueo vencido (RED→GREEN), 6 pruebas de frontera con reloj inyectado y 27 comprobaciones HTTP de integración |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.26 en `:8080` sirviendo LibreriaBrend
 con la base `libreria_brenda_demo` y el usuario `libreria_demo_app`; el Tomcat
@@ -599,6 +600,50 @@ El puerto `8080` no se migró: sigue siendo la misma instancia, ahora con la bas
 demo y el código actual. Detalle en
 [`entorno-aislado-2026-10-21.txt`](QA/evidencias/entorno-aislado-2026-10-21.txt)
 y captura en [`8080-demo-2026-10-21.png`](QA/evidencias/8080-demo-2026-10-21.png).
+
+---
+
+## [RF03] Bloqueo temporal por intentos fallidos
+
+**Fecha:** 2026-10-23
+**Commits:** `f813536` (corrección + pruebas unitarias) y `772c54d`
+(suite HTTP), en la rama `qa/rf03-bloqueo-login`.
+**Requisito oficial:** bloquear el login de un correo durante 2 minutos tras
+5 intentos fallidos, informar los minutos restantes y reiniciar el contador
+tras un acceso exitoso (RF03, prioridad ALTA; numeración oficial RF01–RF17).
+
+### Qué cambió
+
+- **Defecto corregido (RED→GREEN):** `minutosRestantes()` aplicaba
+  `Math.max(1, …)` e informaba **1 minuto para un bloqueo ya vencido**,
+  contradiciendo `estaBloqueado()` (que lo daba por levantado). Ahora devuelve
+  0 cuando el restante ya venció; el techo de minutos para restantes
+  positivos (2 y 1) no cambió.
+- **Pruebas deterministas:** nueva abstracción mínima de reloj
+  (`LongSupplier` paquete-private, por defecto el reloj real) y6 pruebas
+  nuevas en `ControlIntentosLoginExpiracionTest` que cubren119 999 /
+  120 000 / 120 001 ms, el techo de60 001/60 000 ms, la limpieza del
+  registro expirado y el nuevo ciclo de intentos — sin esperas reales.
+- **Suite HTTP nueva:** `test/integration/rf03-bloqueo-tests.sh` con27
+  comprobaciones (4 fallos, activación en el5.º, rechazo en el6.º, minutos
+  en el JSON, contraseña correcta durante bloqueo, reinicio tras éxito,
+  independencia por correo y coherencia entre roles), siempre sobre
+  `libreria_brenda_test` con limpieza de cuentas `rf03.*`.
+
+### Pruebas y regresión (23/10/2026)
+
+| Suite | Resultado |
+|---|---|
+| JUnit sin BD | **78/78** (antes72) |
+| JUnit con `libreria_brenda_test` | **97/97** (antes91) |
+| HTTP RF03 | **27/27** |
+| HTTP RF02 (regresión) | **62/62** |
+| HTTP general (regresión) | **80/80** |
+
+Sin regresiones; RF01/RF02, workflows de CI, respaldos y evidencias
+históricas intactos. Matriz completa, decisiones de borde y riesgos en
+[`QA/RF03_BLOQUEO_LOGIN.md`](QA/RF03_BLOQUEO_LOGIN.md); salidas crudas en
+`QA/evidencias/rf03-*` y `QA/evidencias/*-rf03-2026-10-23.txt`.
 
 ---
 

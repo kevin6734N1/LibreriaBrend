@@ -12,11 +12,11 @@ El desarrollo base fue un trabajo grupal del curso. La atribución completa est�
 
 ## Enfoque QA (portafolio)
 
-- **JUnit 5:** 91 pruebas. 72 se ejecutan sin motor de base de datos; 19 prueban los DAO contra `libreria_brenda_test` (login e historial de pedidos del modal).
-- **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
-- **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados y rotación de sesión. Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
+- **JUnit 5:** 97 pruebas. 78 se ejecutan sin motor de base de datos; 19 prueban los DAO contra `libreria_brenda_test` (login e historial de pedidos del modal).
+- **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo), 27 de RF03 (bloqueo por intentos fallidos: fronteras, minutos restantes y coherencia entre roles) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
+- **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados, rotación de sesión y la corrección de `minutosRestantes()` en RF03 (bloqueo vencido). Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
 - **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (dos jobs verificados en el PR #3).
-- **Mapa de evidencias:** [docs/QA/README.md](docs/QA/README.md) · [matriz RF02](docs/QA/RF02_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
+- **Mapa de evidencias:** [docs/QA/README.md](docs/QA/README.md) · [matriz RF02](docs/QA/RF02_LOGIN.md) · [matriz RF03](docs/QA/RF03_BLOQUEO_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Stack y arquitectura
 
@@ -233,18 +233,20 @@ La evidencia de esta ejecución está en
 > Detalle de los cambios del panel administrativo y de la carga de imágenes: [`docs/REPORTE_PANEL_ADMIN.md`](docs/REPORTE_PANEL_ADMIN.md).
 >
 > Detalle de RF02 (matriz, TDD, evidencias y límites): [`docs/QA/RF02_LOGIN.md`](docs/QA/RF02_LOGIN.md).
+>
+> Detalle de RF03 — bloqueo temporal por intentos fallidos (matriz, TDD con reloj inyectado, evidencias y límites): [`docs/QA/RF03_BLOQUEO_LOGIN.md`](docs/QA/RF03_BLOQUEO_LOGIN.md).
 
 ## Cómo correr los tests
 
-### JUnit 5 (72 sin BD / 91 con BD)
+### JUnit 5 (78 sin BD / 97 con BD)
 
-Un solo script compila todo el proyecto y ejecuta la suite. Sin `DB_NAME`, las 3 clases de `libreria.dao` se omiten con `Assumptions` (se ejecutan 72 pruebas); con `DB_NAME=libreria_brenda_test` se ejecutan las 19 pruebas de DAO, incluidas las de login y el historial del modal.
+Un solo script compila todo el proyecto y ejecuta la suite. Sin `DB_NAME`, las 3 clases de `libreria.dao` se omiten con `Assumptions` (se ejecutan 78 pruebas); con `DB_NAME=libreria_brenda_test` se ejecutan las 19 pruebas de DAO, incluidas las de login y el historial del modal.
 
 ```bash
-# Suite rápida, sin motor de base de datos: 72 ejecutadas, 0 fallos
+# Suite rápida, sin motor de base de datos: 78 ejecutadas, 0 fallos
 JUNIT_EXCLUDE='libreria\.dao\..*' bash test/run-junit-tests.sh
 
-# Suite completa contra la base ficticia: 91/91
+# Suite completa contra la base ficticia: 97/97
 DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=libreria_brenda_test \
 DB_USER=root DB_PASSWORD=tu_clave bash test/run-junit-tests.sh
 ```
@@ -261,13 +263,18 @@ BASE=http://localhost:8091/LibreriaBrend \
 DB_NAME=libreria_brenda_test DB_PASSWORD=tu_clave \
 bash test/integration/rf02-login-tests.sh
 
+# RF03: bloqueo temporal por intentos fallidos (27 comprobaciones)
+BASE=http://localhost:8091/LibreriaBrend \
+DB_NAME=libreria_brenda_test DB_PASSWORD=tu_clave \
+bash test/integration/rf03-bloqueo-tests.sh
+
 # Regresión general: carrito, pedidos, cupones, stock y permisos (80 comprobaciones)
 BASE=http://localhost:8091/LibreriaBrend \
 DB_NAME=libreria_brenda_test DB_PASSWORD=tu_clave \
 bash test/integration/http-tests.sh
 ```
 
-La suite de RF02 crea correos `rf02.*@test.local` por ejecución y los elimina al terminar, para no acumular bloqueos ni depender de reiniciar Tomcat.
+La suite de RF02 crea correos `rf02.*@test.local` por ejecución y la de RF03 correos `rf03.*@test.local`; todos se eliminan al terminar, para no acumular bloqueos ni depender de reiniciar Tomcat.
 
 ### CI en GitHub Actions
 
@@ -280,10 +287,11 @@ Los resultados de la última ejecución se consultan en la pestaña **Checks** d
 
 ## Estado verificado y limitaciones
 
-**Verificado en ejecución el 21/10/2026** (OpenJDK 21.0.12, Tomcat 11.0.26, MariaDB 11.8.9 en WSL2):
+**Verificado en ejecución el 23/10/2026** (OpenJDK 21.0.12; JUnit contra MariaDB 11.8.9 aislada en `127.0.0.1:3307`; suites HTTP contra Tomcat de pruebas en `:8091`):
 
-- **72 tests JUnit ejecutados sin base de datos** (0 fallos) y **91/91** con `libreria_brenda_test` (incluye 19 pruebas de DAO: login y pedidos del modal).
-- **62/62 comprobaciones HTTP de RF02** y **80/80 comprobaciones HTTP generales** contra la base ficticia.
+- **78 tests JUnit ejecutados sin base de datos** (0 fallos) y **97/97** con `libreria_brenda_test` (incluye 19 pruebas de DAO: login y pedidos del modal).
+- **62/62 comprobaciones HTTP de RF02**, **27/27 de RF03** y **80/80 comprobaciones HTTP generales** contra la base ficticia.
+- **RF03:** fronteras de expiración probadas con reloj inyectado (sin esperas reales) y corrección de `minutosRestantes()` que informaba 1 minuto en un bloqueo ya vencido; detalle en [matriz RF03](docs/QA/RF03_BLOQUEO_LOGIN.md).
 - **CI:** dos jobs de GitHub Actions en verde sobre el PR #3; el detalle de la corrida se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-21.txt).
 - RF02 cubre cliente activo/inactivo, contraseña incorrecta, correo inexistente y mal formado, límite de 120 caracteres, BCrypt, separación de roles, autorización y rotación de sesión en login y registro.
 - Se corrigieron session fixation, el fallo con hashes BCrypt truncados y la aceptación de correos más largos que la columna.
@@ -294,7 +302,7 @@ Los resultados de la última ejecución se consultan en la pestaña **Checks** d
 - Validación integral de accesibilidad con lector de pantalla/contraste/WCAG (solo revisión parcial de DOM y teclado).
 - Pruebas de carga y concurrencia; cobertura instrumentada (JaCoCo). No se afirma ningún porcentaje.
 - Tokens CSRF y atributo `SameSite` en cookies (QA-15).
-- Bloqueo de login en memoria: es por correo y compartido entre roles, por lo que cinco fallos pueden bloquear temporalmente a un administrador (DoS). Está documentado en [RF02](docs/QA/RF02_LOGIN.md#6-limitaciones-y-riesgos-abiertos).
+- Bloqueo de login en memoria: es por correo y compartido entre roles, por lo que cinco fallos pueden bloquear temporalmente a un administrador (DoS). Está documentado en [RF02](docs/QA/RF02_LOGIN.md#6-limitaciones-y-riesgos-abiertos) y en [RF03](docs/QA/RF03_BLOQUEO_LOGIN.md#9-riesgos-y-limitaciones).
 - GitHub Actions cubre los jobs unitarios y DAO; la suite HTTP sigue fuera de CI porque requiere Tomcat. La corrida verificada del PR #3 se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-21.txt).
 - La demo es local (`localhost`), no una URL pública; no se afirma disponibilidad para reclutadores ni despliegue en producción.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.

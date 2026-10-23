@@ -1,0 +1,47 @@
+# Ejecución: 2026-10-23T16:27:35-05:00 — HTTP RF03 (bloqueo por intentos fallidos)
+# Comando: BASE=http://localhost:8091/LibreriaBrend DB_PORT=3307 bash test/integration/rf03-bloqueo-tests.sh
+# Tomcat aislado 8091 + MariaDB 11.8.9 aislada 127.0.0.1:3307 (solo libreria_brenda_test)
+
+== Preparacion: aislamiento obligatorio (base de pruebas) ==
+PASS  La conexion apunta a libreria_brenda_test
+PASS  Fixture de clientes cargado
+PASS  Fixture de administradores cargado
+PASS  En este motor NO existe la base comercial libreria_brenda
+PASS  En este motor NO existe la base demo
+PASS  Cuentas sinteticas rf03 creadas (4 clientes +1 cliente/admin compartido)
+PASS  Administrador sintetico rf03 creado (mismo correo que un cliente)
+
+== RF03-BL-01/02: cuatro fallos permiten seguir; el 5.º activa el bloqueo ==
+PASS  RF03-BL-01 tras 3 fallos el 4.º aun no encuentra bloqueo
+PASS  RF03-BL-01 cuatro fallos: autenticacion correcta posible
+PASS  RF03-BL-02 el 5.º fallo procesa credenciales (no esta bloqueado aun)
+PASS  RF03-BL-02 el 5.º fallo informa credenciales incorrectas
+
+== RF03-BL-03/04/05: bloqueo activo, minutos restantes y password correcta ==
+PASS  RF03-BL-03 el 6.º intento queda bloqueado
+PASS  RF03-BL-03 el bloqueo responde JSON ok:false
+PASS  RF03-BL-03 el bloqueo conserva el contrato HTTP 200
+PASS  RF03-BL-04 informa los minutos restantes (2 min recien bloqueado)
+PASS  RF03-BL-05 la contrasena correcta NO autentica durante el bloqueo
+PASS  RF03-BL-05 la contrasena correcta no devuelve ok:true
+
+== RF03-BL-06: el acceso exitoso reinicia el contador ==
+PASS  RF03-BL-06 login exitoso tras 4 fallos
+PASS  RF03-BL-06 tras el exito el contador arranca de cero (4 fallos mas y aun autentica)
+PASS  RF03-BL-06 sin residuo de bloqueo previo
+
+== RF03-BL-07: independencia entre correos ==
+PASS  RF03-BL-07 un correo distinto autentica mientras otro esta bloqueado
+PASS  RF03-BL-07 el bloqueo no se propaga a otros correos
+
+== RF03-BL-08: coherencia del bloqueo entre roles (mismo correo) ==
+PASS  RF03-BL-08 cliente con credenciales correctas sigue bloqueado
+PASS  RF03-BL-08 el mismo correo como administrador tambien esta bloqueado
+PASS  RF03-BL-08 el rol admin no elude el bloqueo
+PASS  RF03-BL-08 control: otro correo no esta bloqueado (fallo de credenciales normal)
+
+== Limpieza ==
+PASS  Cuentas sinteticas RF03 eliminadas
+
+==============================================
+RESULTADO RF03: PASS=27 FAIL=0
