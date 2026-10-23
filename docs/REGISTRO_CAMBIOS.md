@@ -12,18 +12,18 @@
 
 | Fecha | Commit | Cambio |
 |---|---|---|
-| 2026-09-23 | `1a8c8af` | Primer commit — Librería Brenda (app web Java + MySQL) |
-| 2026-09-27 | `65dce9f` | CU-03: validar máximo de 10 productos distintos en el carrito + informe de validación |
-| 2026-09-27 | `84f4288` | **Pieza 1 accesibilidad:** perfil de accesibilidad en BD + filtro de corrección de color (Daltonize) + docs/ con registro y evidencias |
-| 2026-09-27 | `ffcb909` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
-| 2026-09-27 | `7c45421` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
-| 2026-09-27 | `b3a5aa1` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
-| 2026-09-27 | `b5337fd` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
-| 2026-09-27 | `54a810c` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
+| 2026-09-23 | `829cdbc` | Primer commit — Librería Brenda (app web Java + MySQL) |
+| 2026-09-27 | `c4852ce` | CU-03: validar máximo de 10 productos distintos en el carrito + informe de validación |
+| 2026-09-27 | `9715fab` | **Pieza 1 accesibilidad:** perfil de accesibilidad en BD + filtro de corrección de color (Daltonize) + docs/ con registro y evidencias |
+| 2026-09-27 | `3289939` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
+| 2026-09-27 | `37404a3` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
+| 2026-09-27 | `9c0ea3b` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
+| 2026-09-27 | `f1dd3a1` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
+| 2026-09-27 | `80910aa` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
 | 2026-09-28 | *(pendiente de commit)* | **Laboratorio de calidad — TDD (H0007):** `ValidadorProducto` construido test-first (9 tests JUnit 5) + validación en servidor de crear/editar producto (HTTP 400 con errores) |
-| 2026-10-21 | `18f2967` | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
-| 2026-10-21 | `c825f82` | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
-| 2026-10-21 | `18f2967` | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
+| 2026-10-21 | `4db4786` | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
+| 2026-10-21 | `47b73db` | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
+| 2026-10-21 | `4db4786` | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
 
 **Entorno vigente:** Java 21 · Tomcat 11.0.26 en `:8080` sirviendo LibreriaBrend
 con la base `libreria_brenda_demo` y el usuario `libreria_demo_app`; el Tomcat
@@ -429,7 +429,7 @@ general.** Evidencias, matriz y límites en
 
 ### Pendiente
 
-- CI ejecutado en GitHub sobre `18f2967`: **2/2 jobs en success** (unitarios y DAO con MariaDB), ver [evidencia](QA/evidencias/ci-2026-10-21.txt).
+- CI ejecutado en GitHub sobre `4db4786`: **2/2 jobs en success** (unitarios y DAO con MariaDB), ver [evidencia](QA/evidencias/ci-2026-10-21.txt).
 - Bloqueo de login en memoria, por correo y compartido entre roles (riesgo de
   DoS sobre una cuenta admin); sin límite por IP ni TTL de entradas.
 - Saneamiento aplicado en el árbol actual (DNI, correos, nombre personal y
