@@ -1,6 +1,7 @@
 package libreria.util;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.LongSupplier;
 
 /**
  * ControlIntentosLogin - Libreria Brenda
@@ -30,6 +31,24 @@ public class ControlIntentosLogin {
 
     private static final ConcurrentHashMap<String, Registro> intentos = new ConcurrentHashMap<>();
 
+    /**
+     * Reloj del sistema, inyectable SOLO desde las pruebas del mismo paquete
+     * para poder comprobar la expiracion (120 s) sin esperar 2 minutos reales.
+     * En produccion siempre es System::currentTimeMillis: conducta publica
+     * identica a la anterior.
+     */
+    private static volatile LongSupplier reloj = System::currentTimeMillis;
+
+    /** Solo para pruebas: fija un reloj controlable. Ver ControlIntentosLoginExpiracionTest. */
+    static void fijarRelojParaPruebas(LongSupplier relojPruebas) {
+        reloj = relojPruebas;
+    }
+
+    /** Solo para pruebas: restaura el reloj real del sistema. */
+    static void restaurarRelojReal() {
+        reloj = System::currentTimeMillis;
+    }
+
     private ControlIntentosLogin() {
         // clase utilitaria, no se instancia
     }
@@ -43,7 +62,7 @@ public class ControlIntentosLogin {
         Registro r = intentos.get(normalizar(email));
         if (r == null) return false;
         if (r.bloqueadoHasta == 0L) return false;
-        if (System.currentTimeMillis() >= r.bloqueadoHasta) {
+        if (reloj.getAsLong() >= r.bloqueadoHasta) {
             // el bloqueo ya expiró: se limpia para no arrastrar estado viejo
             intentos.remove(normalizar(email));
             return false;
@@ -51,12 +70,16 @@ public class ControlIntentosLogin {
         return true;
     }
 
-    /** Minutos (redondeados hacia arriba) que faltan para que se levante el bloqueo. */
+    /**
+     * Minutos (redondeados hacia arriba) que faltan para que se levante el bloqueo.
+     * Si el bloqueo ya vencio informa 0, consistente con estaBloqueado().
+     */
     public static long minutosRestantes(String email) {
         Registro r = intentos.get(normalizar(email));
         if (r == null || r.bloqueadoHasta == 0L) return 0;
-        long restanteMs = r.bloqueadoHasta - System.currentTimeMillis();
-        return Math.max(1, (restanteMs + 59_999) / 60_000);
+        long restanteMs = r.bloqueadoHasta - reloj.getAsLong();
+        if (restanteMs <= 0L) return 0; // vencido: 0 minutos restantes
+        return (restanteMs + 59_999) / 60_000;
     }
 
     /** Registra un intento fallido; si llega al máximo, activa el bloqueo temporal. */
@@ -66,7 +89,7 @@ public class ControlIntentosLogin {
         synchronized (r) {
             r.intentosFallidos++;
             if (r.intentosFallidos >= MAX_INTENTOS) {
-                r.bloqueadoHasta = System.currentTimeMillis() + BLOQUEO_MS;
+                r.bloqueadoHasta = reloj.getAsLong() + BLOQUEO_MS;
             }
         }
     }
