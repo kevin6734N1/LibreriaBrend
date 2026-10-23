@@ -8,6 +8,7 @@ target/
 build/
 out/
 .tools/
+.tools-libreria/
 *.class
 *.war
 *.ear

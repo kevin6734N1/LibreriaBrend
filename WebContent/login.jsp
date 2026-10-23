@@ -85,9 +85,9 @@
 
     <!-- Creds demo -->
     <div style="margin-top:16px; background:#F5F5F5; border-radius:8px; padding:12px; font-size:0.78rem; color:#666; text-align:center;">
-      <strong>Demo rápida:</strong><br>
-      Cliente: cliente@brenda.pe / 123456<br>
-      Admin: admin@brenda.pe / admin123 + EMP-0001
+      <strong>Demo local:</strong><br>
+      Cliente: cliente01@example.com / Cliente#2026<br>
+      Admin: admin@example.com / Admin#2026 + EMP-DEMO
     </div>
 
   </div>

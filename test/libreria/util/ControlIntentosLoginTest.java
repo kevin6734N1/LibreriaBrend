@@ -1,7 +1,14 @@
 package libreria.util;
 
 import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ControlIntentosLoginTest {
@@ -90,5 +97,38 @@ class ControlIntentosLoginTest {
         assertDoesNotThrow(() -> ControlIntentosLogin.registrarFallo(null));
         assertDoesNotThrow(() -> ControlIntentosLogin.estaBloqueado(null));
         assertDoesNotThrow(() -> ControlIntentosLogin.registrarExito(null));
+    }
+
+    /**
+     * El contador se comparte entre hilos de Tomcat. Cinco fallos simultaneos
+     * deben contar exactamente cinco y activar el bloqueo, sin perder updates.
+     */
+    @Test
+    void cincoFallosConcurrentes_bloqueanLaCuenta() throws Exception {
+        String email = emailUnico();
+        int hilos = 5;
+        ExecutorService pool = Executors.newFixedThreadPool(hilos);
+        CountDownLatch preparados = new CountDownLatch(hilos);
+        CountDownLatch arranque = new CountDownLatch(1);
+        List<Future<?>> tareas = new ArrayList<>();
+
+        try {
+            for (int i = 0; i < hilos; i++) {
+                tareas.add(pool.submit(() -> {
+                    preparados.countDown();
+                    arranque.await();
+                    ControlIntentosLogin.registrarFallo(email);
+                    return null;
+                }));
+            }
+
+            assertTrue(preparados.await(5, TimeUnit.SECONDS), "los hilos no arrancaron");
+            arranque.countDown();
+            for (Future<?> tarea : tareas) tarea.get(5, TimeUnit.SECONDS);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        assertTrue(ControlIntentosLogin.estaBloqueado(email));
     }
 }

@@ -1,6 +1,7 @@
 package libreria.dao;
 
 import libreria.models.Cliente;
+import libreria.models.PedidoResumen;
 import libreria.util.ConexionBD;
 import libreria.util.PasswordUtil;
 
@@ -98,6 +99,35 @@ public class ClienteDAO {
                 c.setTotalPedidos(rs.getInt("total_pedidos"));
                 c.setTotalGastado(rs.getDouble("total_gastado"));
                 lista.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    /** Historial reciente de pedidos de un cliente, para el modal de clientes.jsp. */
+    public List<PedidoResumen> listarPedidosRecientes(int clienteId, int limite) {
+        List<PedidoResumen> lista = new ArrayList<>();
+        int tope = Math.max(1, Math.min(limite, 20));
+        String sql = "SELECT id, fecha, total, estado FROM pedidos " +
+                     "WHERE cliente_id = ? ORDER BY fecha DESC, id DESC LIMIT ?";
+
+        try (Connection con = ConexionBD.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, clienteId);
+            ps.setInt(2, tope);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PedidoResumen p = new PedidoResumen();
+                    p.setId(rs.getString("id"));
+                    p.setFecha(rs.getTimestamp("fecha"));
+                    p.setTotal(rs.getDouble("total"));
+                    p.setEstado(rs.getString("estado"));
+                    lista.add(p);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

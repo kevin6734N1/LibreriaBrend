@@ -1,0 +1,134 @@
+ENTORNO AISLADO DE LIBRERIABREND — TOMCAT PROPIO EN :8082
+Fecha: 2026-10-21
+Alcance: ejecución local; no se reinició ni modificó el Tomcat antiguo,
+         no se tocaron LibaaS, libaas-mysql ni libaas-app, y no se migró
+         el puerto 8080.
+
+1. TOPOLOGÍA VERIFICADA
+-----------------------
+- Windows 11, OpenJDK 21.0.12.
+- El Tomcat antiguo sigue respondiendo en :8080 (HTTP 200); no se detuvo.
+- Tomcat 11.0.26 propio en .tools-libreria/apache-tomcat-11.0.26.
+- HTTP en 8082 (PID 13772, java.exe); shutdown en 8006; AJP en 8010.
+- MariaDB de desarrollo en 127.0.0.1:3306, base libreria_brenda_demo.
+- MariaDB de pruebas en WSL2, 127.0.0.1:3307, base libreria_brenda_test.
+- .tools-libreria/ está excluido en .gitignore; no se versiona.
+
+2. USUARIO SQL EXCLUSIVO
+------------------------
+Usuario: libreria_demo_app (host %, porque la conexión desde Windows llega
+a MariaDB como 172.17.0.1 por el NAT de Docker, no como 127.0.0.1).
+
+SHOW DATABASES con ese usuario:
+  information_schema
+  libreria_brenda_demo
+
+Privilegios efectivos (information_schema.schema_privileges):
+  libreria_brenda_demo: SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW
+
+Comprobaciones negativas:
+  SELECT sobre libreria_brenda.clientes
+    -> ERROR 1142: SELECT command denied
+  SELECT sobre libreria_brenda_test.clientes
+    -> ERROR 1142: SELECT command denied
+
+La contraseña existe solo en el db.properties local del Tomcat aislado
+(ignorado por Git). No se copió a logs, README ni a este archivo.
+
+3. CONFIGURACIÓN DEL CONTEXTO
+-----------------------------
+- WebContent/ y las clases compiladas se publicaron en
+  .tools-libreria/apache-tomcat-11.0.26/webapps/LibreriaBrend/.
+- El db.properties de ese contexto apunta a:
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_NAME=libreria_brenda_demo
+    DB_USER=libreria_demo_app
+    DB_PASSWORD=<solo en el archivo local>
+- setenv.bat solo define JAVA_HOME, UTF-8 y zona America/Lima; no define
+  DB_* y por tanto no puede redirigir la aplicación a otra base.
+
+4. VERIFICACIÓN FUNCIONAL
+--------------------------
+- login.jsp: HTTP 200.
+- Login admin (admin@example.com / EMP-DEMO): {"ok":true,"redirect":"admin.jsp"}.
+- Login cliente (cliente01@example.com): {"ok":true,"redirect":"index.jsp"}.
+- pedidos.jsp con sesión de cliente: HTTP 200; PedidoServlet devuelve 8
+  pedidos propios (incluye PED-1788638730511).
+- ClienteServlet con sesión admin: HTTP 200, 16 clientes.
+  - nombres "Cliente Demo": 16.
+  - correos @example.com: 16.
+  - DNI 999000xx, teléfonos 9000001xx y direcciones "Av. Demo ...": 16.
+- Modal de clientes.jsp (cliente 1):
+  - HTTP 200 en ClienteServlet?accion=pedidos&id=1.
+  - 8 pedidos, ordenados por fecha descendente; el primero es
+    PED-1788638730511 · 05/09/2026 · S/ 102.00 · CONFIRMADO.
+  - El navegador mostró 16 filas y el modal con los 8 pedidos.
+  - Captura: docs/QA/evidencias/entorno-aislado-2026-10-21.png.
+- admin-pedidos.jsp con sesión admin: HTTP 200, 16 IDs PED-*.
+- ProductoServlet público: HTTP 200, 11 productos, 11 activos.
+- Catálogo en navegador: 11 tarjetas renderizadas, sin mensaje de error.
+- Base demo: 16 pedidos y 11 productos.
+
+Comprobaciones negativas del endpoint del modal:
+  Sin sesión -> HTTP 401, JSON "No autorizado".
+  id=abc    -> HTTP 400, JSON "Cliente inválido".
+  id=9999   -> HTTP 200, arreglo vacío [].
+
+5. PRUEBAS AUTOMATIZADAS
+------------------------
+JUnit 5 (contra libreria_brenda_test en 3307):
+  JUNIT_EXIT=0 · 91 tests found, 91 successful, 0 failed.
+
+JUnit 5 sin base de datos:
+  JUNIT_UNIT_EXIT=0 · 72 tests ejecutados, 0 failed.
+  Las 3 clases DAO se omiten por Assumptions (19 pruebas no arrancadas).
+
+HTTP RF02:
+  RF02_EXIT=0 · PASS=62 FAIL=0.
+
+HTTP general:
+  HTTP_EXIT=0 · PASS=80 FAIL=0.
+
+Las suites HTTP se ejecutaron contra el Tomcat de pruebas en :8091 y
+libreria_brenda_test; no contra la base comercial.
+
+6. LÍMITES DE LA FASE DE AISLAMIENTO
+-----------------------------------
+- Durante el aislamiento inicial, el Tomcat de :8080 no se reinició ni modificó;
+  la migración de puertos quedó pendiente.
+- No se hizo merge del PR #3.
+- No se modificaron contenedores, bases, credenciales ni la aplicación LibaaS.
+  La corrección posterior solo tocó la configuración local del Tomcat que sirve
+  LibreriaBrend en .tools (ignorado por Git).
+
+7. CORRECCIÓN POSTERIOR AUTORIZADA DE :8080
+-------------------------------------------
+Síntoma: en :8080, admin@example.com / Admin#2026 / EMP-DEMO respondía
+"Credenciales de empleado incorrectas".
+
+Causa: VS Code lanzaba Tomcat directamente (Code.exe -> cmd.exe -> java.exe),
+sin ejecutar bin/setenv.bat. El contexto tomaba WEB-INF/db.properties, que
+seguía apuntando a libreria_brenda. Se confirmó porque la cuenta de esa base
+(admin@brenda.pe) sí autenticaba y la demo no.
+
+Corrección aplicada solo en el entorno local de :8080:
+- db.properties del contexto apunta a libreria_brenda_demo con
+  libreria_demo_app; la contraseña sigue únicamente en ese archivo ignorado.
+- setenv.bat quedó coherente: DB_NAME=libreria_brenda_demo y
+  DB_USER=libreria_demo_app.
+- Se publicaron las clases actuales (ClienteServlet con accion=pedidos y
+  PedidoResumen); antes la JSP era nueva pero el .class era del 17/10.
+- Se guardó una copia local de la configuración comercial anterior en
+  db.properties.bak-comercial-20261021 y setenv.bat.bak-comercial-20261021
+  (dentro de .tools, ignorado por Git).
+
+Verificación en :8080 tras reiniciar:
+- login admin demo -> {"ok":true,"redirect":"admin.jsp"}
+- ClienteServlet -> 16 clientes, 16 "Cliente Demo", 16 @example.com
+- modal cliente 01 -> 8 pedidos; primero PED-1788638730511 · 05/09/2026
+- navegador -> panel de clientes con 16 filas y modal con 8 pedidos
+- Captura: docs/QA/evidencias/8080-demo-2026-10-21.png
+- login.jsp -> HTTP 200
+
+El puerto 8080 sigue siendo el mismo; no se migró el Tomcat aislado.

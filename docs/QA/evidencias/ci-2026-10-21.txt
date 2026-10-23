@@ -1,0 +1,37 @@
+# GitHub Actions - verificacion real
+
+Fecha: 2026-10-21
+Repositorio: kevin6734N1/LibreriaBrend
+Commit verificado: 18f2967 (rama qa/rf02-login, PR #3)
+Workflow: JUnit 5 (.github/workflows/junit.yml)
+
+## Ejecucion del push
+
+Run: https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39681874693
+Conclusion: success
+
+- Tests unitarios (sin BD) | completed | success
+  https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39681874693/job/119506121916
+- Login de clientes y administradores (DAO + BD) | completed | success
+  https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39681874693/job/119506122155
+
+## Ejecucion del pull_request
+
+Run: https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39681883986
+Conclusion: success
+
+- Tests unitarios (sin BD) | completed | success
+  https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39681883986/job/119506153019
+- Login de clientes y administradores (DAO + BD) | completed | success
+  https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39681883986/job/119506153309
+
+## Alcance
+
+El workflow ejecuta la suite JUnit completa, incluidos los 19 tests de DAO
+contra MariaDB 11.8 como servicio. La suite HTTP de RF02 y la regresion HTTP
+general siguen ejecutandose en local, no en este workflow.
+
+## Corrida anterior
+
+La corrida sobre 32d7179 tambien termino en success:
+https://github.com/kevin6734N1/LibreriaBrend/actions/runs/39657332520

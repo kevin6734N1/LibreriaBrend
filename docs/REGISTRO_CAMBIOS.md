@@ -12,19 +12,24 @@
 
 | Fecha | Commit | Cambio |
 |---|---|---|
-| 2026-09-23 | `1a8c8af` | Primer commit — Librería Brenda (app web Java + MySQL) |
-| 2026-09-27 | `65dce9f` | CU-03: validar máximo de 10 productos distintos en el carrito + informe de validación |
-| 2026-09-27 | `84f4288` | **Pieza 1 accesibilidad:** perfil de accesibilidad en BD + filtro de corrección de color (Daltonize) + docs/ con registro y evidencias |
-| 2026-09-27 | `ffcb909` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
-| 2026-09-27 | `7c45421` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
-| 2026-09-27 | `b3a5aa1` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
-| 2026-09-27 | `b5337fd` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
-| 2026-09-27 | `54a810c` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
+| 2026-09-23 | `829cdbc` | Primer commit — Librería Brenda (app web Java + MySQL) |
+| 2026-09-27 | `c4852ce` | CU-03: validar máximo de 10 productos distintos en el carrito + informe de validación |
+| 2026-09-27 | `9715fab` | **Pieza 1 accesibilidad:** perfil de accesibilidad en BD + filtro de corrección de color (Daltonize) + docs/ con registro y evidencias |
+| 2026-09-27 | `3289939` | **Pieza 2 accesibilidad:** marcado ARIA / compatibilidad con lector de pantalla en las páginas de cliente |
+| 2026-09-27 | `37404a3` | **Pieza 3 accesibilidad:** lectura en voz alta (Web Speech API) + corrección del filtro en `<html>` |
+| 2026-09-27 | `9c0ea3b` | **Paso 2 — retiro del ODS10 antiguo:** una sola regla de negocio (envío ≥ S/30 gratis), `descuento` fijo en 0 para el paso 3 |
+| 2026-09-27 | `f1dd3a1` | **Paso 3 — códigos promocionales:** tablas + DAO + revalidación en servidor + UI en carrito (solo con sesión, un uso por cliente) |
+| 2026-09-27 | `80910aa` | **Paso 3b — refuerzos:** rechazo de código que empeora el envío · liberación al cancelar · precios reales desde BD |
 | 2026-09-28 | *(pendiente de commit)* | **Laboratorio de calidad — TDD (H0007):** `ValidadorProducto` construido test-first (9 tests JUnit 5) + validación en servidor de crear/editar producto (HTTP 400 con errores) |
+| 2026-10-21 | `4db4786` | **RF02 — inicio de sesión:** validación de correo, BCrypt tolerante a hashes malformados, cuentas inactivas, separación de roles, rotación de sesión y 62 comprobaciones HTTP |
+| 2026-10-21 | `47b73db` | **Demo local:** base aislada `libreria_brenda_demo` con 16 clientes sintéticos; `clientes.jsp` sin datos embebidos y panel de `:8080` verificado |
+| 2026-10-21 | `4db4786` | **Entorno aislado:** Tomcat 11.0.26 propio en `:8082`, usuario SQL limitado a `libreria_brenda_demo` y modal de clientes alimentado por pedidos reales |
 
-**Entorno vigente:** Java 21 · Tomcat 11.0.0-M24 · MariaDB 11.8.8 sobre Fedora
-WSL2 · BD `libreria_brenda` (root/root, puerto 3306) · driver
-`mysql-connector-j-9.7.0.jar` · Jakarta Servlet 6.
+**Entorno vigente:** Java 21 · Tomcat 11.0.26 en `:8080` sirviendo LibreriaBrend
+con la base `libreria_brenda_demo` y el usuario `libreria_demo_app`; el Tomcat
+aislado de `:8082` queda disponible pero detenido · MariaDB 11.8.9 en `3306`
+para la demo y `3307` para pruebas · credenciales locales no versionadas ·
+driver `mysql-connector-j-9.7.0.jar` · Jakarta Servlet 6.
 
 ---
 
@@ -392,6 +397,208 @@ proyecto OK. Evidencias completas, reproducción y límites honestos en
 **Pendiente:** republish en Tomcat y prueba HTTP end-to-end (400 con payload
 inválido) — Tomcat estaba detenido al cerrar la sesión. El fallback silencioso
 a categoría 1 en `ProductoDAO.obtenerCategoriaId()` queda como refactor futuro.
+
+---
+
+## [RF02] Inicio de sesión de cliente y administrador
+
+**Fecha:** 2026-10-21
+**Motivación:** convertir el login en un incremento de portafolio QA verificable
+y cerrar defectos reales de autenticación y sesión.
+
+### Qué se implementó
+
+1. **`ValidadorEmail`** (`src/libreria/util/`), construido test-first: formato
+   y límite de 120 caracteres (el de la columna `email`). Reemplaza las dos
+   regex duplicadas de `LoginServlet` y `RegistroServlet`.
+2. **`SesionAutenticada`** (`src/libreria/servlets/`): crea la sesión, rota el
+   `JSESSIONID` con `request.changeSessionId()` y limpia atributos previos.
+   Se usa en login y registro.
+3. **`PasswordUtil.verificar`:** valida el formato BCrypt completo antes de
+   llamar a jBCrypt. Un hash truncado ya no puede lanzar
+   `StringIndexOutOfBoundsException` y tumbar el login.
+4. **Pruebas:** 18 JUnit de DAO (caracterización contra `libreria_brenda_test`),
+   16 JUnit de `ValidadorEmail` (TDD), 2 de hash malformado, 1 de concurrencia
+   del contador de intentos y 62 comprobaciones HTTP de RF02.
+
+### Verificación
+
+**72/72 JUnit sin BD · 91/91 JUnit con BD · 62/62 HTTP RF02 · 80/80 HTTP
+general.** Evidencias, matriz y límites en
+[`docs/QA/RF02_LOGIN.md`](QA/RF02_LOGIN.md).
+
+### Pendiente
+
+- CI ejecutado en GitHub sobre `4db4786`: **2/2 jobs en success** (unitarios y DAO con MariaDB), ver [evidencia](QA/evidencias/ci-2026-10-21.txt).
+- Bloqueo de login en memoria, por correo y compartido entre roles (riesgo de
+  DoS sobre una cuenta admin); sin límite por IP ni TTL de entradas.
+- Saneamiento aplicado en el árbol actual (DNI, correos, nombre personal y
+  hashes sensibles). El historial anterior conserva los valores antiguos porque
+  no se reescribió: ver [`docs/QA/SEGURIDAD_REPOSITORIO.md`](QA/SEGURIDAD_REPOSITORIO.md).
+
+---
+
+## [Demo] Panel administrativo con datos sintéticos aislados
+
+**Fecha:** 2026-10-21
+**Motivación:** el Tomcat que sirve `localhost:8080` mostraba clientes
+originales aunque el backup SQL ya estaba saneado. El problema no era la JSP:
+la aplicación leía de la base real de la instancia `libaas-mysql` en el puerto
+3307 (`libreria_brenda`, 32 clientes), no del backup del repositorio.
+
+### Diagnóstico
+
+- `setenv.bat` definía `DB_HOST=127.0.0.1`, `DB_PORT=3307` y
+  `DB_NAME=libreria_brenda`; esas variables tienen prioridad sobre
+  `WEB-INF/db.properties`.
+- `clientes.jsp` además conservaba un arreglo de 10 clientes de ejemplo que se
+  mostraba antes de que `fetch('ClienteServlet')` respondiera.
+- La base de 3307 no se modificó: sigue con 32 clientes y 29 pedidos; no se
+  le aplicó ningún `UPDATE`, `DELETE` ni cambio de esquema.
+
+### Cambios
+
+- **`database/demo/libreria_brenda_demo.sql`:** seed estático que crea
+  `libreria_brenda_demo` en MariaDB, con 16 clientes ficticios
+  (`Cliente Demo`, DNI `99900001`–`99900016`, correos `@example.com`,
+  teléfonos `9000001xx`, direcciones `Av. Demo ...`), 16 pedidos, 31 ítems y
+  8 comprobantes. Conserva los IDs y las claves foráneas; no toca
+  `libreria_brenda` ni `libreria_brenda_test`.
+- **`WebContent/clientes.jsp`:** se eliminó el arreglo de clientes embebido;
+  el listado depende solo de `ClienteServlet`/`ClienteDAO`. El historial del
+  modal se alineó con los pedidos del seed.
+- **`WebContent/login.jsp`:** la pista de demo ahora muestra las cuentas
+  sintéticas (`admin@example.com` / `Admin#2026` / `EMP-DEMO` y
+  `cliente01@example.com` / `Cliente#2026`).
+- **Configuración local (fuera del repositorio):** el Tomcat de `:8080` quedó
+  apuntando a `libreria_brenda_demo` en 3306. Se respaldaron `setenv.bat` y
+  `db.properties` antes del cambio; la contraseña se dejó solo en
+  `db.properties`, no en `setenv.bat`.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| Carga del seed | 16 clientes, 16 pedidos, 31 ítems, 8 comprobantes, 0 huérfanos |
+| `ClienteServlet` autenticado | 16 filas; 16 nombres/`@example.com`/DNI/teléfonos/direcciones sintéticos |
+| Panel `clientes.jsp` en navegador | 16 filas, 0 coincidencias con nombres o direcciones antiguas; modal con 8 pedidos del cliente 01 |
+| JUnit sin BD | **72/72** |
+| JUnit con `libreria_brenda_test` | **91/91** |
+| HTTP RF02 | **62/62** |
+| HTTP general | **80/80** |
+
+Evidencia: [`docs/QA/evidencias/demo-sintetica-2026-10-21.txt`](QA/evidencias/demo-sintetica-2026-10-21.txt).
+
+### Límites
+
+- La demo es local y no sustituye a la base real; para volver a ella se
+  restauran los respaldos de configuración y se reinicia Tomcat.
+- El saneamiento sigue sin reescribir el historial de Git: los valores antiguos
+  permanecen en commits anteriores, como se advierte en
+  [`SEGURIDAD_REPOSITORIO.md`](QA/SEGURIDAD_REPOSITORIO.md).
+- No se hizo merge del PR #3 ni se modificó `libreria_brenda_test` más allá de
+  las suites de prueba.
+
+---
+
+## [Aislamiento] Tomcat propio y usuario SQL exclusivo para LibreriaBrend
+
+**Fecha:** 2026-10-21
+**Motivación:** LibreriaBrend dependía de la instalación de LibaaS, de su
+Tomcat y de credenciales compartidas. El objetivo fue levantar una instancia
+propia, en otro puerto, conectada solo a `libreria_brenda_demo`, sin detener
+ni modificar el entorno antiguo.
+
+### Cambios
+
+- **`.gitignore`:** se agregó `.tools-libreria/`; la instalación local y sus
+  credenciales no se versionan.
+- **Tomcat aislado:** Apache Tomcat 11.0.26 en
+  `.tools-libreria/apache-tomcat-11.0.26`, HTTP `8082`, shutdown `8006` y AJP
+  `8010`. El Tomcat de `:8080` no se reinició ni se editó.
+- **Usuario SQL:** `libreria_demo_app`, sin privilegios globales y con
+  `SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW` solo sobre
+  `libreria_brenda_demo`. El host es `%` porque la conexión del host llega a
+  MariaDB como `172.17.0.1` por el NAT de Docker; no se reutilizó `root` ni
+  `libaas_app`.
+- **Credenciales:** solo en el `db.properties` del contexto desplegado, que
+  está ignorado por Git. `setenv.bat` únicamente define `JAVA_HOME`, UTF-8 y
+  zona horaria, sin variables `DB_*` que puedan redirigir la conexión.
+- **Modal de clientes:** `ClienteServlet?accion=pedidos` devuelve el historial
+  real desde `ClienteDAO.listarPedidosRecientes` (DTO `PedidoResumen`), con
+  filtro por cliente, orden descendente y límite acotado. `clientes.jsp` ya no
+  usa un historial estático.
+- **Prueba de integración:** `ClienteDAOPedidosTest` crea dos clientes y tres
+  pedidos temporales en `libreria_brenda_test`, verifica el filtro y el orden,
+  y limpia los datos al terminar.
+
+### Verificación
+
+| Comprobación | Resultado |
+|---|---|
+| Login admin en `:8082` | HTTP 200, `{"ok":true,"redirect":"admin.jsp"}` |
+| Login cliente en `:8082` | HTTP 200, `{"ok":true,"redirect":"index.jsp"}` |
+| `ClienteServlet` | 16 clientes, 16 `Cliente Demo`, 16 correos `@example.com` |
+| `pedidos.jsp` / `PedidoServlet` | HTTP 200; 8 pedidos propios del cliente 01 |
+| Modal cliente 01 | 8 pedidos reales; primero `PED-1788638730511` · 05/09/2026 |
+| `admin-pedidos.jsp` | 16 IDs `PED-*` |
+| Catálogo | HTTP 200; 11 productos, 11 activos |
+| SQL aislado | `libreria_brenda` y `libreria_brenda_test` denegadas (ERROR 1142) |
+| JUnit con BD | **91/91** (0 fallos) |
+| JUnit sin BD | **72 ejecutadas**, 0 fallos; 3 clases DAO omitidas |
+| HTTP RF02 | **62/62** |
+| HTTP general | **80/80** |
+
+Evidencia: [`docs/QA/evidencias/entorno-aislado-2026-10-21.txt`](QA/evidencias/entorno-aislado-2026-10-21.txt)
+y captura del modal: [`entorno-aislado-2026-10-21.png`](QA/evidencias/entorno-aislado-2026-10-21.png).
+
+### Límites
+
+- No se migró el puerto `8080`: el Tomcat antiguo sigue disponible y la
+  decisión de retirarlo queda para una etapa posterior.
+- El host `%` del usuario demo es más amplio que `localhost`; el permiso sigue
+  acotado al esquema `libreria_brenda_demo` y no incluye administración.
+- No se hizo merge del PR #3 ni se modificaron volúmenes o credenciales de
+  LibaaS.
+
+---
+
+## [Corrección] El :8080 volvió a apuntar a la demo
+
+**Fecha:** 2026-10-21
+**Síntoma:** al reabrir el proyecto desde VS Code, `admin@example.com` /
+`Admin#2026` / `EMP-DEMO` respondía "Credenciales de empleado incorrectas".
+
+**Causa:** VS Code lanza Java directamente (`Code.exe` → `cmd.exe` → `java.exe`)
+y no ejecuta `bin/setenv.bat`. El contexto de `:8080` tomaba
+`WEB-INF/db.properties`, que seguía apuntando a `libreria_brenda`; por eso la
+cuenta comercial autenticaba y la demo no. Además, la JSP de clientes era nueva
+pero el `ClienteServlet.class` desplegado era del 17/10 y no tenía
+`accion=pedidos`.
+
+### Corrección local aplicada
+
+- `db.properties` del contexto de `:8080` ahora apunta a
+  `libreria_brenda_demo` con el usuario `libreria_demo_app`; la contraseña solo
+  vive en ese archivo ignorado.
+- `setenv.bat` quedó coherente con el mismo nombre de base y usuario.
+- Se publicaron las clases actuales desde `src/` (incluido `PedidoResumen`).
+- Se conservaron copias locales de la configuración comercial anterior
+  (`*.bak-comercial-20261021`) dentro de `.tools`, sin versionar.
+
+### Verificación en :8080
+
+| Comprobación | Resultado |
+|---|---|
+| Login admin demo | HTTP 200, `{"ok":true,"redirect":"admin.jsp"}` |
+| `ClienteServlet` | 16 clientes, 16 `Cliente Demo`, 16 `@example.com` |
+| Modal cliente 01 | 8 pedidos reales; primero `PED-1788638730511` · 05/09/2026 |
+| Navegador | 16 filas y modal con 8 pedidos |
+
+El puerto `8080` no se migró: sigue siendo la misma instancia, ahora con la base
+demo y el código actual. Detalle en
+[`entorno-aislado-2026-10-21.txt`](QA/evidencias/entorno-aislado-2026-10-21.txt)
+y captura en [`8080-demo-2026-10-21.png`](QA/evidencias/8080-demo-2026-10-21.png).
 
 ---
 

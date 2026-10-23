@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import libreria.dao.ClienteDAO;
 import libreria.models.Cliente;
+import libreria.models.PedidoResumen;
 
 @WebServlet("/ClienteServlet")
 public class ClienteServlet extends HttpServlet {
@@ -26,6 +27,12 @@ public class ClienteServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
             throws ServletException, IOException {
+
+        String accion = request.getParameter("accion");
+        if ("pedidos".equals(accion)) {
+            responderPedidosRecientes(request, response);
+            return;
+        }
 
         ClienteDAO dao = new ClienteDAO();
         List<Cliente> clientes = dao.listarTodos();
@@ -67,6 +74,46 @@ public class ClienteServlet extends HttpServlet {
         response.getWriter().write(json.toString());
     }
 
+    /** Historial reciente de pedidos para el modal de clientes.jsp. */
+    private void responderPedidosRecientes(HttpServletRequest request,
+                                           HttpServletResponse response)
+            throws IOException {
+
+        response.setContentType("application/json;charset=UTF-8");
+
+        int clienteId;
+        try {
+            clienteId = Integer.parseInt(request.getParameter("id"));
+            if (clienteId <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"ok\":false,\"error\":\"Cliente inválido.\"}");
+            return;
+        }
+
+        List<PedidoResumen> pedidos = new ClienteDAO().listarPedidosRecientes(clienteId, 10);
+        StringBuilder json = new StringBuilder("[");
+
+        for (int i = 0; i < pedidos.size(); i++) {
+            PedidoResumen p = pedidos.get(i);
+            json.append("{")
+                .append("\"id\":\"").append(escapar(p.getId())).append("\",")
+                .append("\"fecha\":");
+            if (p.getFecha() != null) {
+                json.append("\"").append(FORMATO_FECHA.format(p.getFecha())).append("\"");
+            } else {
+                json.append("null");
+            }
+            json.append(",\"total\":").append(p.getTotal())
+                .append(",\"estado\":\"").append(escapar(p.getEstado())).append("\"}");
+
+            if (i < pedidos.size() - 1) json.append(",");
+        }
+
+        json.append("]");
+        response.getWriter().write(json.toString());
+    }
+
     /**
      * Activa/inactiva un cliente. Antes no existia forma de hacer esto desde
      * la interfaz: ClienteDAO.cambiarEstado() ya existia en el DAO, pero
@@ -103,6 +150,10 @@ public class ClienteServlet extends HttpServlet {
         if (texto == null) {
             return "";
         }
-        return texto.replace("\"", "\\\"");
+        return texto.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\t", "\\t");
     }
 }

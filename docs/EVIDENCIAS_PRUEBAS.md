@@ -18,7 +18,7 @@ $ systemctl is-active mariadb
 active
 ```
 
-### E2. Conexión con las credenciales del proyecto (root/root, puerto 3306)
+### E2. Conexión con las credenciales locales del proyecto (puerto 3306)
 
 ```text
 $ mariadb -h 127.0.0.1 -P 3306 -u root -proot -e "SELECT VERSION() ..."
