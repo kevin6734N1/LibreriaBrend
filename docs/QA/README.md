@@ -30,11 +30,12 @@ Esta carpeta reúne la documentación y las evidencias de aseguramiento de calid
 
 - **JUnit (23/10/2026):** 78 pruebas ejecutadas sin BD, 0 fallos; **97/97** con `libreria_brenda_test`.
 - **HTTP (23/10/2026):** RF03 **29/29** (corregido tras revisión; 1.ª corrida27/27); RF02 **62/62**; regresión general **80/80**. Pruebas negativas de aislamiento: **2/2 abortos sin escrituras**.
-- **CI:** dos jobs de JUnit en el workflow `junit.yml` (verificados en verde en el PR #3); la rama de RF03 reporta su CI en su propio PR. La suite HTTP **no** corre en GitHub Actions.
+- **CI (29/10/2026):** dos jobs de JUnit en el workflow `junit.yml`, en verde en el PR #4 (runs #17 y #18) y en el merge sobre `main` (run #19). La suite HTTP **no** corre en GitHub Actions.
 - **Demo local:** `:8080`, base `libreria_brenda_demo`, 16 clientes sintéticos y modal de pedidos con 8 registros del cliente 01.
 
 Evidencias de la última corrida (23/10/2026 — RF03 y regresión):
 
+- [CI del merge de RF03 en `main` (runs #17–#19)](evidencias/ci-2026-10-29-rf03-main.txt)
 - [RF03 corregido (29/29, tras revisión del PR #4)](evidencias/rf03-http-corregido-2026-10-23.txt)
 - [Pruebas negativas de aislamiento (abortos sin escrituras)](evidencias/rf03-aislamiento-negativo-2026-10-23.txt)
 - [RED RF03 (2 fallos antes de la corrección)](evidencias/rf03-red-2026-10-23.txt)

@@ -1,0 +1,32 @@
+CI - GitHub Actions sobre main tras fusionar RF03 (PR #4)
+Consultado vía API de GitHub el 29/10/2026 (hora de Lima; 30/10/2026 en UTC).
+Repositorio: kevin6734N1/LibreriaBrend (PRIVADO)
+Workflow: .github/workflows/junit.yml  (nombre: JUnit 5)
+
+== Corridas ==
+run  evento         SHA        resultado
+#17  push           32dee68    success   (cabeza de qa/rf03-bloqueo-login, commit correctivo)
+#18  pull_request   32dee68    success   (PR #4)
+#19  push           f74d41a    success   (merge de PR #4 sobre main)
+
+== Detalle del run #19 (main) ==
+id: 40996166872 · run_attempt: 1
+created_at: 2026-10-30T03:13:34Z · updated_at: 2026-10-30T03:14:24Z
+
+job                                          status      conclusion
+Tests unitarios (sin BD)                     completed   success
+Login de clientes y administradores (DAO+BD) completed   success
+
+== Check-runs del head del PR #4 (32dee68) ==
+total_count: 4 · todos completed · conclusion success
+(2 jobs x 2 corridas: push #17 y pull_request #18)
+
+== Alcance real de la CI ==
+Solo JUnit: job sin base de datos y job con MariaDB 11.8 como servicio
+(database/schema_test.sql + database/fixtures_test.sql contra libreria_brenda_test).
+Las suites HTTP de RF02 (62), RF03 (29) y general (80) NO se ejecutan en CI:
+requieren un Tomcat desplegado y corren localmente contra :8091 con la base de pruebas.
+
+== Estado del PR #4 al consultar ==
+state: open -> merged: true (merge commit f74d41a751cf0262d38723620ae0d4276a5476b3)
+commits: 4 · changed_files: 17

@@ -15,7 +15,7 @@ El desarrollo base fue un trabajo grupal del curso. La atribución completa est�
 - **JUnit 5:** 97 pruebas. 78 se ejecutan sin motor de base de datos; 19 prueban los DAO contra `libreria_brenda_test` (login e historial de pedidos del modal).
 - **Integración HTTP:** 62 comprobaciones de RF02 (login, roles, sesión, bloqueo), 29 de RF03 (bloqueo por intentos fallidos: fronteras, minutos restantes y coherencia entre roles) y 80 comprobaciones generales de carrito, pedidos, cupones y permisos.
 - **TDD real:** validador de correo, tolerancia a hashes BCrypt malformados, rotación de sesión y la corrección de `minutosRestantes()` en RF03 (bloqueo vencido). Los ciclos RED → GREEN están documentados con evidencia, sin fabricar fallos para código que ya funcionaba.
-- **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (dos jobs verificados en el PR #3).
+- **Herramientas:** Java 21, JUnit 5, Tomcat 11, MariaDB 11, Bash/curl y GitHub Actions (dos jobs verificados en `main`).
 - **Mapa de evidencias:** [docs/QA/README.md](docs/QA/README.md) · [matriz RF02](docs/QA/RF02_LOGIN.md) · [matriz RF03](docs/QA/RF03_BLOQUEO_LOGIN.md) · [saneamiento y riesgo residual](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Stack y arquitectura
@@ -283,7 +283,7 @@ El workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) se ejec
 1. **Tests unitarios (sin BD):** compila y ejecuta la suite excluyendo `libreria.dao`; no necesita MariaDB.
 2. **Login de clientes y administradores (DAO + BD):** levanta MariaDB 11.8 como servicio, carga `database/schema_test.sql` y `database/fixtures_test.sql`, y ejecuta las pruebas de DAO contra `libreria_brenda_test`.
 
-Los resultados de la última ejecución se consultan en la pestaña **Checks** del PR #3. La suite HTTP no está en CI porque requiere un Tomcat desplegado; se ejecuta localmente contra `:8091` y la base de pruebas.
+Los resultados de la última ejecución se consultan en la pestaña **Actions** de `main` (última corrida verificada: run #19, 29/10/2026). La suite HTTP no está en CI porque requiere un Tomcat desplegado; se ejecuta localmente contra `:8091` y la base de pruebas.
 
 ## Estado verificado y limitaciones
 
@@ -292,7 +292,7 @@ Los resultados de la última ejecución se consultan en la pestaña **Checks** d
 - **78 tests JUnit ejecutados sin base de datos** (0 fallos) y **97/97** con `libreria_brenda_test` (incluye 19 pruebas de DAO: login y pedidos del modal).
 - **62/62 comprobaciones HTTP de RF02**, **29/29 de RF03** y **80/80 comprobaciones HTTP generales** contra la base ficticia.
 - **RF03:** fronteras de expiración probadas con reloj inyectado (sin esperas reales) y corrección de `minutosRestantes()` que informaba 1 minuto en un bloqueo ya vencido; detalle en [matriz RF03](docs/QA/RF03_BLOQUEO_LOGIN.md).
-- **CI:** dos jobs de GitHub Actions en verde sobre el PR #3; el detalle de la corrida se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-21.txt).
+- **CI:** dos jobs de GitHub Actions en verde sobre el merge de RF03 en `main` (runs #17, #18 y #19); el detalle de la corrida está en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-29-rf03-main.txt).
 - RF02 cubre cliente activo/inactivo, contraseña incorrecta, correo inexistente y mal formado, límite de 120 caracteres, BCrypt, separación de roles, autorización y rotación de sesión en login y registro.
 - Se corrigieron session fixation, el fallo con hashes BCrypt truncados y la aceptación de correos más largos que la columna.
 - Regresión general en verde: acceso anónimo, validación de productos, compra, cupones, cancelación, stock, límite de 10 productos y payloads malformados.
@@ -303,11 +303,15 @@ Los resultados de la última ejecución se consultan en la pestaña **Checks** d
 - Pruebas de carga y concurrencia; cobertura instrumentada (JaCoCo). No se afirma ningún porcentaje.
 - Tokens CSRF y atributo `SameSite` en cookies (QA-15).
 - Bloqueo de login en memoria: es por correo y compartido entre roles, por lo que cinco fallos pueden bloquear temporalmente a un administrador (DoS). Está documentado en [RF02](docs/QA/RF02_LOGIN.md#6-limitaciones-y-riesgos-abiertos) y en [RF03](docs/QA/RF03_BLOQUEO_LOGIN.md#9-riesgos-y-limitaciones).
-- GitHub Actions cubre los jobs unitarios y DAO; la suite HTTP sigue fuera de CI porque requiere Tomcat. La corrida verificada del PR #3 se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-21.txt).
+- GitHub Actions cubre los jobs unitarios y DAO; la suite HTTP sigue fuera de CI porque requiere Tomcat. La corrida verificada del merge de RF03 se enlaza en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-29-rf03-main.txt).
 - La demo es local (`localhost`), no una URL pública; no se afirma disponibilidad para reclutadores ni despliegue en producción.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.
 
-**Saneamiento de datos:** el backup del árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. **El historial de Git no se reescribió**, así que los valores anteriores siguen en commits públicos; el alcance y el riesgo residual están en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
+**Saneamiento de datos:** el árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. El **historial de `main` y de las ramas de trabajo fue reescrito** el 23/10/2026 para retirar los 41 valores anteriores, y el repositorio pasó a **privado**; aun así, la reescritura no revoca clones ni cachés previos, por lo que el riesgo residual sigue descrito en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
+
+## Estado del repositorio
+
+`main` es la única rama de trabajo: RF01, RF02 (#3) y RF03 (#4) están integrados en ella y no se mantienen ramas paralelas de esas funcionalidades. El repositorio de GitHub es **privado**. Los respaldos del historial anterior son locales y no se publican.
 
 ## Roles académicos
 
