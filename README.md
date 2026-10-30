@@ -307,11 +307,11 @@ Los resultados de la última ejecución se consultan en la pestaña **Actions** 
 - La demo es local (`localhost`), no una URL pública; no se afirma disponibilidad para reclutadores ni despliegue en producción.
 - Funcionalidades de backlog sin evidencia: ficha individual de producto, administración de categorías y recuperación de contraseña.
 
-**Saneamiento de datos:** el árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. El **historial de `main` y de las ramas de trabajo fue reescrito** el 23/10/2026 para retirar los 41 valores anteriores, y el repositorio pasó a **privado**; aun así, la reescritura no revoca clones ni cachés previos, por lo que el riesgo residual sigue descrito en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
+**Saneamiento de datos:** el árbol actual se saneó con datos sintéticos: 16 DNI de demostración, 17 correos `@example.com`, nombre y correo personal reemplazados, y todos los hashes de clientes y del admin sustituidos por hashes sintéticos de fixtures. El backup no contiene credenciales en texto plano. El **historial de `main` y de las ramas de trabajo fue reescrito** el 23/10/2026 para retirar los 41 valores anteriores; aun así, la reescritura no revoca clones, cachés ni referencias previas, por lo que el riesgo residual se mantiene documentado en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Estado del repositorio
 
-`main` es la única rama de trabajo: RF01, RF02 (#3) y RF03 (#4) están integrados en ella y no se mantienen ramas paralelas de esas funcionalidades. El repositorio de GitHub es **privado**. Los respaldos del historial anterior son locales y no se publican.
+`main` es la única rama de trabajo: RF01, RF02 (#3) y RF03 (#4) están integrados en ella y no se mantienen ramas paralelas de esas funcionalidades. Los respaldos del historial anterior son locales y no se publican. La visibilidad del repositorio y las condiciones para abrirlo no se fijan aquí: están en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Roles académicos
 
