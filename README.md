@@ -283,7 +283,7 @@ El workflow [`.github/workflows/junit.yml`](.github/workflows/junit.yml) se ejec
 1. **Tests unitarios (sin BD):** compila y ejecuta la suite excluyendo `libreria.dao`; no necesita MariaDB.
 2. **Login de clientes y administradores (DAO + BD):** levanta MariaDB 11.8 como servicio, carga `database/schema_test.sql` y `database/fixtures_test.sql`, y ejecuta las pruebas de DAO contra `libreria_brenda_test`.
 
-Los resultados de la última ejecución se consultan en la pestaña **Actions** de `main` (última corrida verificada: run #19, 29/10/2026). La suite HTTP no está en CI porque requiere un Tomcat desplegado; se ejecuta localmente contra `:8091` y la base de pruebas.
+Los resultados de la última ejecución se consultan en la pestaña **Actions** de `main`; la corrida del merge de RF03 quedó registrada en [la evidencia de CI](docs/QA/evidencias/ci-2026-10-29-rf03-main.txt). La suite HTTP no está en CI porque requiere un Tomcat desplegado; se ejecuta localmente contra `:8091` y la base de pruebas.
 
 ## Estado verificado y limitaciones
 

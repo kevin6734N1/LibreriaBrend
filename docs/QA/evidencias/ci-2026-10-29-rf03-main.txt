@@ -8,6 +8,8 @@ run  evento         SHA        resultado
 #17  push           32dee68    success   (cabeza de qa/rf03-bloqueo-login, commit correctivo)
 #18  pull_request   32dee68    success   (PR #4)
 #19  push           f74d41a    success   (merge de PR #4 sobre main)
+#20  push           d306a5b    success   (docs: README con el cierre de RF03 y el único main)
+#21  push           246f9da    success   (docs: visibilidad sin afirmar en el README)
 
 == Detalle del run #19 (main) ==
 id: 40996166872 · run_attempt: 1
