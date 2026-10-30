@@ -1,0 +1,36 @@
+# RED RF03 — Fronteras de expiración del bloqueo
+# Ejecución: 2026-10-23 (fase RED, antes de la corrección)
+# Comando: bash test/run-junit-tests.sh
+# SHA inicial: e9ec8399701be1e75551aae870d8cdf28cc99508 (rama qa/rf03-bloqueo-login)
+# Estado del código: solo se añadió la infraestructura de reloj inyectable
+#   (LongSupplier por defecto System::currentTimeMillis, conducta neutra);
+#   minutosRestantes() AÚN CON EL DEFECTO (Math.max(1, ...)).
+# Entorno: OpenJDK 21.0.12.1, Windows 11, sin motor de base de datos.
+
+Salida real de la suite (recorte a lo relevante):
+
+│  ├─ ControlIntentosLoginExpiracionTest ✔
+│  │  ├─ trasElVencimiento_minutosRestantes_esCero_sinConsultaPrevia() ✘ bloqueo vencido: minutosRestantes no debe informar minutos de un bloqueo ya levantado ==> expected: <0> but was: <1>
+│  │  ├─ enElVencimiento_minutosRestantes_esCero() ✘ bloqueo vencido: los minutos restantes deben ser 0 ==> expected: <0> but was: <1>
+
+  JUnit Jupiter:ControlIntentosLoginExpiracionTest:trasElVencimiento_minutosRestantes_esCero_sinConsultaPrevia()
+    MethodSource [className = 'libreria.util.ControlIntentosLoginExpiracionTest', methodName = 'trasElVencimiento_minutosRestantes_esCero_sinConsultaPrevia', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: bloqueo vencido: minutosRestantes no debe informar minutos de un bloqueo ya levantado ==> expected: <0> but was: <1>
+       libreria.util.ControlIntentosLoginExpiracionTest.trasElVencimiento_minutosRestantes_esCero_sinConsultaPrevia(ControlIntentosLoginExpiracionTest.java:83)
+  JUnit Jupiter:ControlIntentosLoginExpiracionTest:enElVencimiento_minutosRestantes_esCero()
+    MethodSource [className = 'libreria.util.ControlIntentosLoginExpiracionTest', methodName = 'enElVencimiento_minutosRestantes_esCero', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: bloqueo vencido: los minutos restantes deben ser 0 ==> expected: <0> but was: <1>
+       libreria.util.ControlIntentosLoginExpiracionTest.enElVencimiento_minutosRestantes_esCero(ControlIntentosLoginExpiracionTest.java:74)
+
+[        97 tests found           ]
+[        78 tests started         ]
+[        76 tests successful      ]
+[         2 tests failed          ]
+
+# Las 2 fallas son de ASERCIÓN sobre el defecto investigado (no de
+# compilación ni de datos): causa exacta — minutosRestantes() aplicaba
+# Math.max(1, ...) y devolvía 1 minuto para un bloqueo ya vencido, mientras
+# estaBloqueado() devolvía false para el mismo estado.
+# Las otras 4 pruebas nuevas de la clase (fronteras 119999 ms, 60001/60000 ms,
+# vencimiento exacto con estaBloqueado y nuevo ciclo de intentos) pasaron ya
+# en RED: caracterización, no defecto.

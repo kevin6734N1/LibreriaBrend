@@ -1,0 +1,26 @@
+# Pruebas negativas de aislamiento — rf03-bloqueo-tests.sh (correccion post-revision PR #4)
+# Fecha: 2026-10-23T17:11:38-05:00
+# Objetivo: demostrar que un esquema/puerto incorrecto ABORTA antes de escribir o borrar.
+# Canario observable: rf03.canario.previo@test.local (fila previa a la corrida).
+#   Con el script anterior (trap instalado ANTES de las precondiciones y cleanup
+#   con LIKE 'rf03.%@test.local') esta fila habria sido borrada en el aborto.
+
+## N1: DB_NAME='libreria_brenda' (esquema prohibido, distinto del literal)
+exit=1
+== Preparacion: aislamiento obligatorio (todas las condiciones son fatales) ==
+FALLO DE PRECONDICION: DB_NAME='libreria_brenda' (se exige literalmente libreria_brenda_test)
+ABORTADO: no se ejecuto ningun INSERT ni DELETE.
+
+## N2: DB_NAME correcto pero DB_PORT=3399 (motor inexistente => DATABASE() no es el esquema exigido)
+exit=1
+== Preparacion: aislamiento obligatorio (todas las condiciones son fatales) ==
+PASS  DB_NAME literalmente libreria_brenda_test
+PASS  BASE apunta al Tomcat de pruebas aislado (:8091)
+FALLO DE PRECONDICION: SELECT DATABASE()='' (se exige libreria_brenda_test)
+ABORTADO: no se ejecuto ningun INSERT ni DELETE.
+
+## Resultado
+exit N1=1 (esperado 1) | exit N2=1 (esperado 1)
+filas antes=5 filas despues=5 (iguales: sin escrituras ni borrados)
+canario presente tras ambas corridas=1 (esperado 1: el trap NO se ejecuto)
+Ningun INSERT ni DELETE se ejecuto: ambas corridas abortaron en precondiciones y el trap ni se instalo.
