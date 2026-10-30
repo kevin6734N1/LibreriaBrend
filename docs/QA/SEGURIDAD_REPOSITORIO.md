@@ -1,7 +1,7 @@
 # Saneamiento de datos del repositorio
 
 **Fecha de saneamiento del árbol:** 2026-10-21. **Actualización del historial:** 2026-10-23.
-**Estado:** el árbol y los historiales de `main` y `qa/rf02-login` fueron saneados y publicados en un repositorio **privado**. **Persisten referencias y objetos históricos accesibles mediante GitHub**, por lo que todavía no debe hacerse público.
+**Estado:** el árbol y el historial de `main` fueron saneados y publicados; el **2026-10-29 el propietario volvió a hacer público el repositorio** de forma consciente. **Persisten referencias y objetos históricos accesibles mediante GitHub**, por lo que los riesgos de la sección 4 se mantienen aunque el repositorio sea público.
 **Alcance:** respaldo SQL, datos antiguos en `WebContent/clientes.jsp`, documentación de credenciales locales e historial de las ramas publicables.
 
 ## 1. Confirmación del propietario
@@ -85,10 +85,17 @@ pueden subsistir diffs cacheados, ejecuciones anteriores de Actions, clones y
 copias externas. El escaneo de 41 valores conocidos tampoco demuestra la
 ausencia de cualquier otro dato personal.
 
-Los respaldos que conservan el historial anterior y los mapas de sustitución
-están **fuera del repositorio rastreado** y deben permanecer privados.
+Los respaldos que conservaban el historial anterior y los mapas de sustitución
+estuvieron **fuera del repositorio rastreado** y nunca se publicaron. El
+2026-10-29 el propietario eliminó esa carpeta de respaldo local (espejo del
+historial anterior, mapas de sustitución y entorno de pruebas aislado); los
+commits antiguos solo subsisten en ramas locales no publicadas de este clon
+(`respaldo-pre-saneamiento-*`, `backup/*`, `recovery/*`, `audit/*`).
 
-## 5. Pendientes antes de volver a hacer público el repositorio
+## 5. Riesgos aceptados al publicar el repositorio (2026-10-29)
+
+El propietario decidió publicar el repositorio una vez cerrado RF03. Los puntos
+siguientes dejan de ser bloqueadores y pasan a ser riesgos asumidos:
 
 1. Comprobar y tratar los **objetos antiguos todavía accesibles en GitHub**,
    especialmente por SHA y referencias internas de PR. Evaluar una solicitud a
@@ -101,11 +108,12 @@ están **fuera del repositorio rastreado** y deben permanecer privados.
    de demostración (nombres, teléfonos y direcciones). Los metadatos de autor
    se conservaron; las credenciales demo no deben reutilizarse.
 5. Conservar las evidencias históricas tal como fueron capturadas. Algunos SHA
-   originales allí mencionados ya no resuelven mediante las ramas nuevas;
-   el mapeo de equivalencias se mantiene **privado**.
+   originales allí mencionados ya no resuelven mediante las ramas nuevas; el
+   mapeo de equivalencias se eliminó junto con la carpeta de respaldo y no se
+   publicó en ningún momento.
 
-La privacidad actual del repositorio es una protección temporal, no una garantía
-de que desaparezcan clones o cachés ya existentes.
+La publicación actual no revoca clones, forks, cachés ni objetos ya servidos:
+el riesgo residual sigue siendo el descrito en esta sección.
 
 ## 6. Comandos de verificación no destructivos
 

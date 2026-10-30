@@ -311,7 +311,7 @@ Los resultados de la última ejecución se consultan en la pestaña **Actions** 
 
 ## Estado del repositorio
 
-`main` es la única rama de trabajo: RF01, RF02 (#3) y RF03 (#4) están integrados en ella y no se mantienen ramas paralelas de esas funcionalidades. Los respaldos del historial anterior son locales y no se publican. La visibilidad del repositorio y las condiciones para abrirlo no se fijan aquí: están en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
+`main` es la única rama de trabajo: RF01, RF02 (#3) y RF03 (#4) están integrados en ella y no se mantienen ramas paralelas de esas funcionalidades. El repositorio de GitHub es **público** por decisión del propietario (29/10/2026). Los respaldos del historial anterior son locales y no se publican. El riesgo residual de la reescritura histórica está en [docs/QA/SEGURIDAD_REPOSITORIO.md](docs/QA/SEGURIDAD_REPOSITORIO.md).
 
 ## Roles académicos
 
