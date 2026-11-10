@@ -1,0 +1,47 @@
+==============================================================================
+EVIDENCIA DE COBERTURA INSTRUMENTADA - JaCoCo 0.8.12
+LibreriaBrend - Sprint 4: Pruebas No Funcionales (rendimiento y cobertura)
+Generado: 2026-11-10 00:40
+==============================================================================
+
+Agente org.jacoco.agent-0.8.12-runtime.jar.
+Clases de produccion analizadas: src/libreria (41 clases, excluyendo las de prueba).
+
+--- Suite JUnit 5 (103 pruebas) ---
+  Clases de produccion: 41
+  Lineas       298/1807  (16.49 %)
+  Ramas        104/749  (13.89 %)
+  Instrucciones1182/7523  (15.71 %)
+  Complejidad 132/669  (19.73 %)
+  Metodos      98/292  (33.56 %)
+
+--- Trafico HTTP real sobre Tomcat ---
+  Clases de produccion: 41
+  Lineas       957/1807  (52.96 %)
+  Ramas        275/749  (36.72 %)
+  Instrucciones4034/7523  (53.62 %)
+  Complejidad 251/669  (37.52 %)
+  Metodos      190/292  (65.07 %)
+
+--- Combinada (JUnit 5 + trafico HTTP) ---
+  Clases de produccion: 41
+  Lineas       1040/1807  (57.55 %)
+  Ramas        312/749  (41.66 %)
+  Instrucciones4335/7523  (57.62 %)
+  Complejidad 301/669  (44.99 %)
+  Metodos      212/292  (72.60 %)
+
+COBERTURA DE LINEAS POR PAQUETE (medicion combinada)
+  PAQUETE              LINEAS        %      RAMAS          %
+------------------------------------------------------------
+  libreria.dao         397/693    57.29 %  80/218    36.70 %
+  libreria.filtros     29/31    93.55 %  28/30    93.33 %
+  libreria.models      128/165    77.58 %  6/6   100.00 %
+  libreria.servlets    343/717    47.84 %  112/359    31.20 %
+  libreria.util        143/201    71.14 %  86/136    63.24 %
+
+Reportes generados en formato CSV, XML y HTML:
+  out/jacoco/report/            (solo suite JUnit)
+  out/jacoco/report-http/        (solo trafico HTTP)
+  out/jacoco/report-combinado/   (JUnit + trafico HTTP)
+

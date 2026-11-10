@@ -107,6 +107,33 @@ cp -r build/classes/. <TOMCAT>/webapps/LibreriaBrend/WEB-INF/classes/
 
 Abrir `http://localhost:8080/LibreriaBrend/index.jsp`.
 
+#### 3.1. Ejecución desde VS Code (extensión Tomcat)
+
+El repositorio incluye `.vscode/settings.json` con la configuración de la extensión **Tomcat**
+(`al-rimi.tomcat`), que es la que aparece el botón de ejecución en la vista *Tomcat* de la barra
+lateral. El proyecto usa su propio Tomcat en `.tools-libreria/apache-tomcat-11.0.26`, con puerto
+HTTP **8082** y puerto de apagado 8006.
+
+> La carpeta `.tools` de este repositorio es un enlace simbólico a un directorio de otro
+> proyecto de la misma máquina. Por eso el Tomcat propio del proyecto vive en `.tools-libreria`:
+> son instalaciones físicas distintas y no se interfieren.
+
+Al pulsar **Deploy** en el nodo de la aplicación, la extensión compila con Eclipse, publica el
+contexto en `webapps/LibreriaBrend` y arranca el Tomcat. La aplicación queda disponible en
+`http://localhost:8082/LibreriaBrend/`.
+
+Dos ajustes de la extensión tienen alcance `machine` (`tomcat.home`, `tomcat.base`, `tomcat.port`
+y `tomcat.javaHome`), por lo que VS Code los **ignora** en el ámbito del proyecto: deben
+configurarse en los ajustes de usuario de VS Code.
+
+```jsonc
+// Ajustes de usuario de VS Code (File > Preferences > Settings > Open User Settings)
+"tomcat.home": "<ruta>\\.tools-libreria\\apache-tomcat-11.0.26",
+"tomcat.base": "<ruta>\\.tools-libreria\\apache-tomcat-11.0.26",
+"tomcat.port": 8082,
+"tomcat.javaHome": "C:\\Program Files\\Microsoft\\jdk-21.0.12.101-hotspot"
+```
+
 ### 4. Demo local con datos sintéticos
 
 El script [`database/demo/libreria_brenda_demo.sql`](database/demo/libreria_brenda_demo.sql) crea una base **independiente** llamada `libreria_brenda_demo` y la carga con 16 clientes ficticios, 16 pedidos, 31 ítems y 8 comprobantes. Conserva los IDs y las claves foráneas, pero **no toca** `libreria_brenda` ni `libreria_brenda_test`.

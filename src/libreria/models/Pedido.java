@@ -2,6 +2,7 @@ package libreria.models;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Modelo Pedido - Librería Brenda
@@ -11,6 +12,23 @@ public class Pedido {
     public enum Estado {
         PENDIENTE, CONFIRMADO, ENVIADO, ENTREGADO, CANCELADO
     }
+
+    /**
+     * Secuencia monotónica para la generación de identificadores de pedido.
+     *
+     * QA-S4-01: antes el identificador se construía como "PED-" + System.currentTimeMillis().
+     * Bajo concurrencia, dos peticiones de checkout que caen en el mismo milisegundo generaban
+     * el mismo identificador; el INSERT del pedido era rechazado por la clave primaria, la
+     * transacción se revertía y el servidor respondía HTTP 200 con
+     * {"ok":false,"error":"no se pudo guardar en la base de datos"}, es decir, el fallo se
+     * manifestaba como error de negocio y no como error de servidor.
+     *
+     * La secuencia se sembró con el milisegundo actual y se incrementa de forma atómica, de modo
+     * que dos hilos nunca obtienen el mismo valor dentro de la misma JVM. Como la semilla parte
+     * del reloj del sistema, el identificador sigue siendo creciente en el tiempo y un
+     * reinicio del servidor no reutiliza valores ya emitidos.
+     */
+    private static final AtomicLong SECUENCIA = new AtomicLong(System.currentTimeMillis());
 
     private String          id;
     private String          clienteEmail;
@@ -27,7 +45,7 @@ public class Pedido {
     public Pedido() {
         this.fecha  = new Date();
         this.estado = Estado.PENDIENTE;
-        this.id     = "PED-" + System.currentTimeMillis();
+        this.id     = "PED-" + SECUENCIA.incrementAndGet();
     }
 
     // ---- Getters ----

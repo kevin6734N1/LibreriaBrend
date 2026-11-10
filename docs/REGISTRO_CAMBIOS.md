@@ -649,6 +649,48 @@ históricas intactos. Matriz completa, decisiones de borde y riesgos en
 [`QA/RF03_BLOQUEO_LOGIN.md`](QA/RF03_BLOQUEO_LOGIN.md); salidas crudas en
 `QA/evidencias/rf03-*` y `QA/evidencias/*-rf03-2026-10-23.txt`.
 
+### Sprint 4 — Pruebas no funcionales y cobertura instrumentada (09/11/2026)
+
+Etapa de aseguramiento de calidad no funcional: 8 historias de usuario (HU-01 … HU-08),
+34 story points, del 01/11/2026 al 08/11/2026.
+
+**Herramientas incorporadas:** Apache JMeter 5.6.3 instalado como aplicación en el equipo
+(`C:\Apache\apache-jmeter-5.6.3`) y JaCoCo 0.8.12 para la cobertura instrumentada.
+
+**Correcciones sobre el código de producción:**
+
+| Código | Hallazgo | Corrección | Regresión |
+|---|---|---|---|
+| QA-S4-01 | El identificador de pedido se generaba con `System.currentTimeMillis()`, lo que colisionaba bajo concurrencia (101 claves primarias duplicadas) | Secuencia monotónica con `AtomicLong` | `PedidoIdentificadorUnicoTest` (1.600 pedidos en 64 hilos) |
+| QA-S4-02 | `ConexionBD` abría y destruía una conexión física por consulta: 15.698 sockets en `TIME_WAIT` y 49 s de latencia máxima | Pool acotado de 60 conexiones, con API pública sin cambios mediante un proxy que devuelve la conexión al pool | `ConexionBDPoolTest` |
+
+**Hallazgo abierto:** QA-S4-03 — `admin.jsp` y `admin-pedidos.jsp` no aplican paginación y
+materializan la totalidad de los pedidos (85,83 % y 95,41 % de error en la carga mixta).
+Corrección propuesta para el Sprint 5.
+
+**Medición ejecutada:**
+
+| Medición | Resultado |
+|---|---|
+| Campaña JMeter (10 escenarios) | 275.979 muestras; 0 % de error en 16 de 18 servicios medidos |
+| Cobertura JaCoCo (JUnit + tráfico HTTP) | 57,55 % de líneas, 41,66 % de ramas, 72,60 % de métodos sobre 41 clases de producción |
+| JUnit 5 | **103/103**, 0 fallos |
+| Recorrido funcional HTTP | **36/36**, 0 fallos |
+
+**CI:** el job `unit-tests` excluye ahora `libreria.util.ConexionBDPoolTest`, que abre
+conexiones reales contra el motor y no puede ejecutarse sin base de datos. Verificado en local:
+**80/80** sin BD y **103/103** con BD.
+
+**Entorno y datos:** la base local fue restaurada desde `libreria_brenda_backup.sql` (respaldo
+saneado) porque había vuelto a una versión anterior al saneamiento, y la aplicación quedó
+apuntando a `libreria_brenda_demo`, la copia íntegramente sintética. Los ajustes del botón de
+ejecución de VS Code (extensión Tomcat) se corrigieron para apuntar al Tomcat propio del
+proyecto, en el puerto 8082. Detalle en
+[`QA/SEGURIDAD_REPOSITORIO.md`](QA/SEGURIDAD_REPOSITORIO.md).
+
+**Documentación nueva:** [`QA/SPRINT4_PRUEBAS_NO_FUNCIONALES.md`](QA/SPRINT4_PRUEBAS_NO_FUNCIONALES.md)
+y evidencias textuales en `QA/evidencias/sprint4-*`.
+
 ---
 
 ## Pendiente (roadmap de accesibilidad)

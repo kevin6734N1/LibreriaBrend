@@ -49,3 +49,19 @@ dump*.sql
 # .settings/
 # .classpath
 # .project
+
+# --- Entregables de la Práctica 12: pruebas estáticas ---
+# El informe Word del laboratorio y la evidencia de métricas son artefactos
+# de entrega académica, no parte del producto: no se versionan.
+/LABORATORIO*N*12*.docx
+/analisis-estatico-lab12/
+
+# --- Artefactos locales del equipo ---
+# .cloud-attachments/ guarda conversaciones importadas que pueden contener
+# datos personales del proyecto: nunca se versionan.
+.cloud-attachments/
+desktop.ini
+# Capturas de pantalla pendientes de revisión antes de publicarlas
+/screenshots/
+# Datos binarios de cobertura JaCoCo (los reportes CSV/XML/HTML sí se versionan)
+*.exec

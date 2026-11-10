@@ -1,0 +1,16 @@
+==============================================================================
+EVIDENCIA DE LA SUITE JUNIT 5 - EJECUCION FINAL DEL SPRINT 4
+LibreriaBrend - Sprint 4: Pruebas No Funcionales (rendimiento y cobertura)
+Generado: 2026-11-10 00:40
+==============================================================================
+
+  TEST-junit-jupiter.xml
+  TEST-junit-platform-suite.xml
+  TEST-junit-vintage.xml
+
+Total de pruebas: 103 | fallos: 0
+
+Pruebas de regresion anadidas en el Sprint 4:
+  test/libreria/models/PedidoIdentificadorUnicoTest.java  (QA-S4-01)
+  test/libreria/util/ConexionBDPoolTest.java              (QA-S4-02)
+

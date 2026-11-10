@@ -26,7 +26,9 @@ jobs:
 
       - name: Compilar y ejecutar JUnit
         env:
-          JUNIT_EXCLUDE: 'libreria\.dao\..*'
+          # Se excluyen los DAO y ConexionBDPoolTest (QA-S4-02), que abre
+          # conexiones reales contra el motor y solo puede ejecutarse con BD.
+          JUNIT_EXCLUDE: 'libreria\.dao\..*|libreria\.util\.ConexionBDPoolTest'
         run: bash test/run-junit-tests.sh
 
   login-dao-tests:

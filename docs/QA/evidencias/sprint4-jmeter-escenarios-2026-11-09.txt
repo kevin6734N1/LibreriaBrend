@@ -1,0 +1,42 @@
+==============================================================================
+EVIDENCIA DE PRUEBAS DE RENDIMIENTO - Apache JMeter 5.6.3
+LibreriaBrend - Sprint 4: Pruebas No Funcionales (rendimiento y cobertura)
+Generado: 2026-11-10 00:40
+==============================================================================
+
+Ejecucion no interactiva (modo -n) sobre la aplicacion desplegada en Tomcat 11.0.26
+con la base de datos de pruebas en Docker (MariaDB 12.3.3).
+
+Criterios de evaluacion por servicio:
+  p95 <= umbral de la historia | tasa de error <= umbral | throughput >= minimo pactado
+
+ESCENARIO              SERVICIO                   MUESTRAS  ERR%    p50    p95    p99    max   rps   VEREDICTO
+----------------------------------------------------------------------------------------------------------------------
+hu01-carga            LoginServlet                   300   0.00    66     80     92    105     18   CUMPLE
+hu01-estres           LoginServlet                   400   0.00    65     80     89    104     16   CUMPLE
+hu01-picos            LoginServlet                   600   0.00    93    130    149    227    134   CUMPLE
+hu01-resistencia      LoginServlet                  2000   0.00   149    276    357    797    171   CUMPLE
+hu03-carga            ProductoServlet               4000   0.00     3      5      7     25    189   CUMPLE
+hu03-estres           ProductoServlet               5000   0.00     3      6      8     35    149   CUMPLE
+hu03-picos            ProductoServlet               5000   0.00     3      7     15     52   1163   CUMPLE
+hu05-carga            PedidoServlet guardarDB        300   0.00    11     16     17     19     34   CUMPLE
+hu05-picos            PedidoServlet guardarDB        600   0.00    62    110    158    269    131   CUMPLE
+hu08-carga-mixta      LoginServlet (cliente)       87598   0.00   153    515    583   3347    146   CUMPLE
+hu08-carga-mixta      LoginServlet (admin)           120   0.00   135    486    549    556      3   CUMPLE
+hu08-carga-mixta      ProductoServlet              87579   0.00    25     73    106  16382    146   CUMPLE
+hu08-carga-mixta      PedidoServlet validarPromo    87574   0.00    78    142    174   6753    146   CUMPLE
+hu08-carga-mixta      admin.jsp                      120  85.83     0  51302  55767  58015      3   REVISAR
+hu08-carga-mixta      clientes.jsp                   109   0.00     5     39     58     73      3   CUMPLE
+hu08-carga-mixta      admin-pedidos.jsp              109  95.41     0      0  49420  55362      3   REVISAR
+hu08-carga-mixta      productos.jsp                  105   0.00     5     39     80     89      3   CUMPLE
+hu08-carga-mixta      ReporteServlet                 105   0.00   298    467    737   5226      3   CUMPLE
+----------------------------------------------------------------------------------------------------------------------
+Muestras totales ejecutadas: 281619
+
+Criterios no cumplidos (requieren correccion en Sprint 5):
+  QA-S4-03  admin.jsp y admin-pedidos.jsp no aplican paginacion: materializan la
+            totalidad de los pedidos y fallan bajo carga mixta (85,83 % y 95,41 %).
+
+Archivos .jtl de origen: out/jmeter/resultados/*.jtl
+Resumen estructurado: out/jmeter/resultados/resumen.json
+

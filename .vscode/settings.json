@@ -1,0 +1,45 @@
+{
+  // Configuracion de VS Code para LibreriaBrend.
+  //
+  // El boton "Run" de la extension Tomcat (al-rimi.tomcat) usa estos valores.
+  // Antes esta configuracion vivia solo a nivel de usuario y apuntaba al Tomcat
+  // de LibaaS (otro proyecto, otro curso), por lo que al pulsar Run se
+  // arrancaba la aplicacion equivocada. Con este archivo, cada proyecto
+  // elige su propio Tomcat.
+  //
+  // Tomcat DEDICADO de este proyecto (.tools-libreria): puerto HTTP 8082 y
+  // puerto de apagado 8006. La carpeta .tools de este repositorio es un punto de
+  // montaje al .tools de LibaaS: por eso el Tomcat propio vive en .tools-libreria.
+  // Base de datos: MariaDB 12.3.3 en Docker (contenedor libreria-brenda-mariadb),
+  // puerto 3306, base libreria_brenda_demo con datos 100 % sinteticos.
+  //
+  // AVISO: tomcat.home, tomcat.base, tomcat.port, tomcat.ports y tomcat.javaHome
+  // estan declarados con scope "machine" por la extension, por lo que VS Code los
+  // IGNORA a nivel de workspace y solo los lee de los ajustes de usuario. Por eso
+  // el home activo y el puerto 8082 se configuran en los ajustes de usuario de
+  // VS Code; aqui solo se fijan los de alcance "window".
+  "tomcat.home": "C:\\Users\\kevin\\Proyectos\\LibreriaBrend\\.tools-libreria\\apache-tomcat-11.0.26",
+  "tomcat.base": "C:\\Users\\kevin\\Proyectos\\LibreriaBrend\\.tools-libreria\\apache-tomcat-11.0.26",
+  "tomcat.javaHome": "C:\\Program Files\\Microsoft\\jdk-21.0.12.101-hotspot",
+  "tomcat.port": 8082,
+  "tomcat.ports": [8082],
+  "tomcat.buildType": "Eclipse",
+  "tomcat.autoDeployMode": "Disable",
+  "tomcat.browser": "Microsoft Edge",
+  "tomcat.logLevel": "INFO",
+  "tomcat.showTimestamp": true,
+  "java.import.generatesMetadataFilesAtProjectRoot": false,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.maven.enabled": false,
+  "java.import.exclusions": [
+    "**/node_modules/**",
+    "**/.metadata/**",
+    "**/archetype-resources/**",
+    "**/META-INF/maven/**",
+    "**/.tools/**",
+    "**/.tools-libreria/**",
+    "**/target/**",
+    "**/build/**",
+    "**/out/**"
+  ]
+}

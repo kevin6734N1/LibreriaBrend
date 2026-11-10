@@ -115,7 +115,59 @@ siguientes dejan de ser bloqueadores y pasan a ser riesgos asumidos:
 La publicación actual no revoca clones, forks, cachés ni objetos ya servidos:
 el riesgo residual sigue siendo el descrito en esta sección.
 
-## 6. Comandos de verificación no destructivos
+## 6. Restauración del entorno local (09/11/2026)
+
+El **09 de noviembre de 2026**, durante el Sprint 4, se detectó que la base de datos local del
+proyecto había vuelto a una versión **anterior al saneamiento**: el contenedor
+`libreria-brenda-mariadb` (MariaDB 12.3.3, puerto 3306) contenía 17 clientes con correos
+electrónicos personales y documentos de identidad reales, en lugar del conjunto sintético del
+respaldo. El repositorio y su historial no estaban afectados: el árbol ya estaba saneado y la
+divergencia estaba únicamente en la base local.
+
+Acciones ejecutadas:
+
+1. **Respaldo de seguridad** del estado previo, depositado **fuera del repositorio**
+   (`C:\Users\kevin\_respaldo-libreriabrend\`), para no perder información en caso de
+   necesidad.
+2. **Restauración** del esquema `libreria_brenda` a partir de `libreria_brenda_backup.sql`, que
+   es el respaldo saneado versionado en el repositorio (DNI en el rango `99900001`–`99900016`,
+   correos `clienteN@example.com`, hash BCrypt sintético).
+3. **Auditoría** del resultado: 0 correos fuera de `@example.com`, 0 documentos de identidad
+   fuera del rango de demostración y 0 correos de dominio real. Evidencia en
+   [`evidencias/sprint4-auditoria-datos-motor-2026-11-09.txt`](evidencias/sprint4-auditoria-datos-motor-2026-11-09.txt).
+4. **Fijación de la configuración local** para que la aplicación no vuelva a apuntar por
+   defecto a un esquema con datos reales (ver sección 7).
+
+La copia de demostración `libreria_brenda_demo` (16 clientes íntegramente sintéticos: «Cliente
+Demo / Apellido NN») se conservó sin cambios y es la base que usa ahora la aplicación en el
+entorno de trabajo.
+
+## 7. Configuración del entorno de trabajo (09/11/2026)
+
+Para que el botón de ejecución de VS Code no arrancara la aplicación contra una base con datos
+personales, se corrigieron tres puntos:
+
+| Elemento | Antes | Ahora |
+|---|---|---|
+| Base de datos de la aplicación | `libreria_brenda` (restaurada, saneada) | `libreria_brenda_demo` (100 % sintética), fijada en `WebContent/WEB-INF/db.properties` |
+| Tomcat de la extensión Tomcat | apontando al Tomcat de otro proyecto | Tomcat propio del proyecto: `.tools-libreria/apache-tomcat-11.0.26`, puerto HTTP 8082, apagado 8006 |
+| Ajustes de VS Code | `tomcat.home` global con ruta ajena | `tomcat.home`, `tomcat.base` y `tomcat.port` en los ajustes de usuario; ajustes de proyecto en `.vscode/settings.json` |
+
+Notas relevantes:
+
+- Los ajustes `tomcat.home`, `tomcat.base`, `tomcat.port` y `tomcat.javaHome` están declarados
+  por la extensión con alcance `machine`, por lo que VS Code **los ignora en el ámbito del
+  proyecto**: deben configurarse en los ajustes de usuario. El archivo `.vscode/settings.json`
+  del proyecto solo fija los ajustes de alcance `window` (tipo de compilación, navegador y
+  nivel de registro).
+- La carpeta `.tools` de este repositorio es un **enlace simbólico** al directorio `.tools` de
+  otro proyecto de la máquina. Por eso el Tomcat propio del proyecto vive en `.tools-libreria`
+  y no en `.tools`: son instalaciones físicas distintas.
+- `WebContent/WEB-INF/db.properties` está excluido de Git por la regla `*.properties` del
+  `.gitignore`, de modo que las credenciales locales nunca se versionan. La plantilla pública
+  del repositorio es `db.properties.example`.
+
+## 8. Comandos de verificación no destructivos
 
 ```bash
 # Confirmar las dos puntas remotas sin alterar el repositorio
