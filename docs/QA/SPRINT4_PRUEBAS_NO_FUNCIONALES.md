@@ -24,14 +24,18 @@ reportes de JaCoCo en CSV/XML/HTML y salidas de la suite JUnit). No hay valores 
 | JaCoCo | 0.8.12 | Agente de instrumentación para cobertura de código |
 | JUnit | 5.11.4 (Console Standalone) | Suite de pruebas automatizadas del proyecto |
 | Apache Tomcat | 11.0.26 | Contenedor de la aplicación bajo prueba |
-| MariaDB | 12.3.3 (Docker) | Motor de base de datos del entorno de pruebas |
+| MariaDB | 11.8 (contenedor aislado de medición) | Motor de la base de pruebas usada durante la campaña |
 | JDK | 21.0.12 | Compilación y ejecución |
 
 JMeter se instaló como aplicación en el equipo de trabajo (`C:\Apache\apache-jmeter-5.6.3`),
 dejando de depender de la versión portable.
 
-El entorno de medición está **aislado del entorno de demostración**: contenedor MariaDB
-dedicado con puerto propio, Tomcat con puerto propio y base de datos con datos sintéticos.
+El entorno de medición está **aislado del entorno de demostración**: la campaña se ejecutó
+contra un contenedor MariaDB 11.8 propio, publicado en el puerto 3310, con su propio esquema
+`libreria_brenda_test` cargado desde `database/schema_test.sql` y `database/fixtures_test.sql`.
+Ese aislamiento evitó que las 275.979 muestras de la campaña contaminaran los datos de la
+aplicación y los del entorno de demostración, que viven en otro contenedor (MariaDB 12.3.3,
+puerto 3306).
 
 ---
 
