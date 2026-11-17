@@ -1,0 +1,32 @@
+G0 — PREPARACION DEL ENTORNO (orquestador)
+Fecha: 2026-11-16 19:47
+Rama de trabajo: qa/caso-combinado (creada desde main en 36848b5)
+
+[1] SUT creado y compilando aislado
+$ javac -encoding UTF-8 -d out/caso-cb src/libreria/util/EvaluadorPrestamo.java
+=> COMPILA_OK, genera out/caso-cb/libreria/util/EvaluadorPrestamo.class
+Firma: public static String evaluar(int edad, double ingreso, int puntaje, int antiguedad, boolean tieneDeudas)
+Contrato: devuelve exactamente "Aprobado", "Aprobado por antigüedad" o "Rechazado".
+
+[2] Herramientas JaCoCo presentes (out/ está en .gitignore, no se versionan)
+out/tools/jacocoagent.jar  (org.jacoco.agent 0.8.12, 302428 bytes)
+out/tools/jacococli.jar    (org.jacoco.cli 0.8.12 nodeps, 586283 bytes)
+
+[3] Insumos del caso en docs/QA/caso-combinado/insumos/
+Caso_Practico_.pdf  (479658 bytes, copiado de C:\Users\kevin\Downloads\Caso_Practico_.pdf)
+Caso_Practico_.txt  (3192 bytes, texto extraido del mismo PDF)
+
+[4] Herramientas base verificadas
+javac 21.0.12.1 (OpenJDK Microsoft, build 21.0.12.1+1-LTS)
+WebContent/WEB-INF/lib/junit-platform-console-standalone-1.11.4.jar
+Microsoft Edge presente en "/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+hc 0.1.21
+
+[5] git status --porcelain (solo archivos de la actividad)
+?? docs/QA/CASO_COMBINADO_ORQUESTACION.md
+?? docs/QA/caso-combinado/
+?? src/libreria/util/EvaluadorPrestamo.java
+
+Ninguna modificacion a src/libreria mas alla del SUT nuevo.
+
+VEREDICTO G0: SUPERADA

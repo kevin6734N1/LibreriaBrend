@@ -1,0 +1,24 @@
+EVIDENCIA T1 — Compilación de la suite de caja blanca
+=====================================================
+Repositorio : C:\Users\kevin\Proyectos\LibreriaBrend (rama qa/caso-combinado)
+Fecha       : ejecución real registrada en este archivo al compilar (javac 21.0.12.1)
+
+Comando ejecutado (Git Bash, desde la raíz del repositorio):
+
+  L=WebContent/WEB-INF/lib
+  JUNIT="$L/junit-platform-console-standalone-1.11.4.jar"
+  mkdir -p out/caso-cb
+  javac -encoding UTF-8 -cp "$JUNIT" -d out/caso-cb \
+    src/libreria/util/EvaluadorPrestamo.java \
+    test/libreria/util/EvaluadorPrestamoCajaBlancaTest.java 2>&1 \
+    | tee docs/QA/caso-combinado/evidencias/T1-compilacion.txt
+
+Salida real de javac: VACÍA (0 bytes) — compilación sin errores ni advertencias.
+Código de salida de javac: 0 (verificado con ${PIPESTATUS[0]} = 0).
+
+Classfiles generados (salida real de `ls -l out/caso-cb/libreria/util/`):
+  -rw-r--r-- 1 kevin 197609  480 Nov 16 19:58 EvaluadorPrestamo.class
+  -rw-r--r-- 1 kevin 197609 3469 Nov 16 19:58 EvaluadorPrestamoCajaBlancaTest.class
+
+Versión del compilador (salida real de `javac -version`):
+  javac 21.0.12.1

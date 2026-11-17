@@ -1,0 +1,25 @@
+﻿╷
+├─ JUnit Platform Suite ✔
+├─ JUnit Jupiter ✔
+│  └─ EvaluadorPrestamoCajaNegraTest ✔
+│     └─ Tabla de decisiones de Caja Negra: Equivalencia + Valores Límite ✔
+│        ├─ Caso 1 [BVA: Frontera inferior valida (edad e ingreso)]: edad=21, ingreso=1500.0... ✔
+│        ├─ Caso 2 [BVA: Frontera superior invalida (edad > 65)]: edad=66, ingreso=2000.0, p... ✔
+│        ├─ Caso 3 [EP invalida / BVA: Puntaje en frontera (<=600)]: edad=35, ingreso=1800.0... ✔
+│        ├─ Caso 4 [BVA: Frontera inferior invalida (edad < 21)]: edad=20, ingreso=2000.0, p... ✔
+│        ├─ Caso 5 [BVA: Limite inferior de excepcion (R4)]: edad=40, ingreso=1200.0, puntaj... ✔
+│        └─ Caso 6 [EP invalida: Excepcion con deuda vencida (R4)]: edad=40, ingreso=1200.0,... ✔
+└─ JUnit Vintage ✔
+Test run finished after 166 ms
+[         5 containers found      ]
+[         0 containers skipped    ]
+[         5 containers started    ]
+[         0 containers aborted    ]
+[         5 containers successful ]
+[         0 containers failed     ]
+[         6 tests found           ]
+[         0 tests skipped         ]
+[         6 tests started         ]
+[         0 tests aborted         ]
+[         6 tests successful      ]
+[         0 tests failed          ]

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Caso Práctico — Prueba Combinada (Caja Negra + Caja Blanca)</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45;
+         color: #1d1d1f; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 4mm; border-bottom: 2px solid #1f4e79; padding-bottom: 2mm; }
+  h2 { font-size: 13pt; color: #1f4e79; margin: 7mm 0 2mm; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 5mm 0 1.5mm; page-break-after: avoid; }
+  table { border-collapse: collapse; width: 100%; margin: 2mm 0 4mm; font-size: 9pt;
+          page-break-inside: avoid; }
+  th, td { border: 0.4pt solid #8a8a8a; padding: 1.6mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #e8eef5; }
+  code, pre { font-family: Consolas, monospace; font-size: 8.6pt; }
+  pre { background: #f5f6f8; border-left: 3px solid #1f4e79; padding: 2.5mm 3mm;
+        white-space: pre-wrap; page-break-inside: avoid; }
+  .portada { text-align: center; margin-top: 45mm; }
+  .seccion { page-break-before: always; }
+  footer { font-size: 8pt; color: #666; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <h1 style="border:none; font-size:20pt; color:#1f4e79;">Caso Práctico<br>Prueba Combinada (Caja Negra + Caja Blanca)</h1>
+  <p style="font-size:12pt;">Sistema de Aprobación de Préstamos Bancarios</p>
+  <p style="margin-top:15mm; font-size:11pt;">
+    <strong>Proyecto:</strong> LibreriaBrend — Calidad y Pruebas de Software (UPN)<br>
+    <strong>Módulo evaluado:</strong> <code>libreria.util.EvaluadorPrestamo</code><br>
+    <strong>QA responsable de la ejecución:</strong> Kevin David Urbe Bolo<br>
+    <strong>Fecha de ejecución:</strong> 16/11/2026 · <strong>Versión del informe:</strong> 1.0
+  </p>
+  <p style="margin-top:10mm; font-size:9.5pt; color:#444;">
+    Entorno declarado: Windows 11 · Git Bash · Java 21.0.12.1 (OpenJDK Microsoft) ·
+    JUnit Platform Console 1.11.4 · JaCoCo 0.8.12 · rama <code>qa/caso-combinado</code>
+  </p>
+</div>
+
+<div class="seccion">
+<h1>1. Planteamiento del problema</h1>
+<p>Una entidad financiera ha desarrollado un módulo de software encargado de evaluar de forma automática si un cliente califica para un préstamo personal. Las reglas de negocio del módulo son:</p>
+<table>
+<tr><th>Id</th><th>Regla</th></tr>
+<tr><td><strong>R1</strong></td><td>Rango de edad: el solicitante debe tener entre <strong>21 y 65 años</strong> (ambos inclusive)</td></tr>
+<tr><td><strong>R2</strong></td><td>Ingreso mensual: el ingreso mensual neto debe ser <strong>mayor o igual a $1,500</strong></td></tr>
+<tr><td><strong>R3</strong></td><td>Historial crediticio: el puntaje crediticio debe ser <strong>superior a 600 puntos</strong></td></tr>
+<tr><td><strong>R4</strong></td><td>Excepción interna: si el cliente tiene <strong>más de 5 años de antigüedad</strong> en el banco y <strong>no posee deudas vencidas</strong>, el sistema aprueba el préstamo automáticamente aunque su ingreso sea de <strong>al menos $1,200</strong></td></tr>
+<tr><td><strong>R5</strong></td><td>Cualquier otro caso: <strong>"Rechazado"</strong></td></tr>
+</table>
+<p>Fragmento de código simplificado del enunciado (Python):</p>
+<pre>def evaluar_prestamo(edad, ingreso, puntaje, antiguedad, tiene_deudas):
+    if 21 &lt;= edad &lt;= 65 and puntaje &gt; 600:
+        if ingreso &gt;= 1500:
+            return "Aprobado"
+        elif antiguedad &gt; 5 and not tiene_deudas and ingreso &gt;= 1200:
+            return "Aprobado por antigüedad"
+    return "Rechazado"</pre>
+<p><strong>Ubicación del SUT dentro de Librería Brenda.</strong> El módulo bajo prueba se materializó como <code>src/libreria/util/EvaluadorPrestamo.java</code>: traducción fiel a Java 21 del fragmento anterior, con la firma <code>public static String evaluar(int edad, double ingreso, int puntaje, int antiguedad, boolean tieneDeudas)</code> y el contrato de devolver exactamente <code>"Aprobado"</code>, <code>"Aprobado por antigüedad"</code> o <code>"Rechazado"</code>, sin validaciones extra, sin <code>null</code> y sin excepciones.</p>
+<p><strong>Advertencia de alcance.</strong> <code>EvaluadorPrestamo</code> es un <strong>ejercicio académico</strong> del curso de Calidad y Pruebas de Software (mismo criterio que <code>libreria.util.CalculadoraMorosidad</code>): no forma parte de los 17 requisitos funcionales implementados de Librería Brenda ni se integra con Servlets, DAO, base de datos ni interfaz. Los datos manejados son ficticios.</p>
+</div>
+
+<div class="seccion">
+<h1>2. Consigna de evaluación</h1>
+<p>Como ingeniero de calidad (QA), se pidió diseñar una estrategia de pruebas combinada para validar este módulo:</p>
+<ol>
+<li><strong>Pruebas de Caja Negra:</strong> definir 3 casos de prueba utilizando las técnicas de <strong>Partición de Equivalencia</strong> y <strong>Análisis de Valores Límite</strong>, basándose únicamente en las reglas de negocio.</li>
+<li><strong>Pruebas de Caja Blanca:</strong> analizar el código fuente y determinar <strong>cuántos casos de prueba se necesitan como mínimo</strong> para lograr una <strong>cobertura de decisiones (ramas) del 100 %</strong>, justificando cada camino elegido.</li>
+</ol>
+<p><strong>Cómo se ejecutó la consigna.</strong> La evaluación se orquestó con una malla de dos testers independientes que trabajaron por caminos separados y coincidieron en el veredicto: el <strong>Tester 2 (caja negra, Antigravity)</strong> diseñó sus casos únicamente desde las reglas R1–R5 del enunciado, sin leer el fuente del SUT antes de tener su tabla de casos; el <strong>Tester 1 (caja blanca)</strong> analizó la estructura de decisiones del código y construyó la suite mínima de cobertura de ramas sin leer los casos del Tester 2. El orquestador (Vibe CLI) preparó el SUT, despachó ambos encargos, validó cada puerta de calidad y redactó este informe. El detalle de despachos, esperas e incidencias queda en <code>BITACORA.md</code>.</p>
+</div>
+
+<div class="seccion">
+<h1>3. Solución de caja negra</h1>
+<p>Diseño del Tester 2 <strong>desde la especificación</strong> (reglas R1–R5), sin mirar el código. La suite se implementó como tabla ejecutable (<code>@ParameterizedTest</code> + <code>@CsvSource</code>): cada fila es un caso entrada → salida esperada.</p>
+
+<h3>3.1 Clases de equivalencia identificadas</h3>
+<table>
+<tr><th>Variable</th><th>Partición</th><th>Clase</th><th>Rango / valores representativos</th></tr>
+<tr><td>Edad</td><td>Válida</td><td>CE1-V</td><td>21 ≤ edad ≤ 65 (ej. 30, 35, 40)</td></tr>
+<tr><td></td><td>Inválida (baja)</td><td>CE1-I1</td><td>edad &lt; 21 (ej. 18, 20)</td></tr>
+<tr><td></td><td>Inválida (alta)</td><td>CE1-I2</td><td>edad &gt; 65 (ej. 66, 70)</td></tr>
+<tr><td>Ingreso</td><td>Válida estándar</td><td>CE2-V1</td><td>ingreso ≥ 1500 (ej. 1500, 2000)</td></tr>
+<tr><td></td><td>Válida por excepción</td><td>CE2-V2</td><td>1200 ≤ ingreso &lt; 1500 (ej. 1200, 1300)</td></tr>
+<tr><td></td><td>Inválida</td><td>CE2-I</td><td>ingreso &lt; 1200 (ej. 1100, 1199)</td></tr>
+<tr><td>Puntaje</td><td>Válida</td><td>CE3-V</td><td>puntaje &gt; 600, es decir ≥ 601 (ej. 601, 650, 750)</td></tr>
+<tr><td></td><td>Inválida</td><td>CE3-I</td><td>puntaje ≤ 600 (ej. 600, 500)</td></tr>
+<tr><td>Antigüedad</td><td>Válida (excepción)</td><td>CE4-V</td><td>antigüedad &gt; 5, es decir ≥ 6 (ej. 6, 10)</td></tr>
+<tr><td></td><td>Inválida (excepción)</td><td>CE4-I</td><td>antigüedad ≤ 5 (ej. 0, 1, 5)</td></tr>
+<tr><td>Deudas</td><td>Válida (excepción)</td><td>CE5-V</td><td><code>false</code> (sin deudas vencidas)</td></tr>
+<tr><td></td><td>Inválida (excepción)</td><td>CE5-I</td><td><code>true</code> (con deudas vencidas)</td></tr>
+</table>
+
+<h3>3.2 Valores límite analizados</h3>
+<table>
+<tr><th>Variable</th><th>Frontera</th><th>Valor</th><th>Clasificación</th><th>Justificación</th></tr>
+<tr><td>Edad</td><td>Inferior</td><td>20</td><td>Inválido (CE1-I1)</td><td>Inmediatamente por debajo del mínimo de 21 años: debe rechazar</td></tr>
+<tr><td></td><td>Inferior</td><td>21</td><td>Válido (CE1-V)</td><td>Límite inferior exacto inclusivo de R1</td></tr>
+<tr><td></td><td>Superior</td><td>65</td><td>Válido (CE1-V)</td><td>Límite superior exacto inclusivo de R1</td></tr>
+<tr><td></td><td>Superior</td><td>66</td><td>Inválido (CE1-I2)</td><td>Inmediatamente por encima del máximo de 65 años: debe rechazar</td></tr>
+<tr><td>Ingreso</td><td>Estándar</td><td>1500.0</td><td>Válido (CE2-V1)</td><td>Umbral mínimo exacto de R2</td></tr>
+<tr><td></td><td>Excepción</td><td>1200.0</td><td>Válido (CE2-V2)</td><td>Umbral mínimo exacto de la excepción R4</td></tr>
+<tr><td></td><td>Excepción</td><td>1199.0</td><td>Inválido (CE2-I)</td><td>Inmediatamente inferior al piso de $1,200: rechazo absoluto</td></tr>
+<tr><td>Puntaje</td><td>Frontera estricta</td><td>600</td><td>Inválido (CE3-I)</td><td>R3 exige estrictamente &gt; 600: el valor exacto no califica</td></tr>
+<tr><td></td><td>Frontera estricta</td><td>601</td><td>Válido (CE3-V)</td><td>Primer entero que satisface puntaje &gt; 600</td></tr>
+<tr><td>Antigüedad</td><td>Frontera excepción</td><td>5</td><td>Inválido para R4 (CE4-I)</td><td>R4 exige "más de 5 años": 5 exactos no califican</td></tr>
+<tr><td></td><td>Frontera excepción</td><td>6</td><td>Válido para R4 (CE4-V)</td><td>Primer entero que supera estrictamente los 5 años</td></tr>
+<tr><td>Deudas</td><td>Dominio discreto</td><td>false / true</td><td>Válido / Inválido (CE5)</td><td>Habilita / bloquea la vía de excepción R4</td></tr>
+</table>
+
+<h3>3.3 Casos de prueba ejecutados y resultado observado</h3>
+<table>
+<tr><th>#</th><th>Técnica</th><th>Edad</th><th>Ingreso</th><th>Puntaje</th><th>Antigüedad</th><th>Deudas</th><th>Esperado</th><th>Observado</th><th>Estado</th></tr>
+<tr><td>1</td><td>BVA: frontera inferior válida (edad e ingreso)</td><td>21</td><td>1500.0</td><td>601</td><td>1</td><td>false</td><td>Aprobado</td><td>Aprobado</td><td>CONFORME</td></tr>
+<tr><td>2</td><td>BVA: frontera superior inválida (edad &gt; 65)</td><td>66</td><td>2000.0</td><td>750</td><td>2</td><td>false</td><td>Rechazado</td><td>Rechazado</td><td>CONFORME</td></tr>
+<tr><td>3</td><td>EP inválida / BVA: puntaje en frontera (≤ 600)</td><td>35</td><td>1800.0</td><td>600</td><td>0</td><td>false</td><td>Rechazado</td><td>Rechazado</td><td>CONFORME</td></tr>
+<tr><td>4</td><td>BVA: frontera inferior inválida (edad &lt; 21)</td><td>20</td><td>2000.0</td><td>700</td><td>3</td><td>false</td><td>Rechazado</td><td>Rechazado</td><td>CONFORME</td></tr>
+<tr><td>5</td><td>BVA: límite inferior de la excepción (R4)</td><td>40</td><td>1200.0</td><td>650</td><td>6</td><td>false</td><td>Aprobado por antigüedad</td><td>Aprobado por antigüedad</td><td>CONFORME</td></tr>
+<tr><td>6</td><td>EP inválida: excepción con deuda vencida (R4)</td><td>40</td><td>1200.0</td><td>650</td><td>6</td><td>true</td><td>Rechazado</td><td>Rechazado</td><td>CONFORME</td></tr>
+</table>
+<p>Los casos 1–3 son los obligatorios de la consigna (frontera inferior válida, frontera superior inválida y partición inválida); los casos 4–6 son complementarios del propio diseño del Tester 2, cada uno justificado por partición o frontera en <code>evidencias/T2-casos.md</code>.</p>
+<p><strong>Ejecución real:</strong> JUnit Platform Console 1.11.4 reportó <code>6 tests found</code>, <code>6 tests successful</code>, <code>0 tests failed</code> (166 ms). Hallazgos: <strong>0</strong> — el módulo reprodujo la especificación en los 6 casos. Veredicto del Tester 2: <strong>CUMPLE</strong>.</p>
+</div>
+
+<div class="seccion">
+<h1>4. Solución de caja blanca</h1>
+<p>Análisis del Tester 1 <strong>sobre la estructura interna</strong> del SUT, sin leer los casos del Tester 2.</p>
+
+<h3>4.1 Estructura de decisiones del SUT</h3>
+<pre>if (edad &gt;= 21 &amp;&amp; edad &lt;= 65 &amp;&amp; puntaje &gt; 600) {        // D1: 3 condiciones -&gt; 6 ramas
+    if (ingreso &gt;= 1500) {                              // D2: 1 condición  -&gt; 2 ramas
+        return "Aprobado";
+    } else if (antiguedad &gt; 5 &amp;&amp; !tieneDeudas &amp;&amp; ingreso &gt;= 1200) {  // D3: 3 condiciones -&gt; 6 ramas
+        return "Aprobado por antigüedad";
+    }
+}
+return "Rechazado";</pre>
+<table>
+<tr><th>Decisión</th><th>Condiciones (subexpresiones)</th><th>Saltos condicionales</th><th>Ramas</th></tr>
+<tr><td>D1 (<code>if</code> externo)</td><td><code>edad &gt;= 21</code>, <code>edad &lt;= 65</code>, <code>puntaje &gt; 600</code></td><td>3</td><td>6</td></tr>
+<tr><td>D2 (<code>if</code> interno)</td><td><code>ingreso &gt;= 1500</code></td><td>1</td><td>2</td></tr>
+<tr><td>D3 (<code>else if</code>)</td><td><code>antiguedad &gt; 5</code>, <code>!tieneDeudas</code>, <code>ingreso &gt;= 1200</code></td><td>3</td><td>6</td></tr>
+<tr><td><strong>Total</strong></td><td>7 condiciones</td><td><strong>7</strong></td><td><strong>14</strong></td></tr>
+</table>
+
+<h3>4.2 Caminos a nivel de decisión (los 4 de la consigna)</h3>
+<table>
+<tr><th>Camino</th><th>Recorrido</th><th>Salida</th></tr>
+<tr><td>C1</td><td>D1 falso</td><td>Rechazado</td></tr>
+<tr><td>C2</td><td>D1 verdadero + D2 verdadero</td><td>Aprobado</td></tr>
+<tr><td>C3</td><td>D1 verdadero + D2 falso + D3 verdadero</td><td>Aprobado por antigüedad</td></tr>
+<tr><td>C4</td><td>D1 verdadero + D2 falso + D3 falso</td><td>Rechazado</td></tr>
+</table>
+
+<h3>4.3 Por qué 4 caminos no bastan: mínimo de 8 casos para el 100 % de ramas</h3>
+<p>JaCoCo mide <strong>ramas de subexpresión</strong> (cada condición de una expresión <code>&amp;&amp;</code> es un salto condicional con dos resultados), no solo el resultado de la decisión completa. Para cubrir las 14 ramas, cada una de las 7 condiciones debe evaluarse <strong>verdadera en al menos un caso y falsa en al menos otro</strong>:</p>
+<ul>
+<li>Las tres salidas falsas de D1 (<code>edad &lt; 21</code>, <code>edad &gt; 65</code>, <code>puntaje ≤ 600</code>) son <strong>mutuamente excluyentes</strong>: cada una exige su propio caso → 3 casos.</li>
+<li>Las cuatro salidas de D3 (<code>antiguedad ≤ 5</code>, <code>tieneDeudas</code>, <code>ingreso &lt; 1200</code>, o todas verdaderas) también son mutuamente excluyentes y solo se alcanzan con D2 falso → 4 casos.</li>
+<li>D2 verdadero (<code>ingreso ≥ 1500</code>) no puede darse en ninguno de los 4 casos anteriores → 1 caso adicional.</li>
+</ul>
+<p><strong>Mínimo: 3 + 4 + 1 = 8 casos.</strong> Los 4 caminos de la consigna cubren el nivel decisión; los 4 casos adicionales cierran las ramas de subexpresión que el nivel decisión deja fuera.</p>
+
+<h3>4.4 Tabla de caminos ejecutados (8 casos)</h3>
+<p>Entrada en el orden <code>(edad, ingreso, puntaje, antigüedad, tieneDeudas)</code>.</p>
+<table>
+<tr><th>Camino</th><th>Condiciones evaluadas</th><th>Entrada</th><th>Salida esperada</th><th>Salida observada</th><th>Rama(s) que cubre</th></tr>
+<tr><td>1</td><td>D1: <code>edad &gt;= 21</code> falsa (cortocircuito)</td><td>(18, 2000.0, 700, 6, false)</td><td>Rechazado</td><td>Rechazado</td><td><code>edad &gt;= 21</code> → falsa</td></tr>
+<tr><td>2</td><td>D1: <code>edad &lt;= 65</code> falsa</td><td>(66, 2000.0, 750, 2, false)</td><td>Rechazado</td><td>Rechazado</td><td><code>edad &gt;= 21</code> → V; <code>edad &lt;= 65</code> → F</td></tr>
+<tr><td>3</td><td>D1: <code>puntaje &gt; 600</code> falsa (frontera 600)</td><td>(35, 1800.0, 600, 0, false)</td><td>Rechazado</td><td>Rechazado</td><td><code>edad &lt;= 65</code> → V; <code>puntaje &gt; 600</code> → F</td></tr>
+<tr><td>4</td><td>D1 completa V; D2: <code>ingreso &gt;= 1500</code> V</td><td>(30, 1600.0, 650, 1, false)</td><td>Aprobado</td><td>Aprobado</td><td><code>puntaje &gt; 600</code> → V; <code>ingreso &gt;= 1500</code> → V</td></tr>
+<tr><td>5</td><td>D2 F; D3: <code>antiguedad &gt; 5</code> falsa</td><td>(40, 1300.0, 650, 2, false)</td><td>Rechazado</td><td>Rechazado</td><td><code>ingreso &gt;= 1500</code> → F; <code>antiguedad &gt; 5</code> → F</td></tr>
+<tr><td>6</td><td>D3: <code>!tieneDeudas</code> falsa</td><td>(40, 1300.0, 650, 6, true)</td><td>Rechazado</td><td>Rechazado</td><td><code>antiguedad &gt; 5</code> → V; <code>!tieneDeudas</code> → F</td></tr>
+<tr><td>7</td><td>D3: <code>ingreso &gt;= 1200</code> falsa</td><td>(40, 1100.0, 650, 6, false)</td><td>Rechazado</td><td>Rechazado</td><td><code>!tieneDeudas</code> → V; <code>ingreso &gt;= 1200</code> → F</td></tr>
+<tr><td>8</td><td>D3 completa verdadera (excepción R4)</td><td>(40, 1300.0, 650, 6, false)</td><td>Aprobado por antigüedad</td><td>Aprobado por antigüedad</td><td><code>ingreso &gt;= 1200</code> → V</td></tr>
+</table>
+<p>Trazabilidad con la consigna: C1 = camino 1, C2 = camino 4, C3 = camino 8, C4 = camino 5. Cada camino es un método de prueba con nombre descriptivo y aserción <code>assertEquals</code> cuyo mensaje cita la regla de negocio ejercitada (R1–R5). Sin <code>assertTrue(true)</code>, sin pruebas sin aserción y sin entradas duplicadas.</p>
+
+<h3>4.5 Cobertura medida con JaCoCo (real, no estimada)</h3>
+<p>Ejecución con <code>-javaagent</code> (JaCoCo 0.8.12) y reporte CSV sobre la clase:</p>
+<pre>GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+JaCoCo Coverage Report,libreria.util,EvaluadorPrestamo,0,28,0,14,0,6,0,8,0,1</pre>
+<table>
+<tr><th>Métrica (clase <code>libreria.util.EvaluadorPrestamo</code>)</th><th>Cubierto</th><th>Perdido</th><th>Total</th><th>%</th></tr>
+<tr><td><strong>Ramas (BRANCH)</strong></td><td><strong>14</strong></td><td><strong>0</strong></td><td><strong>14</strong></td><td><strong>100 %</strong></td></tr>
+<tr><td>Instrucciones</td><td>28</td><td>0</td><td>28</td><td>100 %</td></tr>
+<tr><td>Líneas</td><td>6</td><td>0</td><td>6</td><td>100 %</td></tr>
+<tr><td>Métodos</td><td>1</td><td>0</td><td>1</td><td>100 %</td></tr>
+</table>
+<p><strong>Ejecución real:</strong> JUnit reportó <code>8 tests found</code>, <code>8 tests successful</code>, <code>0 tests failed</code> (90 ms). El orquestador reprodujo la medición desde el <code>jacoco.exec</code> generado por el Tester 1 y obtuvo la fila CSV idéntica. Veredicto del Tester 1: <strong>CUMPLE</strong>.</p>
+</div>
+
+<div class="seccion">
+<h1>5. Prueba combinada: matriz de trazabilidad</h1>
+<p>Fila por caso de las dos suites; ninguna prueba fue reescrita para "hacerla pasar" y el SUT permaneció intacto durante toda la actividad (<code>git diff --stat src/</code> vacío).</p>
+<table>
+<tr><th>Caso</th><th>Técnica que lo originó</th><th>Regla(s)</th><th>Rama(s) / camino que ejercita</th><th>Veredicto</th></tr>
+<tr><td>N1 (21, 1500, 601, 1, F)</td><td>Caja negra — BVA frontera inferior válida</td><td>R1, R2, R3</td><td>D1 V + D2 V (camino C2)</td><td>CONFORME</td></tr>
+<tr><td>N2 (66, 2000, 750, 2, F)</td><td>Caja negra — BVA frontera superior inválida</td><td>R1, R5</td><td>D1 F por <code>edad &lt;= 65</code> falsa</td><td>CONFORME</td></tr>
+<tr><td>N3 (35, 1800, 600, 0, F)</td><td>Caja negra — EP/BVA frontera de puntaje</td><td>R3, R5</td><td>D1 F por <code>puntaje &gt; 600</code> falsa</td><td>CONFORME</td></tr>
+<tr><td>N4 (20, 2000, 700, 3, F)</td><td>Caja negra — BVA frontera inferior inválida</td><td>R1, R5</td><td>D1 F por <code>edad &gt;= 21</code> falsa</td><td>CONFORME</td></tr>
+<tr><td>N5 (40, 1200, 650, 6, F)</td><td>Caja negra — BVA límite de la excepción</td><td>R4</td><td>D1 V + D2 F + D3 V (camino C3)</td><td>CONFORME</td></tr>
+<tr><td>N6 (40, 1200, 650, 6, T)</td><td>Caja negra — EP excepción bloqueada por deuda</td><td>R4, R5</td><td>D1 V + D2 F + D3 F (<code>!tieneDeudas</code> falsa)</td><td>CONFORME</td></tr>
+<tr><td>B1 (18, 2000, 700, 6, F)</td><td>Caja blanca — camino 1 (C1)</td><td>R1, R5</td><td><code>edad &gt;= 21</code> falsa</td><td>OK</td></tr>
+<tr><td>B2 (66, 2000, 750, 2, F)</td><td>Caja blanca — camino 2</td><td>R1, R5</td><td><code>edad &gt;= 21</code> V; <code>edad &lt;= 65</code> F</td><td>OK</td></tr>
+<tr><td>B3 (35, 1800, 600, 0, F)</td><td>Caja blanca — camino 3</td><td>R3, R5</td><td><code>edad &lt;= 65</code> V; <code>puntaje &gt; 600</code> F</td><td>OK</td></tr>
+<tr><td>B4 (30, 1600, 650, 1, F)</td><td>Caja blanca — camino 4 (C2)</td><td>R1, R2, R3</td><td><code>puntaje &gt; 600</code> V; <code>ingreso &gt;= 1500</code> V</td><td>OK</td></tr>
+<tr><td>B5 (40, 1300, 650, 2, F)</td><td>Caja blanca — camino 5 (C4)</td><td>R4, R5</td><td><code>ingreso &gt;= 1500</code> F; <code>antiguedad &gt; 5</code> F</td><td>OK</td></tr>
+<tr><td>B6 (40, 1300, 650, 6, T)</td><td>Caja blanca — camino 6</td><td>R4, R5</td><td><code>antiguedad &gt; 5</code> V; <code>!tieneDeudas</code> F</td><td>OK</td></tr>
+<tr><td>B7 (40, 1100, 650, 6, F)</td><td>Caja blanca — camino 7</td><td>R4, R5</td><td><code>!tieneDeudas</code> V; <code>ingreso &gt;= 1200</code> F</td><td>OK</td></tr>
+<tr><td>B8 (40, 1300, 650, 6, F)</td><td>Caja blanca — camino 8 (C3)</td><td>R4</td><td><code>ingreso &gt;= 1200</code> V</td><td>OK</td></tr>
+</table>
+<p><strong>Lectura de la matriz.</strong> La caja negra respondió "¿el módulo cumple las reglas de negocio para las fronteras y particiones de la especificación?" y la caja blanca respondió "¿la estructura interna queda ejercitada al 100 %?". Las dos técnicas llegaron por caminos independientes (el Tester 2 no leyó el fuente antes de diseñar; el Tester 1 no leyó los casos de caja negra) y coincidieron en el veredicto: 14 casos ejecutados, 0 fallos, 0 hallazgos. Ninguna técnica sustituye a la otra: la caja negra puede dar por bueno un módulo con ramas muertas (código que nunca se ejecuta pero que sus casos no visitan), y la caja blanca puede cubrir el 100 % de ramas de un módulo que incumple una regla de negocio (las ramas estarían ejercitadas, pero con salidas equivocadas). Combinadas, la caja negra aporta el oráculo correcto desde la especificación y la caja blanca garantiza que ninguna decisión del código quedó sin probar.</p>
+</div>
+
+<div class="seccion">
+<h1>6. Evidencias y trazabilidad</h1>
+<table>
+<tr><th>Archivo (en <code>docs/QA/caso-combinado/</code>)</th><th>Comando / origen que lo produjo</th><th>Fecha</th><th>Resultado</th></tr>
+<tr><td><code>evidencias/G0-preparacion.txt</code></td><td>Preparación del orquestador (rama, jars, SUT compilado aislado)</td><td>16/11/2026 19:47</td><td>G0 superada</td></tr>
+<tr><td><code>prompts/01-tester-caja-blanca.md</code></td><td>Encargo del Tester 1 (materializado por el orquestador)</td><td>16/11/2026 19:51</td><td>Despachado</td></tr>
+<tr><td><code>prompts/02-tester-caja-negra.md</code></td><td>Encargo del Tester 2 (materializado por el orquestador)</td><td>16/11/2026 19:51</td><td>Despachado</td></tr>
+<tr><td><code>evidencias/T2-compilacion.txt</code></td><td><code>javac -encoding UTF-8 -cp $JUNIT -d out/caso-cn ...</code></td><td>16/11/2026 19:50</td><td>0 errores</td></tr>
+<tr><td><code>evidencias/T2-clases-equivalencia.md</code></td><td>Diseño del Tester 2 (particiones y fronteras)</td><td>16/11/2026 19:50</td><td>Tabla completa</td></tr>
+<tr><td><code>evidencias/T2-caja-negra-junit.txt</code></td><td><code>java -jar $JUNIT -cp out/caso-cn --select-class ...CajaNegraTest</code></td><td>16/11/2026 19:52</td><td>6/6 exitosos, 0 fallos</td></tr>
+<tr><td><code>evidencias/T2-caja-negra-junit-utf8.txt</code></td><td>Copia legible del anterior (UTF-16LE → UTF-8, contenido íntegro)</td><td>16/11/2026 19:57</td><td>6/6 exitosos</td></tr>
+<tr><td><code>evidencias/T2-casos.md</code></td><td>Matriz de casos del Tester 2</td><td>16/11/2026 19:52</td><td>6/6 conformes, 0 hallazgos</td></tr>
+<tr><td><code>evidencias/T1-compilacion.txt</code></td><td><code>javac -encoding UTF-8 -cp $JUNIT -d out/caso-cb ...</code></td><td>16/11/2026 19:58</td><td>0 errores</td></tr>
+<tr><td><code>evidencias/T1-caja-blanca-junit.txt</code></td><td><code>java -jar $JUNIT -cp out/caso-cb --select-class ...CajaBlancaTest</code></td><td>16/11/2026 19:58</td><td>8/8 exitosos, 0 fallos</td></tr>
+<tr><td><code>evidencias/T1-jacoco-ramas.txt</code></td><td><code>java -jar out/tools/jacococli.jar report out/caso-cb/jacoco.exec --classfiles ... --csv ...</code></td><td>16/11/2026 19:58</td><td>BRANCH 14/14, MISSED 0</td></tr>
+<tr><td><code>evidencias/T1-caminos.md</code></td><td>Tabla de caminos del Tester 1</td><td>16/11/2026 19:59</td><td>8 caminos, 14 ramas</td></tr>
+<tr><td><code>evidencias/G3-coherencia.txt</code></td><td>Validación cruzada del orquestador</td><td>16/11/2026 20:05</td><td>G3 superada</td></tr>
+<tr><td><code>evidencias/G4-regresion.txt</code></td><td><code>JUNIT_EXCLUDE='libreria\.dao\..*' bash test/run-junit-tests.sh</code></td><td>16/11/2026 20:03</td><td>94/98; 4 fallos por BD caída (pool)</td></tr>
+<tr><td><code>evidencias/G4-regresion-sin-bd.txt</code></td><td><code>JUNIT_EXCLUDE='libreria\.dao\..*|libreria\.util\.ConexionBDPoolTest' bash test/run-junit-tests.sh</code></td><td>16/11/2026 20:06</td><td>94/94, 0 fallos</td></tr>
+<tr><td><code>evidencias/G4-veredicto.txt</code></td><td>Análisis del orquestador de las dos corridas</td><td>16/11/2026 20:06</td><td>G4 superada (salvedad ambiental)</td></tr>
+<tr><td><code>BITACORA.md</code></td><td>Registro de despachos, esperas, veredictos e incidencias</td><td>16/11/2026</td><td>Continua</td></tr>
+</table>
+<p><strong>Regresión del proyecto (G4).</strong> La suite completa se ejecutó sin base de datos. En la corrida con el comando estándar, 94 de 98 pruebas pasaron; los 4 fallos corresponden a <code>libreria.util.ConexionBDPoolTest</code> (Sprint 4), que exige un MySQL/MariaDB vivo y en este entorno no había ningún proceso escuchando en 3306/3307. Es una condición ambiental preexistente: la actividad no modificó ningún archivo rastreado del proyecto. Excluida esa clase dependiente de BD, la suite quedó en verde con las 14 pruebas nuevas incluidas (94/94, 0 fallos).</p>
+</div>
+
+<div class="seccion">
+<h1>7. Conclusiones y límites</h1>
+<p><strong>Conclusiones.</strong></p>
+<ol>
+<li>El módulo <code>EvaluadorPrestamo</code> reprodujo las reglas R1–R5 en los <strong>14 casos ejecutados</strong> (6 de caja negra + 8 de caja blanca): 0 fallos, 0 hallazgos.</li>
+<li>La suite de caja blanca alcanzó <strong>100 % de cobertura de ramas medida</strong> (14/14, <code>BRANCH_MISSED = 0</code>) con el mínimo de 8 casos justificado por estructura de decisiones; la de caja negra validó las fronteras y particiones de la especificación con 6 casos justificados por técnica.</li>
+<li>Las dos técnicas, aplicadas por agentes independientes, <strong>coincidieron en el veredicto</strong>: el comportamiento observable cumple la especificación y la estructura interna queda totalmente ejercitada.</li>
+<li>La combinación aporta lo que ninguna técnica da sola: la caja negra provee el oráculo desde la regla de negocio; la caja blanca garantiza que ninguna decisión del código quedó sin probar.</li>
+</ol>
+<p><strong>Límites del alcance.</strong></p>
+<ul>
+<li>La cobertura medida no es calidad total: certifica que se ejecutaron las 14 ramas de esta clase, no que el módulo sea correcto para entradas no probadas ni para requisitos no especificados.</li>
+<li>Se evaluó <strong>una sola clase</strong> con datos ficticios, como ejercicio académico: no forma parte de los 17 RF de Librería Brenda y no se integra con Servlets, DAO ni base de datos.</li>
+<li>Este informe <strong>no certifica el producto</strong> Librería Brenda ni sus módulos reales; sus conclusiones no se extrapolan a otros componentes del sistema.</li>
+<li>Incidencia de la malla documentada en <code>BITACORA.md</code>: el CLI asignado originalmente a la caja blanca (MiniMax Code) quedó fuera de servicio por caída persistente de su proveedor de modelo (error 50113), por lo que el encargo se reasignó a un agente Vibe con el mismo prompt versionado y las mismas reglas de independencia; los entregables y puertas de calidad no cambiaron.</li>
+<li>Salvedad ambiental de la regresión: las 4 pruebas del pool de conexiones requieren MariaDB levantado; quedaron fuera del verde de esta corrida por ausencia de BD, no por la actividad.</li>
+</ul>
+</div>
+
+<div class="seccion">
+<h1>8. Anexos</h1>
+
+<h3>Anexo A — Código del SUT (<code>src/libreria/util/EvaluadorPrestamo.java</code>)</h3>
+<pre>package libreria.util;
+
+/**
+ * Evaluador de aprobación de préstamos personales.
+ *
+ * Ejercicio académico del caso práctico "Prueba Combinada (Caja Negra +
+ * Caja Blanca)" de Calidad y Pruebas de Software (UPN): traducción fiel
+ * a Java 21 del fragmento Python del enunciado. Función independiente:
+ * no forma parte de los 17 requisitos funcionales implementados de
+ * Librería Brenda ni se integra con Servlets, DAO, base de datos ni
+ * interfaz.
+ *
+ * Reglas de negocio del enunciado:
+ * R1: edad del solicitante entre 21 y 65 años, ambos inclusive.
+ * R2: ingreso mensual neto &gt;= 1500.
+ * R3: puntaje crediticio &gt; 600.
+ * R4: excepción interna: antigüedad &gt; 5 años y sin deudas vencidas
+ *     aprueba aunque el ingreso sea &gt;= 1200.
+ * R5: cualquier otro caso: "Rechazado".
+ */
+public final class EvaluadorPrestamo {
+
+    private EvaluadorPrestamo() {
+        // clase utilitaria, no se instancia
+    }
+
+    /**
+     * Evalúa si un solicitante califica para un préstamo personal.
+     * Devuelve exactamente "Aprobado", "Aprobado por antigüedad" o
+     * "Rechazado": sin validaciones extra, sin null y sin excepciones.
+     */
+    public static String evaluar(int edad, double ingreso, int puntaje, int antiguedad, boolean tieneDeudas) {
+        if (edad &gt;= 21 &amp;&amp; edad &lt;= 65 &amp;&amp; puntaje &gt; 600) {
+            if (ingreso &gt;= 1500) {
+                return "Aprobado";
+            } else if (antiguedad &gt; 5 &amp;&amp; !tieneDeudas &amp;&amp; ingreso &gt;= 1200) {
+                return "Aprobado por antigüedad";
+            }
+        }
+        return "Rechazado";
+    }
+}</pre>
+
+<h3>Anexo B — Suite de caja blanca (<code>test/libreria/util/EvaluadorPrestamoCajaBlancaTest.java</code>)</h3>
+<pre>package libreria.util;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Pruebas de CAJA BLANCA (Tester 1) para
+ * EvaluadorPrestamo#evaluar(int, double, int, int, boolean).
+ *
+ * Objetivo: 100 % de cobertura de ramas medida con JaCoCo 0.8.12 sobre la
+ * clase libreria.util.EvaluadorPrestamo.
+ *
+ * Estructura de decisiones del SUT (7 saltos condicionales = 14 ramas):
+ *  - D1: if (edad &gt;= 21 &amp;&amp; edad &lt;= 65 &amp;&amp; puntaje &gt; 600)  -&gt; 3 condiciones -&gt; 6 ramas
+ *  - D2: if (ingreso &gt;= 1500)                            -&gt; 1 condición  -&gt; 2 ramas
+ *  - D3: else if (antiguedad &gt; 5 &amp;&amp; !tieneDeudas &amp;&amp; ingreso &gt;= 1200) -&gt; 3 condiciones -&gt; 6 ramas
+ *
+ * Caminos a nivel de decisión (los 4 de la consigna):
+ *  1. C1: D1 falso -&gt; "Rechazado"
+ *  2. C2: D1 verdadero + D2 verdadero -&gt; "Aprobado"
+ *  3. C3: D1 verdadero + D2 falso + D3 verdadero -&gt; "Aprobado por antigüedad"
+ *  4. C4: D1 verdadero + D2 falso + D3 falso -&gt; "Rechazado"
+ *
+ * Por qué 4 no bastan y hacen falta 8 casos: JaCoCo mide ramas de subexpresión,
+ * no solo el resultado de la decisión. Cada una de las 7 condiciones debe
+ * evaluarse verdadera en al menos un caso y falsa en al menos otro. Las tres
+ * salidas falsas de D1 son mutuamente excluyentes (3 casos), las cuatro salidas
+ * de D3 también lo son (4 casos, todos con D2 falso) y D2 verdadero exige un
+ * caso propio: mínimo 3 + 4 + 1 = 8 casos para cerrar las 14 ramas.
+ */
+class EvaluadorPrestamoCajaBlancaTest {
+
+    @Test
+    @DisplayName("Camino 1: primer if falso por edad &lt; 21 -&gt; Rechazado (R1)")
+    void camino1_primerIfFalsoPorEdadInferior_retornaRechazado() {
+        String resultado = EvaluadorPrestamo.evaluar(18, 2000.0, 700, 6, false);
+        assertEquals("Rechazado", resultado,
+                "R1: con edad=18 (&lt; 21) la primera condicion del if externo es falsa"
+                        + " y el modulo debe rechazar sin evaluar ingreso ni puntaje");
+    }
+
+    @Test
+    @DisplayName("Camino 2: primer if falso por edad &gt; 65 -&gt; Rechazado (R1)")
+    void camino2_primerIfFalsoPorEdadSuperior_retornaRechazado() {
+        String resultado = EvaluadorPrestamo.evaluar(66, 2000.0, 750, 2, false);
+        assertEquals("Rechazado", resultado,
+                "R1: con edad=66 (&gt; 65) la segunda condicion del if externo es falsa"
+                        + " y el modulo debe rechazar aunque ingreso y puntaje sean validos");
+    }
+
+    @Test
+    @DisplayName("Camino 3: primer if falso por puntaje = 600 -&gt; Rechazado (R3)")
+    void camino3_primerIfFalsoPorPuntaje_retornaRechazado() {
+        String resultado = EvaluadorPrestamo.evaluar(35, 1800.0, 600, 0, false);
+        assertEquals("Rechazado", resultado,
+                "R3: con puntaje=600 (no &gt; 600) la tercera condicion del if externo es falsa"
+                        + " y el modulo debe rechazar aunque la edad y el ingreso sean validos");
+    }
+
+    @Test
+    @DisplayName("Camino 4: if externo verdadero + ingreso &gt;= 1500 -&gt; Aprobado (R1+R2+R3)")
+    void camino4_ingresoSuficiente_retornaAprobado() {
+        String resultado = EvaluadorPrestamo.evaluar(30, 1600.0, 650, 1, false);
+        assertEquals("Aprobado", resultado,
+                "R1+R2+R3: edad=30 en [21,65], ingreso=1600 &gt;= 1500 y puntaje=650 &gt; 600"
+                        + " cumplen las tres reglas y el modulo debe aprobar");
+    }
+
+    @Test
+    @DisplayName("Camino 5: ingreso &lt; 1500 + antigüedad &lt;= 5 -&gt; Rechazado (R4 no aplica)")
+    void camino5_ingresoBajoAntiguedadCorta_retornaRechazado() {
+        String resultado = EvaluadorPrestamo.evaluar(40, 1300.0, 650, 2, false);
+        assertEquals("Rechazado", resultado,
+                "R4/R5: con ingreso=1300 (&lt; 1500) y antigüedad=2 (&lt;= 5) la excepcion interna"
+                        + " no aplica y el modulo debe rechazar");
+    }
+
+    @Test
+    @DisplayName("Camino 6: ingreso &lt; 1500 + deudas vencidas -&gt; Rechazado (R4 bloqueada por deudas)")
+    void camino6_conDeudasVencidas_retornaRechazado() {
+        String resultado = EvaluadorPrestamo.evaluar(40, 1300.0, 650, 6, true);
+        assertEquals("Rechazado", resultado,
+                "R4: con antigüedad=6 (&gt; 5) pero tieneDeudas=true la segunda condicion"
+                        + " del elif es falsa y el modulo debe rechazar");
+    }
+
+    @Test
+    @DisplayName("Camino 7: ingreso &lt; 1200 con antigüedad suficiente -&gt; Rechazado (R4 exige &gt;= 1200)")
+    void camino7_ingresoDebajoDe1200_retornaRechazado() {
+        String resultado = EvaluadorPrestamo.evaluar(40, 1100.0, 650, 6, false);
+        assertEquals("Rechazado", resultado,
+                "R4: con antigüedad=6 y sin deudas pero ingreso=1100 (&lt; 1200) la tercera"
+                        + " condicion del elif es falsa y el modulo debe rechazar");
+    }
+
+    @Test
+    @DisplayName("Camino 8: excepción interna (antigüedad &gt; 5, sin deudas, ingreso &gt;= 1200) -&gt; Aprobado por antigüedad (R4)")
+    void camino8_excepcionAntiguedad_retornaAprobadoPorAntiguedad() {
+        String resultado = EvaluadorPrestamo.evaluar(40, 1300.0, 650, 6, false);
+        assertEquals("Aprobado por antigüedad", resultado,
+                "R4: con antigüedad=6 (&gt; 5), sin deudas vencidas e ingreso=1300 (&gt;= 1200)"
+                        + " la excepcion interna aprueba aunque el ingreso no llegue a 1500");
+    }
+}</pre>
+
+<h3>Anexo C — Suite de caja negra (<code>test/libreria/util/EvaluadorPrestamoCajaNegraTest.java</code>)</h3>
+<pre>package libreria.util;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * Pruebas de Caja Negra para EvaluadorPrestamo.
+ *
+ * Diseñadas a partir de la especificación funcional (Reglas R1 a R5)
+ * utilizando las técnicas de Partición de Equivalencia (EP) y
+ * Análisis de Valores Límite (BVA).
+ */
+public class EvaluadorPrestamoCajaNegraTest {
+
+    @ParameterizedTest(name = "Caso {0} [{1}]: edad={2}, ingreso={3}, puntaje={4}, antiguedad={5}, deudas={6} -&gt; esperado={7}")
+    @CsvSource(delimiter = '|', textBlock = """
+        1 | BVA: Frontera inferior valida (edad e ingreso) | 21 | 1500.0 | 601 | 1 | false | Aprobado
+        2 | BVA: Frontera superior invalida (edad &gt; 65)    | 66 | 2000.0 | 750 | 2 | false | Rechazado
+        3 | EP invalida / BVA: Puntaje en frontera (&lt;=600) | 35 | 1800.0 | 600 | 0 | false | Rechazado
+        4 | BVA: Frontera inferior invalida (edad &lt; 21)    | 20 | 2000.0 | 700 | 3 | false | Rechazado
+        5 | BVA: Limite inferior de excepcion (R4)         | 40 | 1200.0 | 650 | 6 | false | Aprobado por antigüedad
+        6 | EP invalida: Excepcion con deuda vencida (R4)  | 40 | 1200.0 | 650 | 6 | true  | Rechazado
+        """)
+    @DisplayName("Tabla de decisiones de Caja Negra: Equivalencia + Valores Límite")
+    void testEvaluarPrestamoCajaNegra(
+            int caso,
+            String tecnica,
+            int edad,
+            double ingreso,
+            int puntaje,
+            int antiguedad,
+            boolean tieneDeudas,
+            String resultadoEsperado) {
+
+        String resultadoObtenido = EvaluadorPrestamo.evaluar(edad, ingreso, puntaje, antiguedad, tieneDeudas);
+        assertEquals(resultadoEsperado, resultadoObtenido,
+                () -&gt; "Discrepancia en Caso " + caso + " (" + tecnica + "): esperado='"
+                        + resultadoEsperado + "', obtenido='" + resultadoObtenido + "'");
+    }
+}</pre>
+
+<h3>Anexo D — CSV de JaCoCo (fila de la clase, salida real)</h3>
+<pre>GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+JaCoCo Coverage Report,libreria.util,EvaluadorPrestamo,0,28,0,14,0,6,0,8,0,1</pre>
+
+<h3>Anexo E — Salida cruda de la ejecución de caja blanca (JUnit)</h3>
+<pre>╷
+├─ JUnit Platform Suite ✔
+├─ JUnit Jupiter ✔
+│  └─ EvaluadorPrestamoCajaBlancaTest ✔
+│     ├─ Camino 6: ingreso &lt; 1500 + deudas vencidas -&gt; Rechazado (R4 bloqueada por deudas... ✔
+│     ├─ Camino 1: primer if falso por edad &lt; 21 -&gt; Rechazado (R1) ✔
+│     ├─ Camino 5: ingreso &lt; 1500 + antigüedad &lt;= 5 -&gt; Rechazado (R4 no aplica) ✔
+│     ├─ Camino 2: primer if falso por edad &gt; 65 -&gt; Rechazado (R1) ✔
+│     ├─ Camino 3: primer if falso por puntaje = 600 -&gt; Rechazado (R3) ✔
+│     ├─ Camino 8: excepción interna (antigüedad &gt; 5, sin deudas, ingreso &gt;= 1200) -&gt; Apr... ✔
+│     ├─ Camino 4: if externo verdadero + ingreso &gt;= 1500 -&gt; Aprobado (R1+R2+R3) ✔
+│     └─ Camino 7: ingreso &lt; 1200 con antigüedad suficiente -&gt; Rechazado (R4 exige &gt;= 120... ✔
+└─ JUnit Vintage ✔
+
+Test run finished after 90 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         8 tests found           ]
+[         0 tests skipped         ]
+[         8 tests started         ]
+[         0 tests aborted         ]
+[         8 tests successful      ]
+[         0 tests failed          ]</pre>
+
+<h3>Anexo F — Salida cruda de la ejecución de caja negra (JUnit)</h3>
+<pre>╷
+├─ JUnit Platform Suite ✔
+├─ JUnit Jupiter ✔
+│  └─ EvaluadorPrestamoCajaNegraTest ✔
+│     └─ Tabla de decisiones de Caja Negra: Equivalencia + Valores Límite ✔
+│        ├─ Caso 1 [BVA: Frontera inferior valida (edad e ingreso)]: edad=21, ingreso=1500.0... ✔
+│        ├─ Caso 2 [BVA: Frontera superior invalida (edad &gt; 65)]: edad=66, ingreso=2000.0, p... ✔
+│        ├─ Caso 3 [EP invalida / BVA: Puntaje en frontera (&lt;=600)]: edad=35, ingreso=1800.0... ✔
+│        ├─ Caso 4 [BVA: Frontera inferior invalida (edad &lt; 21)]: edad=20, ingreso=2000.0, p... ✔
+│        ├─ Caso 5 [BVA: Limite inferior de excepcion (R4)]: edad=40, ingreso=1200.0, puntaj... ✔
+│        └─ Caso 6 [EP invalida: Excepcion con deuda vencida (R4)]: edad=40, ingreso=1200.0,... ✔
+└─ JUnit Vintage ✔
+Test run finished after 166 ms
+[         5 containers found      ]
+[         0 containers skipped    ]
+[         5 containers started    ]
+[         0 containers aborted    ]
+[         5 containers successful ]
+[         0 containers failed     ]
+[         6 tests found           ]
+[         0 tests skipped         ]
+[         6 tests started         ]
+[         0 tests aborted         ]
+[         6 tests successful      ]
+[         0 tests failed          ]</pre>
+
+<footer>Informe generado por el orquestador (Vibe CLI) — Caso Combinado Caja Negra + Caja Blanca · LibreriaBrend · 16/11/2026 · Toda cifra citada proviene de un archivo de evidencia listado en la sección 6.</footer>
+</div>
+
+</body>
+</html>

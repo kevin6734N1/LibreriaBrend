@@ -1,0 +1,33 @@
+stty: /dev/tty: No such device or address
+[36m╷[0m
+[36m├─[0m [36mJUnit Platform Suite[0m [32m✔[0m
+[36m├─[0m [36mJUnit Jupiter[0m [32m✔[0m
+[36m│  └─[0m [36mEvaluadorPrestamoCajaBlancaTest[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 6: ingreso < 1500 + deudas vencidas -> Rechazado (R4 bloqueada por deudas...[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 1: primer if falso por edad < 21 -> Rechazado (R1)[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 5: ingreso < 1500 + antigüedad <= 5 -> Rechazado (R4 no aplica)[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 2: primer if falso por edad > 65 -> Rechazado (R1)[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 3: primer if falso por puntaje = 600 -> Rechazado (R3)[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 8: excepción interna (antigüedad > 5, sin deudas, ingreso >= 1200) -> Apr...[0m [32m✔[0m
+[36m│     ├─[0m [34mCamino 4: if externo verdadero + ingreso >= 1500 -> Aprobado (R1+R2+R3)[0m [32m✔[0m
+[36m│     └─[0m [34mCamino 7: ingreso < 1200 con antigüedad suficiente -> Rechazado (R4 exige >= 120...[0m [32m✔[0m
+[36m└─[0m [36mJUnit Vintage[0m [32m✔[0m
+
+Test run finished after 90 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         8 tests found           ]
+[         0 tests skipped         ]
+[         8 tests started         ]
+[         0 tests aborted         ]
+[         8 tests successful      ]
+[         0 tests failed          ]
+
+
+[33m[1mWARNING:[21m[39m[0m Delegated to the 'execute' command.
+         This behaviour has been deprecated and will be removed in a future release.
+         Please use the 'execute' command directly.

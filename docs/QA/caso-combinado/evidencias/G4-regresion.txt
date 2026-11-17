@@ -1,0 +1,236 @@
+stty: /dev/tty: No such device or address
+[36m╷[0m
+[36m├─[0m [36mJUnit Platform Suite[0m [32m✔[0m
+[36m├─[0m [36mJUnit Jupiter[0m [32m✔[0m
+[36m│  ├─[0m [36mControlIntentosLoginExpiracionTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtrasElVencimiento_minutosRestantes_esCero_sinConsultaPrevia()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mminutos_seGunElRangoDelRestante()[0m [32m✔[0m
+[36m│  │  ├─[0m [34menElVencimiento_minutosRestantes_esCero()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtrasElVencimiento_laConsultaLimpiaYArrancaUnNuevoCiclo()[0m [32m✔[0m
+[36m│  │  ├─[0m [34menElVencimiento_estaBloqueado_seLevanta()[0m [32m✔[0m
+[36m│  │  └─[0m [34manteDelVencimiento_sigueBloqueado_eInformaUnMinuto()[0m [32m✔[0m
+[36m│  ├─[0m [36mEvaluadorPrestamoCajaBlancaTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 6: ingreso < 1500 + deudas vencidas -> Rechazado (R4 bloqueada por deudas...[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 1: primer if falso por edad < 21 -> Rechazado (R1)[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 5: ingreso < 1500 + antigüedad <= 5 -> Rechazado (R4 no aplica)[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 2: primer if falso por edad > 65 -> Rechazado (R1)[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 3: primer if falso por puntaje = 600 -> Rechazado (R3)[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 8: excepción interna (antigüedad > 5, sin deudas, ingreso >= 1200) -> Apr...[0m [32m✔[0m
+[36m│  │  ├─[0m [34mCamino 4: if externo verdadero + ingreso >= 1500 -> Aprobado (R1+R2+R3)[0m [32m✔[0m
+[36m│  │  └─[0m [34mCamino 7: ingreso < 1200 con antigüedad suficiente -> Rechazado (R4 exige >= 120...[0m [32m✔[0m
+[36m│  ├─[0m [36mCodigoPromoTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mporcentaje_calculaDescuentoSobreSubtotal()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mmontoFijo_igualAlSubtotal_descuentaElSubtotal()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mmontoFijo_mayorAlSubtotal_noExcedeElSubtotal()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mporcentaje_subtotalCero_descuentoCero()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mporcentaje_cien_descuentaTodoElSubtotal()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mmontoFijo_menorAlSubtotal_descuentaElMonto()[0m [32m✔[0m
+[36m│  │  └─[0m [34mporcentaje_redondeaACentimos()[0m [32m✔[0m
+[36m│  ├─[0m [36mConexionBDPoolTest[0m [32m✔[0m
+[36m│  │  ├─[0m [31mQA-S4-02: el autoCommit queda activo al devolver la conexion al pool[0m [31m✘[0m [31mCommunications link failure[0m
+[36m│  │  │     [0m
+[36m│  │  │     [0m[31m   The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.[0m
+[36m│  │  ├─[0m [31mQA-S4-02: la conexion devuelta al pool es utilizable de nuevo[0m [31m✘[0m [31mCommunications link failure[0m
+[36m│  │  │     [0m
+[36m│  │  │     [0m[31m   The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.[0m
+[36m│  │  ├─[0m [31mQA-S4-02: el pool no abre mas conexiones fisicas que su maximo[0m [31m✘[0m [31mHubo errores al usar el pool de conexiones ==> expected: <0> but was: <16>[0m
+[36m│  │  └─[0m [31mQA-S4-02: cerrar() devuelve la conexion al pool en vez de destruirla[0m [31m✘[0m [31mCommunications link failure[0m
+[36m│  │        [0m
+[36m│  │        [0m[31m   The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.[0m
+[36m│  ├─[0m [36mPedidoTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_subtotalBajo30_cobraEnvio10()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_sinItems_cobraSoloEnvio()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_subtotalJustoDebajoDe30_cobraEnvio()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mpedidoNuevo_tieneFecha()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_descuentoSeRestaDelSubtotal()[0m [32m✔[0m
+[36m│  │  ├─[0m [34msubtotal_sinItems_esCero()[0m [32m✔[0m
+[36m│  │  ├─[0m [34msubtotal_sumaTodosLosItems()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mitem_tomaElPrecioDelProductoAlCrearse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_subtotalSobre30_envioGratis()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mpedidoNuevo_estadoPendiente()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_recalcularDosVeces_daElMismoResultado()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mpedidoNuevo_idConPrefijoPED()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mtotal_descuentoQueBajaDe30_activaEnvio()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mitem_subtotalEsPrecioPorCantidad()[0m [32m✔[0m
+[36m│  │  └─[0m [34mtotal_subtotalExactamente30_envioGratis()[0m [32m✔[0m
+[36m│  ├─[0m [36mCalculadoraMorosidadTest[0m [32m✔[0m
+[36m│  │  └─[0m [34mfacturaVencidaConSaldoPendiente_esMoroso()[0m [32m✔[0m
+[36m│  ├─[0m [36mPedidoIdentificadorUnicoTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mQA-S4-01: identificadores de pedido unicos bajo creacion concurrente[0m [32m✔[0m
+[36m│  │  └─[0m [34mQA-S4-01: el identificador conserva el formato esperado[0m [32m✔[0m
+[36m│  ├─[0m [36mValidadorEmailTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_sinPuntoEnElDominio_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_longitudExactaDe120Caracteres_devuelveTrue()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_correoConMayusculas_devuelveTrue()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_sinParteLocal_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_sinArroba_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_soloEspacios_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_nulo_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_conDobleArroba_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_sinDominio_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_correoNormal_devuelveTrue()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_vacio_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_conSaltoDeLinea_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_espaciosExternos_seIgnoran()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_conEspacioInterno_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mesValido_longitudDe121Caracteres_devuelveFalse()[0m [32m✔[0m
+[36m│  │  └─[0m [34mesValido_correoConEtiqueta_devuelveTrue()[0m [32m✔[0m
+[36m│  ├─[0m [36mValidadorProductoTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mcategoriaNula_devuelveError()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mstockCero_noDevuelveError()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mprecioCero_devuelveError()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mvariosCamposInvalidos_acumulaTodosLosErrores()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mproductoValido_noDevuelveErrores()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mnombreVacio_devuelveError()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mprecioNegativo_devuelveError()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mstockNegativo_devuelveError()[0m [32m✔[0m
+[36m│  │  └─[0m [34mcategoriaVacia_devuelveError()[0m [32m✔[0m
+[36m│  ├─[0m [36mEvaluadorPrestamoCajaNegraTest[0m [32m✔[0m
+[36m│  │  └─[0m [36mTabla de decisiones de Caja Negra: Equivalencia + Valores Límite[0m [32m✔[0m
+[36m│  │     ├─[0m [34mCaso 1 [BVA: Frontera inferior valida (edad e ingreso)]: edad=21, ingreso=1500.0...[0m [32m✔[0m
+[36m│  │     ├─[0m [34mCaso 2 [BVA: Frontera superior invalida (edad > 65)]: edad=66, ingreso=2000.0, p...[0m [32m✔[0m
+[36m│  │     ├─[0m [34mCaso 3 [EP invalida / BVA: Puntaje en frontera (<=600)]: edad=35, ingreso=1800.0...[0m [32m✔[0m
+[36m│  │     ├─[0m [34mCaso 4 [BVA: Frontera inferior invalida (edad < 21)]: edad=20, ingreso=2000.0, p...[0m [32m✔[0m
+[36m│  │     ├─[0m [34mCaso 5 [BVA: Limite inferior de excepcion (R4)]: edad=40, ingreso=1200.0, puntaj...[0m [32m✔[0m
+[36m│  │     └─[0m [34mCaso 6 [EP invalida: Excepcion con deuda vencida (R4)]: edad=40, ingreso=1200.0,...[0m [32m✔[0m
+[36m│  ├─[0m [36mPasswordUtilTest[0m [32m✔[0m
+[36m│  │  ├─[0m [34mhash_tieneFormatoBCrypt()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_hashVacio_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mhash_mismaContrasenaDosVeces_generaHashesDistintos()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_hashConPrefijoDesconocido_noLanzaExcepcionYDevuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_contrasenaCorrecta_devuelveTrue()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_hashEnTextoPlano_noLanzaExcepcionYDevuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mhash_noGuardaLaContrasenaEnTextoPlano()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_passwordNula_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_hashNulo_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_contrasenaIncorrecta_devuelveFalse()[0m [32m✔[0m
+[36m│  │  ├─[0m [34mverificar_hashBCryptTruncado_noLanzaExcepcionYDevuelveFalse()[0m [32m✔[0m
+[36m│  │  └─[0m [34mverificar_distingueMayusculasYMinusculas()[0m [32m✔[0m
+[36m│  └─[0m [36mControlIntentosLoginTest[0m [32m✔[0m
+[36m│     ├─[0m [34mloginExitoso_reiniciaElContador()[0m [32m✔[0m
+[36m│     ├─[0m [34mcincoFallosConcurrentes_bloqueanLaCuenta()[0m [32m✔[0m
+[36m│     ├─[0m [34mloginExitoso_levantaUnBloqueoActivo()[0m [32m✔[0m
+[36m│     ├─[0m [34mminutosRestantes_recienBloqueado_sonDos()[0m [32m✔[0m
+[36m│     ├─[0m [34memailSinHistorial_noEstaBloqueado()[0m [32m✔[0m
+[36m│     ├─[0m [34memail_ignoraMayusculasYEspacios()[0m [32m✔[0m
+[36m│     ├─[0m [34mcuatroFallos_noBloquea()[0m [32m✔[0m
+[36m│     ├─[0m [34mminutosRestantes_sinBloqueo_esCero()[0m [32m✔[0m
+[36m│     ├─[0m [34memailNulo_noLanzaExcepcion()[0m [32m✔[0m
+[36m│     ├─[0m [34mcincoFallos_bloquea()[0m [32m✔[0m
+[36m│     ├─[0m [34mbloqueo_esPorEmail_noAfectaAOtrosUsuarios()[0m [32m✔[0m
+[36m│     └─[0m [34mmasDeCincoFallos_sigueBloqueado()[0m [32m✔[0m
+[36m└─[0m [36mJUnit Vintage[0m [32m✔[0m
+
+Failures (4):
+  JUnit Jupiter:ConexionBDPoolTest:QA-S4-02: el autoCommit queda activo al devolver la conexion al pool
+    MethodSource [className = 'libreria.util.ConexionBDPoolTest', methodName = 'autoCommitRestablecido', methodParameterTypes = '']
+    => com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+       com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:165)
+       com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:55)
+       com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:840)
+       com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:416)
+       com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:237)
+       [...]
+     Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+       java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+       java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+       java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+       com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:52)
+       com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:95)
+       [...]
+     Caused by: java.net.ConnectException: Connection refused: connect
+       java.base/sun.nio.ch.Net.connect0(Native Method)
+       java.base/sun.nio.ch.Net.connect(Net.java:601)
+       java.base/sun.nio.ch.Net.connect(Net.java:590)
+       java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:583)
+       java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+       [...]
+  JUnit Jupiter:ConexionBDPoolTest:QA-S4-02: la conexion devuelta al pool es utilizable de nuevo
+    MethodSource [className = 'libreria.util.ConexionBDPoolTest', methodName = 'conexionDevueltaSirve', methodParameterTypes = '']
+    => com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+       com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:165)
+       com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:55)
+       com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:840)
+       com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:416)
+       com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:237)
+       [...]
+     Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+       java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+       java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+       java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+       com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:52)
+       com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:95)
+       [...]
+     Caused by: java.net.ConnectException: Connection refused: connect
+       java.base/sun.nio.ch.Net.connect0(Native Method)
+       java.base/sun.nio.ch.Net.connect(Net.java:601)
+       java.base/sun.nio.ch.Net.connect(Net.java:590)
+       java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:583)
+       java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+       [...]
+  JUnit Jupiter:ConexionBDPoolTest:QA-S4-02: el pool no abre mas conexiones fisicas que su maximo
+    MethodSource [className = 'libreria.util.ConexionBDPoolTest', methodName = 'poolAcotado', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: Hubo errores al usar el pool de conexiones ==> expected: <0> but was: <16>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+       libreria.util.ConexionBDPoolTest.poolAcotado(ConexionBDPoolTest.java:60)
+       java.base/java.lang.reflect.Method.invoke(Method.java:580)
+       java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+       java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+  JUnit Jupiter:ConexionBDPoolTest:QA-S4-02: cerrar() devuelve la conexion al pool en vez de destruirla
+    MethodSource [className = 'libreria.util.ConexionBDPoolTest', methodName = 'cerrarDevuelveAlPool', methodParameterTypes = '']
+    => com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+       com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:165)
+       com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:55)
+       com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:840)
+       com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:416)
+       com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:237)
+       [...]
+     Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+       java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+       java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+       java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+       com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:52)
+       com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:95)
+       [...]
+     Caused by: java.net.ConnectException: Connection refused: connect
+       java.base/sun.nio.ch.Net.connect0(Native Method)
+       java.base/sun.nio.ch.Net.connect(Net.java:601)
+       java.base/sun.nio.ch.Net.connect(Net.java:590)
+       java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:583)
+       java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+       [...]
+
+Test run finished after 1715 ms
+[        16 containers found      ]
+[         0 containers skipped    ]
+[        16 containers started    ]
+[         0 containers aborted    ]
+[        16 containers successful ]
+[         0 containers failed     ]
+[        98 tests found           ]
+[         0 tests skipped         ]
+[        98 tests started         ]
+[         0 tests aborted         ]
+[        94 tests successful      ]
+[         4 tests failed          ]
+
+
+[33m[1mWARNING:[21m[39m[0m Delegated to the 'execute' command.
+         This behaviour has been deprecated and will be removed in a future release.
+         Please use the 'execute' command directly.

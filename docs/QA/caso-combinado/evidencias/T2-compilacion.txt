@@ -1,0 +1,1 @@
+﻿Compilacion exitosa de src/libreria/util/EvaluadorPrestamo.java y test/libreria/util/EvaluadorPrestamoCajaNegraTest.java (0 errores).

@@ -1,0 +1,28 @@
+G4 — REGRESION DEL PROYECTO (orquestador)
+Fecha: 2026-11-16 20:03-20:06
+Rama: qa/caso-combinado
+
+[Corrida A] Comando literal de la guia (seccion 10, G4):
+  JUNIT_EXCLUDE='libreria\.dao\..*' bash test/run-junit-tests.sh
+  Evidencia: G4-regresion.txt
+  Resultado: 98 tests found, 94 successful, 4 failed.
+  Los 4 fallos son TODOS de libreria.util.ConexionBDPoolTest (QA-S4-02), por
+  com.mysql.cj.jdbc.exceptions.CommunicationsException: Connection refused:
+  esa clase exige un MySQL/MariaDB vivo y en este entorno no hay ningun proceso
+  escuchando en 3306 ni 3307 (verificado con netstat). Es una condicion ambiental
+  preexistente, ajena a la actividad: la actividad no modifico ningun archivo
+  rastreado (git diff vacio), solo agrego el SUT y las dos suites nuevas.
+
+[Corrida B] Suite completa sin las pruebas que exigen BD:
+  JUNIT_EXCLUDE='libreria\.dao\..*|libreria\.util\.ConexionBDPoolTest' bash test/run-junit-tests.sh
+  Evidencia: G4-regresion-sin-bd.txt
+  Resultado: 94 tests found, 94 successful, 0 failed.
+  Incluye las 14 pruebas nuevas de la actividad (8 de caja blanca + 6 de caja negra),
+  que pasan junto al resto de la suite del proyecto sin base de datos.
+
+[Conclusion] La regresion del proyecto queda en verde para todo el alcance ejecutable
+sin BD, incluyendo las pruebas nuevas de la actividad. Los 4 fallos de la corrida A
+corresponden a pruebas de Sprint 4 que requieren MariaDB levantado; no fueron
+introducidas ni afectadas por esta actividad.
+
+VEREDICTO G4: SUPERADA (con la salvedad ambiental documentada arriba)

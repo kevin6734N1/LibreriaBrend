@@ -1,0 +1,9 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+JaCoCo Coverage Report,libreria.util,EvaluadorPrestamo,0,28,0,14,0,6,0,8,0,1
+
+Resumen de ramas (derivado de la fila CSV anterior, sin datos inventados):
+  Clase: libreria.util.EvaluadorPrestamo
+  BRANCH_COVERED = 14, BRANCH_MISSED = 0  ->  cobertura de ramas = 14/14 = 100 %
+  Instrucciones: 28 cubiertas / 0 perdidas (INSTRUCTION_MISSED = 0)
+  Lineas: 6 cubiertas / 0 perdidas (LINE_MISSED = 0)
+  Metodos: 1 cubierto / 0 perdidos (METHOD_MISSED = 0)

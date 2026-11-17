@@ -1,0 +1,52 @@
+G3 — COHERENCIA CRUZADA (orquestador)
+Fecha: 2026-11-16 20:05
+Rama: qa/caso-combinado
+
+[1] Veredictos de T2 (caja negra) vs criterios 5.1 y 5.2 de la guia
+    Casos 1-3 (obligatorios): entradas y salidas IDENTICAS a 5.1:
+      (21, 1500, 601, 1, false) -> Aprobado        CONFORME
+      (66, 2000, 750, 2, false) -> Rechazado        CONFORME
+      (35, 1800, 600, 0, false) -> Rechazado        CONFORME
+    Casos 4-6 (complementarios): cubren 5.2:
+      (20, 2000, 700, 3, false) -> Rechazado                  CONFORME
+      (40, 1200, 650, 6, false) -> Aprobado por antiguedad   CONFORME
+      (40, 1200, 650, 6, true)  -> Rechazado                  CONFORME
+    Ejecucion real: 6 tests found, 6 successful, 0 failed (T2-caja-negra-junit.txt).
+    Hallazgos: 0. Veredicto T2: CUMPLE.
+
+[2] Veredictos de T1 (caja blanca) vs criterios 5.3 y 5.4 de la guia
+    Nivel decision (5.3): los 4 caminos de la consigna estan cubiertos:
+      C1 (D1 falso)                    = camino 1: (18, 2000, 700, 6, false)   -> Rechazado
+      C2 (D1 V + D2 V)                 = camino 4: (30, 1600, 650, 1, false)  -> Aprobado
+      C3 (D1 V + D2 F + D3 V)          = camino 8: (40, 1300, 650, 6, false)  -> Aprobado por antiguedad
+      C4 (D1 V + D2 F + D3 F)          = camino 5: (40, 1300, 650, 2, false)  -> Rechazado
+    Nivel rama (5.4): los 4 casos adicionales que cierran las 14 ramas estan presentes:
+      5.4 caso 5 (66, 2000, 750, 2, false)  = camino 2  (cierra "edad <= 65" falsa)
+      5.4 caso 6 (35, 1800, 600, 0, false)  = camino 3  (cierra "puntaje > 600" falsa)
+      5.4 caso 7 (40, 1300, 650, 6, true)   = camino 6  (cierra "!tieneDeudas" falsa)
+      5.4 caso 8 (40, 1100, 650, 6, false)  = camino 7  (cierra "ingreso >= 1200" falsa)
+    JaCoCo real (T1-jacoco-ramas.txt): BRANCH_COVERED = 14, BRANCH_MISSED = 0 (100 %).
+    El orquestador REPRODUJO la medicion desde out/caso-cb/jacoco.exec con el CLI JaCoCo:
+      fila CSV identica: JaCoCo Coverage Report,libreria.util,EvaluadorPrestamo,0,28,0,14,0,6,0,8,0,1
+    Ejecucion real: 8 tests found, 8 successful, 0 failed (T1-caja-blanca-junit.txt).
+    Veredicto T1: CUMPLE.
+
+[3] Ninguna prueba fue reescrita para "hacerla pasar"
+    - Las suites son exactamente las entregadas por los testers; el orquestador solo las leyo.
+    - Ambas pasaron en su primera ejecucion registrada (0 fallos en ambas evidencias JUnit).
+    - El SUT no fue modificado por nadie despues de su creacion en G0:
+      $ git diff --stat -- src/
+      (salida vacia: ninguna clase rastreada modificada)
+      $ git status --porcelain -- src/ test/
+      ?? src/libreria/util/EvaluadorPrestamo.java            (SUT nuevo, creado por el orquestador en G0)
+      ?? test/libreria/util/EvaluadorPrestamoCajaBlancaTest.java  (suite T1)
+      ?? test/libreria/util/EvaluadorPrestamoCajaNegraTest.java   (suite T2)
+
+[4] Coincidencia entre tecnicas
+    - T2 caso 5 (40, 1200, 650, 6, false -> Aprobado por antiguedad) y T1 camino 8
+      (40, 1300, 650, 6, false -> Aprobado por antiguedad) ejercen R4 con ingresos validos
+      distintos: mismo veredicto.
+    - T2 caso 6 (deuda vencida bloquea R4) = T1 camino 6 (misma entrada 40, 1300, 650, 6, true).
+    - Ninguna tecnica encontro defectos: el SUT reproduce R1-R5 en todos los casos probados.
+
+VEREDICTO G3: SUPERADA
