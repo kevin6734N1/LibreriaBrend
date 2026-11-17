@@ -257,7 +257,7 @@ La evidencia de esta ejecución está en
 - **Imágenes de producto:** el formulario de productos acepta arrastrar y soltar JPG/PNG/GIF/WEBP (máx. 3 MB). `ImagenProductoServlet` valida tipo y firma del archivo y lo guarda en `images/productos`; la ruta se envía con el producto. Se puede cambiar la carpeta con `UPLOAD_DIR` (propiedad del sistema o variable de entorno) si el WAR se despliega sin explotar.
 - **Accesibilidad:** preferencias de daltonismo y lectura por voz (funcionalidad parcial).
 
-> Detalle de los cambios del panel administrativo y de la carga de imágenes: [`docs/REPORTE_PANEL_ADMIN.md`](docs/REPORTE_PANEL_ADMIN.md).
+> Detalle de los cambios del panel administrativo y de la carga de imágenes: [`docs/producto/REPORTE_PANEL_ADMIN.md`](docs/producto/REPORTE_PANEL_ADMIN.md).
 >
 > Detalle de RF02 (matriz, TDD, evidencias y límites): [`docs/QA/RF02_LOGIN.md`](docs/QA/RF02_LOGIN.md).
 >

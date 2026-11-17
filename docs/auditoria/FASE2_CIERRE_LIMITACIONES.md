@@ -1,7 +1,7 @@
 # FASE 2 — Cierre de Limitaciones y Resolución de Hallazgos de la Fase 1
 
 **Commit auditado:** `291741c3181010fe9a171e900954bdf22fe7a7cb`
-**Referencia:** [`FASE2_INFORME.md`](FASE2_INFORME.md) · Fase 1: `docs/REGISTRO_CAMBIOS.md`, `docs/EVIDENCIAS_PRUEBAS.md`, `docs/INFORME_VALIDACION.md`
+**Referencia:** [`FASE2_INFORME.md`](FASE2_INFORME.md) · Fase 1: `docs/historial/REGISTRO_CAMBIOS.md`, `docs/QA/EVIDENCIAS_PRUEBAS.md`, `docs/QA/INFORME_VALIDACION.md`
 **Fecha:** 2026-09-28
 
 Estados admitidos: **Confirmado** (verificado empíricamente en runtime) · **Refutado** (la hipótesis no se sostiene con evidencia de ejecución) · **Aún no verificado** (no ejecutable en este entorno, con justificación técnica).
@@ -64,7 +64,7 @@ Estados admitidos: **Confirmado** (verificado empíricamente en runtime) · **Re
 | CU-05 Registrar pedido en BD | Requiere escritura | **Aún no verificado** |
 | CU-06 Consultar pedidos | **Ejercido y fallando el control de autorización**: `GET /PedidoServlet` sin sesión devuelve los pedidos del cliente id=1 (R-01) | **Confirmado (con defecto Crítico)** |
 
-> La afirmación de `docs/INFORME_VALIDACION.md` de que el flujo "se encuentra implementado y funcionando al 100% sin deuda técnica pendiente" **no se sostiene**: CU-06 responde con datos de otro cliente a un visitante anónimo, y CU-04/CU-05 permanecen sin verificación empírica alguna en toda la historia del proyecto (sus pruebas declaradas no son reproducibles).
+> La afirmación de `docs/QA/INFORME_VALIDACION.md` de que el flujo "se encuentra implementado y funcionando al 100% sin deuda técnica pendiente" **no se sostiene**: CU-06 responde con datos de otro cliente a un visitante anónimo, y CU-04/CU-05 permanecen sin verificación empírica alguna en toda la historia del proyecto (sus pruebas declaradas no son reproducibles).
 
 ---
 

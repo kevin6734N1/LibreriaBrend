@@ -1,6 +1,6 @@
 # Documentación QA — LibreriaBrend
 
-Esta carpeta reúne la documentación y las evidencias de aseguramiento de calidad del proyecto. No duplica los informes académicos que viven en `docs/`; actúa como punto de entrada para revisar qué se probó, con qué evidencia y qué límites siguen abiertos.
+Esta carpeta reúne la documentación y las evidencias de aseguramiento de calidad del proyecto. No duplica los informes académicos que viven en `docs/academico/`; actúa como punto de entrada para revisar qué se probó, con qué evidencia y qué límites siguen abiertos.
 
 ## Mapa de documentos
 
@@ -9,6 +9,10 @@ Esta carpeta reúne la documentación y las evidencias de aseguramiento de calid
 | [SPRINT4_PRUEBAS_NO_FUNCIONALES.md](SPRINT4_PRUEBAS_NO_FUNCIONALES.md) | Pruebas de carga, estrés, resistencia y picos con JMeter, cobertura instrumentada con JaCoCo, hallazgos QA-S4-01 a QA-S4-03 y límites de la medición. |
 | [RF02_LOGIN.md](RF02_LOGIN.md) | Matriz de login de cliente/administrador, TDD, resultados JUnit y HTTP, y riesgos abiertos. |
 | [RF03_BLOQUEO_LOGIN.md](RF03_BLOQUEO_LOGIN.md) | Bloqueo temporal por intentos fallidos: matriz de cobertura, brecha G1 con TDD real, fronteras con reloj inyectado, corrección de revisión (precondiciones fatales) y suite HTTP de 29 comprobaciones. |
+| [CASO_COMBINADO_ORQUESTACION.md](CASO_COMBINADO_ORQUESTACION.md) | Guía del caso práctico combinado (caja negra + caja blanca con orquestación de agentes): malla, puertas de calidad G0–G5 y protocolo de evidencias. |
+| [caso-combinado/](caso-combinado/) | Laboratorio 14: informe del caso combinado (`.md`/`.html`/`.pdf`), bitácora de la malla, prompts, insumos y evidencias por puerta de calidad. |
+| [EVIDENCIAS_PRUEBAS.md](EVIDENCIAS_PRUEBAS.md) | Evidencias históricas de pruebas (E1–E20) de las etapas previas del proyecto. |
+| [INFORME_VALIDACION.md](INFORME_VALIDACION.md) | Informe de validación de casos de uso contra la base de prueba, con su aclaración de alcance. |
 | [SEGURIDAD_REPOSITORIO.md](SEGURIDAD_REPOSITORIO.md) | Saneamiento del backup, datos sintéticos, restauración del entorno local y riesgo residual del historial público. |
 | [evidencias/](evidencias/) | Salidas crudas de JUnit, suites HTTP, CI, TDD, JMeter, JaCoCo y capturas de la demo. |
 | [../../README.md](../../README.md) | Puesta en marcha, demo local, stack, CI y limitaciones del proyecto. |

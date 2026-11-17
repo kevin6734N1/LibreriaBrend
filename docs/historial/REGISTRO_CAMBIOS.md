@@ -6,7 +6,7 @@
 > evidencias. El commit se sube con `git push` a
 > `github.com/kevin6734N1/LibreriaBrend` y su hash queda anotado aquí como
 > "estado actual del proyecto". Las evidencias de funcionamiento de cada
-> pieza viven en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md).
+> pieza viven en [`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md).
 
 ## Estado actual del proyecto
 
@@ -97,7 +97,7 @@ CREATE TABLE preferencias_accesibilidad (
 Compilación completa del proyecto sin errores + **7/7 pruebas funcionales
 contra la BD real** (defaults, insert, upsert, rechazo ENUM, cascade) con
 cliente temporal de QA eliminado al terminar. Evidencias completas en
-[`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md).
+[`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md).
 
 ---
 
@@ -151,7 +151,7 @@ usable con lector de pantalla (NVDA/JAWS/VoiceOver) y navegable con teclado.
 `node --check` de los 2 JS externos y de los 5 scripts inline (extraídos con
 awk), greps de marcado por página (aria-checked=6, aria-pressed=8,
 label for=9, etc.) y compilación Java de sanidad. Evidencias completas en
-[`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E10–E12).
+[`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md) (E10–E12).
 
 ---
 
@@ -198,7 +198,7 @@ mandar `false` fijo.
 - `node --check` de `accesibilidad.js` y del script inline de `index.jsp`.
 - Greps: `btn-leer-voz` presente, 3 selectores `html.accesibilidad-*`,
   0 referencias a `body.accesibilidad-*`. Compilación Java OK.
-- Evidencias completas en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E13–E14).
+- Evidencias completas en [`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md) (E13–E14).
 
 ### Límites honestos (para el informe y el QA)
 
@@ -254,7 +254,7 @@ de la Ley 29973 en las piezas de accesibilidad, que no son código),
 `node --check` de `carrito.js` y del inline de `carrito.jsp`, compilación
 Java, y **8/8 pruebas de cálculo** (S/20 → envío 10/total 30; S/35 → gratis;
 borde S/30; descuento seteado antes de `calcularTotal()` se respeta). Evidencias
-en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E15–E17).
+en [`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md) (E15–E17).
 
 ---
 
@@ -309,7 +309,7 @@ extras: carrito vacío, y fallo de stock no consume el código), incluyendo el
 rollback completo del caso de las dos pestañas y la persistencia de
 `descuento=4.00` / `total=36.00` en `pedidos`. Cliente, productos y usos
 temporales eliminados al terminar; la BD quedó sin filas de prueba.
-Evidencias en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md) (E19–E20).
+Evidencias en [`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md) (E19–E20).
 
 ### Decisiones confirmadas y aplicadas (ver [Paso 3b])
 
@@ -353,7 +353,7 @@ total ahora son imposibles de manipular desde el cliente.
 **16/16 pruebas contra la BD real** de los tres fixes (rechazo en los
 subtotales límite, liberación y reuso del código, cancelación ajena
 rechazada, precios reales y producto inexistente). Limpieza verificada: 0
-filas de prueba. Evidencias en [`EVIDENCIAS_PRUEBAS.md`](EVIDENCIAS_PRUEBAS.md)
+filas de prueba. Evidencias en [`EVIDENCIAS_PRUEBAS.md`](../QA/EVIDENCIAS_PRUEBAS.md)
 (E21).
 
 ---
@@ -394,7 +394,7 @@ Rojo y verde documentados **por ciclo y por corrida** (se corrió JUnit después
 de cada Rojo y antes de cada Verde; ciclos 1-5 en secciones 3-7 del informe).
 9/9 en verde al cerrar, también tras el refactor. Compilación completa del
 proyecto OK. Evidencias completas, reproducción y límites honestos en
-[`LABORATORIO_TDD.md`](LABORATORIO_TDD.md).
+[`LABORATORIO_TDD.md`](../academico/LABORATORIO_TDD.md).
 
 **Pendiente:** republish en Tomcat y prueba HTTP end-to-end (400 con payload
 inválido) — Tomcat estaba detenido al cerrar la sesión. El fallback silencioso
@@ -681,7 +681,7 @@ Corrección propuesta para el Sprint 5.
 conexiones reales contra el motor y no puede ejecutarse sin base de datos. Verificado en local:
 **80/80** sin BD y **103/103** con BD.
 
-**Entorno y datos:** la base local fue restaurada desde `libreria_brenda_backup.sql` (respaldo
+**Entorno y datos:** la base local fue restaurada desde `database/backup/libreria_brenda_backup.sql` (respaldo
 saneado) porque había vuelto a una versión anterior al saneamiento, y la aplicación quedó
 apuntando a `libreria_brenda_demo`, la copia íntegramente sintética. Los ajustes del botón de
 ejecución de VS Code (extensión Tomcat) se corrigieron para apuntar al Tomcat propio del

@@ -294,7 +294,7 @@ Nunca apuntar estas ejecuciones a `libreria_brenda` ni a
 | `test/integration/rf03-bloqueo-tests.sh` | Nuevo; corregido en la revisión:29 comprobaciones, precondiciones fatales, cleanup por ejecución y BL-02 real |
 | `docs/QA/RF03_BLOQUEO_LOGIN.md` | Este documento |
 | `docs/QA/README.md` | Índice y última ejecución |
-| `docs/REGISTRO_CAMBIOS.md` | Entrada RF03 |
+| `docs/historial/REGISTRO_CAMBIOS.md` | Entrada RF03 |
 | `README.md` | Enlace a la matriz RF03 y cifras de tests |
 | `docs/QA/evidencias/rf03-*.txt`, `junit-*-rf03-*.txt`, `*-regresion-2026-10-23*.txt` | Salidas crudas (incluye corrida corregida, negativas y regresiones r2) |
 

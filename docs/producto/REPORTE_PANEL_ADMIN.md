@@ -101,4 +101,4 @@ Antes, para asignar una imagen había que copiar el archivo a mano dentro del pr
 - Las imágenes se guardan en la carpeta del **contexto desplegado** (WAR explotado). Un redespliegue que reemplace `WebContent` borra los archivos subidos. Para producción conviene definir `UPLOAD_DIR` (propiedad del sistema o variable de entorno) apuntando a una carpeta persistente, o mover el almacenamiento a un servicio de objetos.
 - No se comprimen ni redimensionan las imágenes, y no se borran los archivos huérfanos si se cancela la edición o se elimina el producto.
 - Sigue pendiente el control CSRF (QA-15); la subida exige sesión admin y mismo origen implícito del navegador, pero no lleva token.
-- El archivo `libreria_brenda_backup.sql` se deja intacto por decisión del equipo: contiene datos históricos y no se usa en pruebas.
+- El archivo `database/backup/libreria_brenda_backup.sql` se deja intacto por decisión del equipo: contiene datos históricos y no se usa en pruebas.

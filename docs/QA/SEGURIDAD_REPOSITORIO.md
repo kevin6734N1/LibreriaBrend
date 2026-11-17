@@ -31,7 +31,7 @@ El propietario revisó visualmente los clientes y confirmó:
 | Backup completo | **conservado** | 587 líneas, mismo formato y CRLF |
 
 También se retiraron las menciones literales de usuario y clave por defecto de la documentación
-(`docs/EVIDENCIAS_PRUEBAS.md`, `docs/REGISTRO_CAMBIOS.md` y
+(`docs/QA/EVIDENCIAS_PRUEBAS.md`, `docs/historial/REGISTRO_CAMBIOS.md` y
 `docs/auditoria/FASE2_CIERRE_LIMITACIONES.md`). Ahora se describen como
 credenciales locales por defecto.
 
@@ -62,7 +62,7 @@ Las suites de regresión se volvieron a ejecutar después del cambio:
 
 Con autorización expresa, se creó un espejo privado de respaldo y se reescribió
 el historial de las ramas publicables. El saneamiento histórico sustituyó **41
-valores identificados** en `libreria_brenda_backup.sql` y
+valores identificados** en `database/backup/libreria_brenda_backup.sql` y
 `WebContent/clientes.jsp`, preservando las pruebas, el código y las evidencias.
 
 El 2026-10-23 se publicaron **en una única transacción atómica** las ramas:
@@ -129,7 +129,7 @@ Acciones ejecutadas:
 1. **Respaldo de seguridad** del estado previo, depositado **fuera del repositorio**
    (`C:\Users\kevin\_respaldo-libreriabrend\`), para no perder información en caso de
    necesidad.
-2. **Restauración** del esquema `libreria_brenda` a partir de `libreria_brenda_backup.sql`, que
+2. **Restauración** del esquema `libreria_brenda` a partir de `database/backup/libreria_brenda_backup.sql`, que
    es el respaldo saneado versionado en el repositorio (DNI en el rango `99900001`–`99900016`,
    correos `clienteN@example.com`, hash BCrypt sintético).
 3. **Auditoría** del resultado: 0 correos fuera de `@example.com`, 0 documentos de identidad

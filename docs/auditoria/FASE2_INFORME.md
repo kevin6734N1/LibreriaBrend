@@ -179,7 +179,7 @@ $ git status --porcelain                   → (vacío, árbol limpio)
 $ git branch --show-current                → main
 $ git ls-remote origin refs/heads/main     → 291741c3181010fe9a171e900954bdf22fe7a7cb
 ```
-`docs/REGISTRO_CAMBIOS.md` declara como "estado actual del proyecto" el commit `54a810c`, que es **cuatro commits anterior** a HEAD (`1936029`, `44c344f`, `c09cfa5`, `291741c`, todos de build/docs). Se confirma en runtime el hallazgo B-01 de la Fase 1. **Recomendación:** actualizar la tabla del registro al cerrar cada conjunto de cambios, conforme a su propia convención.
+`docs/historial/REGISTRO_CAMBIOS.md` declara como "estado actual del proyecto" el commit `54a810c`, que es **cuatro commits anterior** a HEAD (`1936029`, `44c344f`, `c09cfa5`, `291741c`, todos de build/docs). Se confirma en runtime el hallazgo B-01 de la Fase 1. **Recomendación:** actualizar la tabla del registro al cerrar cada conjunto de cambios, conforme a su propia convención.
 
 ---
 
